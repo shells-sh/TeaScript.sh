@@ -1,5 +1,5 @@
 # 🍵 `T.sh`
 
-> Strongly Typed Shell Scripting Programming Language
+> Strongly Typed Programming Language
 >
 > _Implemented on top of BASH_
