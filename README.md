@@ -1,4 +1,4 @@
-# 🍵 `T.sh`
+# 🍵 `TeaScript.sh`
 
 > Strongly Typed Programming Language
 >
