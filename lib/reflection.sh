@@ -233,6 +233,24 @@ reflection() {
       esac
       ;;
 
+    ## ## `reflection snapshots`
+    ##
+    ## You can save the state of your TeaScript program to a snapshot and load it later.
+    ##
+    ## You can specify whether to snapshot just types or also variables etc.
+    ##
+    ## Can be serialized and reloaded for faster program boot time.
+    ##
+    snapshots)
+      local BASH_VAR_PREFIX_VARIABLE="T_VAR_"
+      local snapshotsCommand="$1"; shift
+      case "$snapshotsCommand" in
+        *)
+          :
+          ;;
+      esac
+      ;;
+
     ## ## `reflection variables`
     ##
     variables)
