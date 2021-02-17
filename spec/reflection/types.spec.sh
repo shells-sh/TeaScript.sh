@@ -6,36 +6,31 @@ source teascript.sh
   reflection types define class Dog
 
   expect { reflection types list } toContain "Dog"
-  # expect { reflection types show Dog } toContain "T_TYPE_Dog=..."
 
   reflection types delete Dog
 
   expect { reflection types list } not toContain "Dog"
 }
 
-@spec.can_define_field_with_a_type() {
+@spec.can_define_properties_of_a_defined_field() {
   reflection types define class Dog
+  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]="" [6]="")'
   
-  expect { reflection types show Dog } not toContain "name"
-  expect { reflection types show Dog } toContain 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]="" [6]="")'
+  reflection types addField Dog public name String "Rover" ""
+  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]=";name:7" [6]="" [7]="public|name<String>Rover&")'
 
-  reflection types addField Dog name String
+  reflection types addField Dog private age Integer "" "This is the dog age"
+  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]=";name:7;age:8" [6]="" [7]="public|name<String>Rover&" [8]="private|age<Integer>&This is the dog age")'
 
-  expect { reflection types show Dog } toContain "name" "String"
-  expect { reflection types show Dog } toContain 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]=";name:7" [6]="" [7]="name<String>")'
-}
-
-@spec.can_get_properties_of_a_defined_field() {
-  reflection types define class Dog
-  reflection types addField Dog name String
-  reflection types addField Dog age Integer
-  
   expect { reflection types getFieldType Dog name } toEqual String
-  expect { reflection types getFieldType Dog age } toEqual Integer
-}
+  expect { reflection types getFieldVisibility Dog name } toEqual public
+  expect { reflection types getFieldDefaultValue Dog name } toEqual "Rover"
+  expect { reflection types getFieldComment Dog name } toEqual ""
 
-@pending.can_define_field_with_visibility_and_default_value_as_well() {
-  :
+  expect { reflection types getFieldType Dog age } toEqual Integer
+  expect { reflection types getFieldVisibility Dog age } toEqual private
+  expect { reflection types getFieldDefaultValue Dog age } toEqual ""
+  expect { reflection types getFieldComment Dog age } toEqual "This is the dog age"
 }
 
 @pending.can_define_method_with_parameters_and_return_type() {

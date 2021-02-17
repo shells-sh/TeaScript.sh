@@ -105,10 +105,12 @@ reflection() {
         addField)
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local fieldVisibility="$1"; shift
           local fieldName="$1"; shift
           local fieldType="$1"; shift
           local fieldDefaultValue="$1"; shift
-          local fieldDefinition="$fieldName<$fieldType>$fieldDefaultValue"
+          local fieldComment="$1"; shift
+          local fieldDefinition="$fieldVisibility|$fieldName<$fieldType>$fieldDefaultValue&$fieldComment"
           local fieldList
           eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
           fieldList="${fieldList};${fieldName}:\${#$bashVariableName[@]}"
@@ -130,6 +132,49 @@ reflection() {
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
           unset "$bashVariableName"
           ;;
+        ## ### `reflection types getFieldComment`
+        ##
+        getFieldComment)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local fieldName="$1"; shift
+          local fieldList
+          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          if [[ "$fieldList" = *";$fieldName:"* ]]
+          then
+            local fieldIndex="${fieldList#*;$fieldName:}"
+            local fieldIndex="${fieldIndex%%;*}"
+            local fieldDefinition
+            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
+            # Get the field comment from the field definition
+            local fieldComment="${fieldDefinition##*&}"
+            printf "$fieldComment"
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getFieldDefaultValue`
+        ##
+        getFieldDefaultValue)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local fieldName="$1"; shift
+          local fieldList
+          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          if [[ "$fieldList" = *";$fieldName:"* ]]
+          then
+            local fieldIndex="${fieldList#*;$fieldName:}"
+            local fieldIndex="${fieldIndex%%;*}"
+            local fieldDefinition
+            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
+            # Get the field default value from the field definition
+            local fieldDefaultValue="${fieldDefinition##*>}"
+            fieldDefaultValue="${fieldDefaultValue%%&*}"
+            printf "$fieldDefaultValue"
+          else
+            return 1
+          fi
+          ;;
         ## ### `reflection types getFieldType`
         ##
         getFieldType)
@@ -144,10 +189,31 @@ reflection() {
             local fieldIndex="${fieldIndex%%;*}"
             local fieldDefinition
             eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
-            #
+            # Get the field type from the field definition
             local fieldType="${fieldDefinition#*<}"
             fieldType="${fieldType%%>*}"
             printf "$fieldType"
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getFieldVisibility`
+        ##
+        getFieldVisibility)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local fieldName="$1"; shift
+          local fieldList
+          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          if [[ "$fieldList" = *";$fieldName:"* ]]
+          then
+            local fieldIndex="${fieldList#*;$fieldName:}"
+            local fieldIndex="${fieldIndex%%;*}"
+            local fieldDefinition
+            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
+            # Get the field visibility from the field definition
+            local fieldVisibility="${fieldDefinition%%|*}"
+            printf "$fieldVisibility"
           else
             return 1
           fi
