@@ -4,6 +4,10 @@ source teascript.sh
   :
 }
 
+# def something and something too <<- _
+#   And this is 
+#   a description of the method :)
+# _
 @spec.create_and_dispose_of_object() {
   expect { reflection objects list } toBeEmpty
 
