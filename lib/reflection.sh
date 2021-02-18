@@ -103,9 +103,16 @@ reflection() {
       esac
       ;;
 
-    ## ## `reflection types XXX`
+    ## ## `reflection types`
+    ##
+    ## `TODO` - space optimizations, which'll make it all harder to read, use COMMENTS 
+    ## - addField p s v main string[] args "" <-- public static void
+    ##   - CALLER needs to use this arcane language so that `reflection` doesn't need any conditionals
+    ##   - `reflection` should do conversions only when responding to `getXY` and should check against them when `isPublic` etc
+    ## - combine 'class' (c, i, s, e int stru enum) and value/object (v/o) and if it has literal support (y/n or l/n) <-- don't look at methods, would have to get method def to check if its static
     ##
     types)
+      # REMOVE ALL THESE LOCALS AND USE INTEGERS IN CODE - don't want any variables being created for reflection calls please :)
       local BASH_VAR_PREFIX_TYPE="T_TYPE_"
       local INDEX_OF_TYPE_OF_TYPE=0
       local INDEX_OF_STORAGE_TYPE=1
