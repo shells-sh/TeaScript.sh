@@ -6,6 +6,22 @@ reflection() {
   local reflectionCommand="$1"; shift
   case "$reflectionCommand" in
 
+    ## ## `reflection invocations`
+    ##
+    ## This might be what we call to invoke methods and see if they're available etc (?)
+    ##
+    ## Might also have a `reflection expressions` for validating and evaluating expressions :)
+    ##
+    invocations)
+      local BASH_VAR_PREFIX_VARIABLE="T_VAR_"
+      local invocationsCommand="$1"; shift
+      case "$invocationsCommand" in
+        *)
+          :
+          ;;
+      esac
+      ;;
+
     ## ## `reflection objects`
     ##
     objects)
@@ -240,6 +256,8 @@ reflection() {
     ## You can specify whether to snapshot just types or also variables etc.
     ##
     ## Can be serialized and reloaded for faster program boot time.
+    ##
+    ## Can reduce snapshot size as well with option to remove all type comments.
     ##
     snapshots)
       local BASH_VAR_PREFIX_VARIABLE="T_VAR_"
