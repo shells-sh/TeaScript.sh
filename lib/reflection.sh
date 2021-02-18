@@ -133,6 +133,30 @@ reflection() {
           eval "$bashVariableName[$INDEX_OF_FIELD_LOOKUP]=\"$fieldList\""
           eval "$bashVariableName+=(\"$fieldDefinition\")"
           ;;
+        ## ### `reflection types addMethod`
+        ##
+        addMethod)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodVisibility="$1"; shift
+          local methodName="$1"; shift
+          local methodReturnType="$1"; shift
+          local methodComment="$1"; shift
+          local methodDefinition="$methodVisibility|$methodName<$methodReturnType>$methodComment"
+          while [ $# -gt 0 ]
+          do
+            local paramName="$1"; shift
+            local paramType="$1"; shift
+            local paramDefaultValue="$1"; shift
+            local paramDefinition="$paramName:$paramType;$paramDefaultValue"
+            methodDefinition="${methodDefinition}&${paramDefinition}"
+          done
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          methodList="${methodList};${methodName}:\${#$bashVariableName[@]}"
+          eval "$bashVariableName[$INDEX_OF_METHOD_LOOKUP]=\"$methodList\""
+          eval "$bashVariableName+=(\"$methodDefinition\")"
+          ;;
         ## ### `reflection types define`
         ##
         define)
@@ -230,6 +254,160 @@ reflection() {
             # Get the field visibility from the field definition
             local fieldVisibility="${fieldDefinition%%|*}"
             printf "$fieldVisibility"
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getMethodComment`
+        ##
+        getMethodComment)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method comment from the method definition
+            local methodComment="${methodDefinition##*>}"
+            methodComment="${methodComment%%&*}"
+            printf "$methodComment"
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getMethodParamNames`
+        ##
+        getMethodParamNames)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method param names from the method definition
+            if [[ "$methodDefinition" = *"&"* ]]
+            then
+              local methodParamNames=""
+              local methodParamDefinitions="${methodDefinition#*&}"
+              while [[ "$methodParamDefinitions" = *":"* ]]
+              do
+                methodParamDefinitions="${methodParamDefinitions%:*}"
+                methodParamNames="${methodParamDefinitions##*&} ${methodParamNames}"
+              done
+              printf "${methodParamNames% }"
+            else
+              return 1
+            fi
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getMethodParamDefaultValue`
+        ##
+        getMethodParamDefaultValue)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local paramName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method param default value from the method definition
+            if [[ "$methodDefinition" = *"&"* ]]
+            then
+              local paramDefaultValue="${methodDefinition##*&$paramName:}"
+              paramDefaultValue="${paramDefaultValue#*;}"
+              paramDefaultValue="${paramDefaultValue%%&*}"
+              printf "$paramDefaultValue"
+            else
+              return 1
+            fi
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getMethodParamType`
+        ##
+        getMethodParamType)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local paramName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method param type from the method definition
+            if [[ "$methodDefinition" = *"&"* ]]
+            then
+              local paramType="${methodDefinition##*&$paramName:}"
+              paramType="${paramType%%;*}"
+              printf "$paramType"
+            else
+              return 1
+            fi
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getMethodReturnType`
+        ##
+        getMethodReturnType)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method type from the method definition
+            local methodType="${methodDefinition#*<}"
+            methodType="${methodType%%>*}"
+            printf "$methodType"
+          else
+            return 1
+          fi
+          ;;
+        ## ### `reflection types getMethodVisibility`
+        ##
+        getMethodVisibility)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method visibility from the method definition
+            local methodVisibility="${methodDefinition%%|*}"
+            printf "$methodVisibility"
           else
             return 1
           fi

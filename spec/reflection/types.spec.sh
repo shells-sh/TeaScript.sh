@@ -33,10 +33,33 @@ source teascript.sh
   expect { reflection types getFieldComment Dog age } toEqual "This is the dog age"
 }
 
-@pending.can_define_method_with_parameters_and_return_type() {
-  :
-}
+@spec.can_define_method_with_parameters_and_return_type() {
+  reflection types define class Dog
+  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]="" [6]="")'
 
-@pending.can_optionally_add_a_comment_to_type_and_method_and_field_declarations() {
-  :
+  reflection types addMethod Dog public bark String "This says 'Woof!'"
+
+  expect { reflection types getMethodVisibility Dog bark } toEqual public
+  expect { reflection types getMethodReturnType Dog bark } toEqual String
+  expect { reflection types getMethodComment Dog bark } toEqual "This says 'Woof!'"
+  expect { reflection types getMethodParamNames Dog bark } toEqual ""
+
+  reflection types addMethod Dog private setName void "" name String
+
+  expect { reflection types getMethodVisibility Dog setName } toEqual private
+  expect { reflection types getMethodReturnType Dog setName } toEqual void
+  expect { reflection types getMethodComment Dog setName } toEqual ""
+  expect { reflection types getMethodParamNames Dog setName } toEqual "name"
+  expect { reflection types getMethodParamType Dog setName name } toEqual String
+
+  reflection types addMethod Dog public setNameAndAge void "Sets both the name and age" name String "Rover" age Integer ""
+
+  expect { reflection types getMethodVisibility Dog setNameAndAge } toEqual public
+  expect { reflection types getMethodReturnType Dog setNameAndAge } toEqual void
+  expect { reflection types getMethodComment Dog setNameAndAge } toEqual "Sets both the name and age"
+  expect { reflection types getMethodParamNames Dog setNameAndAge } toEqual "name age"
+  expect { reflection types getMethodParamType Dog setNameAndAge name } toEqual String
+  expect { reflection types getMethodParamDefaultValue Dog setNameAndAge name } toEqual "Rover"
+  expect { reflection types getMethodParamType Dog setNameAndAge age } toEqual Integer
+  expect { reflection types getMethodParamDefaultValue Dog setNameAndAge age } toEqual ""
 }
