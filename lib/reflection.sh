@@ -163,7 +163,10 @@ reflection() {
           local typeOfType="$1"; shift
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          eval "$bashVariableName=(\"$typeName\" \"$typeOfType\" \"\" \"\" \"\" \"\" \"\")"
+          local comment="$1"; shift
+          local baseClassName="$1"; shift
+          local interfaceName="$1"; shift
+          eval "$bashVariableName=(\"$typeName\" \"$typeOfType\" \"$comment\" \"$baseClassName\" \"$interfaceName\" \"\" \"\")"
           ;;
         ## ### `reflection types delete`
         ##
@@ -411,6 +414,34 @@ reflection() {
           else
             return 1
           fi
+          ;;
+        ## ### `reflection types getTypeBaseClass`
+        ##
+        getTypeBaseClass)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_BASECLASS]}\""
+          ;;
+        ## ### `reflection types getTypeComment`
+        ##
+        getTypeComment)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_TYPE_COMMENT]}\""
+          ;;
+        ## ### `reflection types getTypeOfType`
+        ##
+        getTypeOfType)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_TYPE_OF_TYPE]}\""
+          ;;
+        ## ### `reflection types getTypeInterface`
+        ##
+        getTypeInterface)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_INTERFACE]}\""
           ;;
         ## ### `reflection types list`
         ##
