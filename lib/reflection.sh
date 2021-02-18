@@ -32,17 +32,17 @@ reflection() {
         ##
         create)
           local typeName="$1"; shift
-          local referenceId="$( reflection objects generateId )"
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${referenceId}"
+          local objectId="$( reflection objects generateId )"
+          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           # In BASH 4.3+ use declare -g and typeset -n for safety (although eval might be faster than typeset, benchmark)
           eval "$bashVariableName=(\"$typeName\" \"\")"
-          printf "$referenceId"
+          printf "$objectId"
           ;;
         ## ### `reflection objects dispose`
         ##
         dispose)
-          local referenceId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${referenceId}"
+          local objectId="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           unset "$bashVariableName"
           ;;
         ## ### `reflection objects generateId`
@@ -53,8 +53,8 @@ reflection() {
         ## ### `reflection objects getField`
         ##
         getField)
-          local referenceId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${referenceId}"
+          local objectId="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           local fieldName="$1"; shift
           # In BASH 4.3+ use typeset -n for safety (although eval might be faster than typeset, benchmark)
           local fieldList
@@ -76,8 +76,8 @@ reflection() {
         ## ### `reflection objects setField`
         ##
         setField)
-          local referenceId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${referenceId}"
+          local objectId="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           local fieldName="$1"; shift
           local fieldValue="$1"; shift
           # In BASH 4.3+ use typeset -n for safety (although eval might be faster than typeset, benchmark)
@@ -96,8 +96,8 @@ reflection() {
         ## ### `reflection objects show`
         ##
         show)
-          local referenceId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${referenceId}"
+          local objectId="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           declare -p "$bashVariableName" | sed 's/^declare -a //'
           ;;
       esac
@@ -107,13 +107,12 @@ reflection() {
     ##
     types)
       local BASH_VAR_PREFIX_TYPE="T_TYPE_"
-      local INDEX_OF_TYPE_NAME=0
-      local INDEX_OF_TYPE_OF_TYPE=1
-      local INDEX_OF_TYPE_COMMENT=2
-      local INDEX_OF_BASECLASS=3
-      local INDEX_OF_INTERFACE=4
-      local INDEX_OF_FIELD_LOOKUP=5
-      local INDEX_OF_METHOD_LOOKUP=6
+      local INDEX_OF_TYPE_OF_TYPE=0
+      local INDEX_OF_TYPE_COMMENT=1
+      local INDEX_OF_BASECLASS=2
+      local INDEX_OF_INTERFACE=3
+      local INDEX_OF_FIELD_LOOKUP=4
+      local INDEX_OF_METHOD_LOOKUP=5
       local typesCommand="$1"; shift
       case "$typesCommand" in
         ## ### `reflection types addField`
@@ -166,11 +165,11 @@ reflection() {
           local comment="$1"; shift
           local baseClassName="$1"; shift
           local interfaceName="$1"; shift
-          eval "$bashVariableName=(\"$typeName\" \"$typeOfType\" \"$comment\" \"$baseClassName\" \"$interfaceName\" \"\" \"\")"
+          eval "$bashVariableName=(\"$typeOfType\" \"$comment\" \"$baseClassName\" \"$interfaceName\" \"\" \"\")"
           ;;
-        ## ### `reflection types delete`
+        ## ### `reflection types undefine`
         ##
-        delete)
+        undefine)
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
           unset "$bashVariableName"
@@ -482,10 +481,60 @@ reflection() {
     ##
     variables)
       local BASH_VAR_PREFIX_VARIABLE="T_VAR_"
+      local INDEX_OF_VARIABLE_TYPE=0
+      local INDEX_OF_VARIABLE_VALUE=1
+      local INDEX_OF_VARIABLE_REFERENCE_ID=2
       local variablesCommand="$1"; shift
       case "$variablesCommand" in
-        *)
-          :
+        ## ### `reflection variables getObjectId`
+        ##
+        getObjectId)
+          local variableName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_VARIABLE_REFERENCE_ID]}\""
+          ;;
+        ## ### `reflection variables getType`
+        ##
+        getType)
+          local variableName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_VARIABLE_TYPE]}\""
+          ;;
+        ## ### `reflection variables getValue`
+        ##
+        getValue)
+          local variableName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_VARIABLE_VALUE]}\""
+          ;;
+        ## ### `reflection variables list`
+        ##
+        list)
+          ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_VARIABLE"
+          ;;
+        ## ### `reflection variables set`
+        ##
+        set)
+          local variableName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          local variableType="$1"; shift
+          local variableValue="$1"; shift
+          local variableObjectId="$1"; shift
+          eval "$bashVariableName=(\"$variableType\" \"$variableValue\" \"$variableObjectId\")"
+          ;;
+        ## ### `reflection variables show`
+        ##
+        show)
+          local variableName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          declare -p "$bashVariableName" | sed 's/^declare -a //'
+          ;;
+        ## ### `reflection variables unset`
+        ##
+        unset)
+          local variableName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          unset "$bashVariableName"
           ;;
       esac
       ;;

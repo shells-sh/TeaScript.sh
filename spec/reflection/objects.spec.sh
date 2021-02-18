@@ -1,13 +1,5 @@
 source teascript.sh
 
-@pending.create_requires_a_type() {
-  :
-}
-
-# def something and something too <<- _
-#   And this is 
-#   a description of the method :)
-# _
 @spec.create_and_dispose_of_object() {
   expect { reflection objects list } toBeEmpty
 
@@ -20,22 +12,6 @@ source teascript.sh
   reflection objects dispose "$objectId"
 
   expect { reflection objects list } not toContain "Dog"
-}
-
-@pending.get_field_requires_existing_object() {
-  :
-}
-
-@pending.get_field_requires_field_name() {
-  :
-}
-
-@pending.set_field_requires_existing_object() {
-  :
-}
-
-@pending.set_field_requires_field_name_and_value() {
-  :
 }
 
 @spec.get_and_set_object_fields() {

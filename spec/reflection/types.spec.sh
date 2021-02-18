@@ -1,5 +1,7 @@
 source teascript.sh
 
+## TODO ## Add `static` fields and methods
+
 @spec.define_and_delete_types() {
   expect { reflection types list } not toContain "Dog"
 
@@ -8,7 +10,7 @@ source teascript.sh
   expect { reflection types getTypeOfType Dog } toEqual "class"
   expect { reflection types getTypeComment Dog } toEqual "This represents a dog"
 
-  reflection types delete Dog
+  reflection types undefine Dog
   expect { reflection types list } not toContain "Dog"
 }
 
@@ -38,13 +40,10 @@ source teascript.sh
 
 @spec.can_define_properties_of_a_defined_field() {
   reflection types define class Dog
-  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]="" [6]="")'
   
   reflection types addField Dog public name String "Rover" ""
-  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]=";name:7" [6]="" [7]="public|name<String>Rover&")'
 
   reflection types addField Dog private age Integer "" "This is the dog age"
-  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]=";name:7;age:8" [6]="" [7]="public|name<String>Rover&" [8]="private|age<Integer>&This is the dog age")'
 
   expect { reflection types getFieldType Dog name } toEqual String
   expect { reflection types getFieldVisibility Dog name } toEqual public
@@ -59,7 +58,6 @@ source teascript.sh
 
 @spec.can_define_method_with_parameters_and_return_type() {
   reflection types define class Dog
-  expect { reflection types show Dog } toEqual 'T_TYPE_Dog=([0]="Dog" [1]="class" [2]="" [3]="" [4]="" [5]="" [6]="")'
 
   reflection types addMethod Dog public bark String "This says 'Woof!'"
 
