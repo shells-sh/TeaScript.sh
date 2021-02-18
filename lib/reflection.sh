@@ -120,12 +120,13 @@ reflection() {
         addField)
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local fieldScope="$1"; shift
           local fieldVisibility="$1"; shift
           local fieldName="$1"; shift
           local fieldType="$1"; shift
           local fieldDefaultValue="$1"; shift
           local fieldComment="$1"; shift
-          local fieldDefinition="$fieldVisibility|$fieldName<$fieldType>$fieldDefaultValue&$fieldComment"
+          local fieldDefinition="$fieldScope!$fieldVisibility|$fieldName<$fieldType>$fieldDefaultValue&$fieldComment"
           local fieldList
           eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
           fieldList="${fieldList};${fieldName}:\${#$bashVariableName[@]}"
@@ -137,11 +138,12 @@ reflection() {
         addMethod)
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodScope="$1"; shift
           local methodVisibility="$1"; shift
           local methodName="$1"; shift
           local methodReturnType="$1"; shift
           local methodComment="$1"; shift
-          local methodDefinition="$methodVisibility|$methodName<$methodReturnType>$methodComment"
+          local methodDefinition="$methodScope!$methodVisibility|$methodName<$methodReturnType>$methodComment"
           while [ $# -gt 0 ]
           do
             local paramName="$1"; shift
@@ -217,6 +219,27 @@ reflection() {
             return 1
           fi
           ;;
+        ## ### `reflection types getFieldScope`
+        ##
+        getFieldScope)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local fieldName="$1"; shift
+          local fieldList
+          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          if [[ "$fieldList" = *";$fieldName:"* ]]
+          then
+            local fieldIndex="${fieldList#*;$fieldName:}"
+            local fieldIndex="${fieldIndex%%;*}"
+            local fieldDefinition
+            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
+            # Get the field scope from the field definition
+            local fieldScope="${fieldDefinition%%!*}"
+            printf "$fieldScope"
+          else
+            return 1
+          fi
+          ;;
         ## ### `reflection types getFieldType`
         ##
         getFieldType)
@@ -255,6 +278,7 @@ reflection() {
             eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
             # Get the field visibility from the field definition
             local fieldVisibility="${fieldDefinition%%|*}"
+            fieldVisibility="${fieldVisibility##*!}"
             printf "$fieldVisibility"
           else
             return 1
@@ -393,6 +417,27 @@ reflection() {
             return 1
           fi
           ;;
+        ## ### `reflection types getMethodScope`
+        ##
+        getMethodScope)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local methodName="$1"; shift
+          local methodList
+          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          if [[ "$methodList" = *";$methodName:"* ]]
+          then
+            local methodIndex="${methodList#*;$methodName:}"
+            local methodIndex="${methodIndex%%;*}"
+            local methodDefinition
+            eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
+            # Get the method scope from the method definition
+            local methodScope="${methodDefinition%%!*}"
+            printf "$methodScope"
+          else
+            return 1
+          fi
+          ;;
         ## ### `reflection types getMethodVisibility`
         ##
         getMethodVisibility)
@@ -409,6 +454,7 @@ reflection() {
             eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
             # Get the method visibility from the method definition
             local methodVisibility="${methodDefinition%%|*}"
+            methodVisibility="${methodVisibility##*!}"
             printf "$methodVisibility"
           else
             return 1
