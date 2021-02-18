@@ -3,7 +3,7 @@ source teascript.sh
 @spec.define_and_delete_types() {
   expect { reflection types list } not toContain "Dog"
 
-  reflection types define class Dog "This represents a dog"
+  reflection types define class Dog object "This represents a dog"
   expect { reflection types list } toContain "Dog"
   expect { reflection types getTypeOfType Dog } toEqual "class"
   expect { reflection types getTypeComment Dog } toEqual "This represents a dog"
@@ -12,32 +12,40 @@ source teascript.sh
   expect { reflection types list } not toContain "Dog"
 }
 
+@spec.can_define_types_as_value_types_or_with_literal_support() {
+  reflection types define class Animal object
+  expect { reflection types getTypeStorageType Animal } toEqual object
+
+  reflection types define class AnimalName value
+  expect { reflection types getTypeStorageType AnimalName } toEqual value
+}
+
 @pending.can_set_type_base_class_and_or_implemented_interface() {
-  reflection types define class Animal
+  reflection types define class Animal object
   expect { reflection types getTypeBaseClass Animal } toEqual ""
   expect { reflection types getTypeInterface Animal } toEqual ""
 
-  reflection types define interface IAnimal
+  reflection types define interface IAnimal object
   expect { reflection types getTypeBaseClass IAnimal } toEqual ""
   expect { reflection types getTypeInterface IAnimal } toEqual ""
 
-  reflection types define class Dog "" Animal
+  reflection types define class Dog object "" Animal
   expect { reflection types getTypeBaseClass Dog } toEqual "Animal"
   expect { reflection types getTypeInterface Dog } toEqual ""
 
-  reflection types define class Cat "" "" IAnimal
+  reflection types define class Cat object "" "" IAnimal
   expect { reflection types getTypeBaseClass Cat } toEqual ""
   expect { reflection types getTypeInterface Cat } toEqual "IAnimal"
   expect { reflection types getTypeComment Cat } toEqual ""
 
-  reflection types define class Bird "Represents a bird" Animal IAnimal
+  reflection types define class Bird object "Represents a bird" Animal IAnimal
   expect { reflection types getTypeBaseClass Bird } toEqual "Animal"
   expect { reflection types getTypeInterface Bird } toEqual "IAnimal"
   expect { reflection types getTypeComment Bird } toEqual "Represents a bird"
 }
 
 @spec.can_define_properties_of_a_defined_field() {
-  reflection types define class Dog
+  reflection types define class Dog object
   
   reflection types addField Dog instance public name String "Rover" ""
 
@@ -57,7 +65,7 @@ source teascript.sh
 }
 
 @spec.can_define_method_with_parameters_and_return_type() {
-  reflection types define class Dog
+  reflection types define class Dog object
 
   reflection types addMethod Dog static public bark String "This says 'Woof!'"
 

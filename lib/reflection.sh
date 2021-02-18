@@ -108,11 +108,12 @@ reflection() {
     types)
       local BASH_VAR_PREFIX_TYPE="T_TYPE_"
       local INDEX_OF_TYPE_OF_TYPE=0
-      local INDEX_OF_TYPE_COMMENT=1
-      local INDEX_OF_BASECLASS=2
-      local INDEX_OF_INTERFACE=3
-      local INDEX_OF_FIELD_LOOKUP=4
-      local INDEX_OF_METHOD_LOOKUP=5
+      local INDEX_OF_STORAGE_TYPE=1
+      local INDEX_OF_TYPE_COMMENT=2
+      local INDEX_OF_BASECLASS=3
+      local INDEX_OF_INTERFACE=4
+      local INDEX_OF_FIELD_LOOKUP=5
+      local INDEX_OF_METHOD_LOOKUP=6
       local typesCommand="$1"; shift
       case "$typesCommand" in
         ## ### `reflection types addField`
@@ -164,10 +165,11 @@ reflection() {
           local typeOfType="$1"; shift
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local storageType="$1"; shift
           local comment="$1"; shift
           local baseClassName="$1"; shift
           local interfaceName="$1"; shift
-          eval "$bashVariableName=(\"$typeOfType\" \"$comment\" \"$baseClassName\" \"$interfaceName\" \"\" \"\")"
+          eval "$bashVariableName=(\"$typeOfType\" \"$storageType\" \"$comment\" \"$baseClassName\" \"$interfaceName\" \"\" \"\")"
           ;;
         ## ### `reflection types undefine`
         ##
@@ -487,6 +489,13 @@ reflection() {
           local typeName="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
           eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_INTERFACE]}\""
+          ;;
+        ## ### `reflection types getTypeStorageType`
+        ##
+        getTypeStorageType)
+          local typeName="$1"; shift
+          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_STORAGE_TYPE]}\""
           ;;
         ## ### `reflection types list`
         ##
