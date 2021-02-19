@@ -1,10 +1,8 @@
-source teascript.sh
-
 # Update a bit so that value is 1 field and its renamed 'representation' because it
 # can be one of: literal value string, object id reference, or field lookup for a struct where values are kept in expanded variable array slots :)
 # STACK vs HEAP -> easier copying and match the expectation that struct/value type allocation is cheaper
 
-@spec.create_variables_and_get_their_type_value_and_object_reference_Ids() {
+@pending.create_variables_and_get_their_type_value_and_object_reference_Ids() {
   expect { reflection variables list } not toContain "myVar"
 
   reflection variables set myVar TEXT "value of a value type variable"

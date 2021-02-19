@@ -1,6 +1,4 @@
-source teascript.sh
-
-@spec.create_and_dispose_of_object() {
+@pending.create_and_dispose_of_object() {
   expect { reflection objects list } toBeEmpty
 
   run { reflection objects create Dog }
@@ -14,7 +12,7 @@ source teascript.sh
   expect { reflection objects list } not toContain "Dog"
 }
 
-@spec.get_and_set_object_fields() {
+@pending.get_and_set_object_fields() {
   run { reflection objects create Dog }
   local objectId="$STDOUT"
   

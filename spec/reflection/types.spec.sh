@@ -1,5 +1,3 @@
-source teascript.sh
-
 # Add a note on type of whether it supports literals? or check for method?
 
 # Also, whether the Storage Type is a: literal, object ID, OR fields (for struct)
@@ -10,7 +8,7 @@ source teascript.sh
 # - Nullable? <-- variable specific or part of the type itself? var/field/param specific
 # - Generics? <-- this is part of the type name, need T (et al) for methods and fields to be able to use as a type(s) :)
 
-@spec.define_and_delete_types() {
+@pending.define_and_delete_types() {
   expect { reflection types list } not toContain "Dog"
 
   reflection types define class Dog object "This represents a dog"
@@ -22,7 +20,7 @@ source teascript.sh
   expect { reflection types list } not toContain "Dog"
 }
 
-@spec.can_define_types_as_value_types_or_with_literal_support() {
+@pending.can_define_types_as_value_types_or_with_literal_support() {
   reflection types define class Animal object
   expect { reflection types getTypeStorageType Animal } toEqual object
 
@@ -54,7 +52,7 @@ source teascript.sh
   expect { reflection types getTypeComment Bird } toEqual "Represents a bird"
 }
 
-@spec.can_define_properties_of_a_defined_field() {
+@pending.can_define_properties_of_a_defined_field() {
   reflection types define class Dog object
   
   reflection types addField Dog instance public name String "Rover" ""
@@ -74,7 +72,7 @@ source teascript.sh
   expect { reflection types getFieldScope Dog age } toEqual static
 }
 
-@spec.can_define_method_with_parameters_and_return_type() {
+@pending.can_define_method_with_parameters_and_return_type() {
   reflection types define class Dog object
 
   reflection types addMethod Dog static public bark String "This says 'Woof!'"

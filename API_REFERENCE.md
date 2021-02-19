@@ -6,6 +6,12 @@ TeaScript `reflection` provides a read-only interface for introspecting
 on TeaScript types and variables as well as a write interface for defining
 or making changes to types.
 
+## Reference
+
+- [`reflection objects`](#reflection-objects)
+- [`reflection types`](#reflection-types)
+- [`reflection variables`](#reflection-variables)
+
 ```sh
 class Dog implements IAnimal do <<- _
   Represents a dog
@@ -28,11 +34,10 @@ reflection types getFieldType Dog age
 # => "Integer"
 ```
 
-## Reference
-
-- [`reflection objects`](#reflection-objects)
-- [`reflection types`](#reflection-types)
-- [`reflection variables`](#reflection-variables)
+> ℹ️ Note: `reflection` performs no argument assertions or validation  
+> e.g. you can create a variable of a type that does not exist using `reflection variables`.
+>
+> Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
 
 ## 💻 Developer Notes
 
@@ -88,12 +93,13 @@ This contains a lookup table for all characters.
 | `a` | `abstract` |
 | `c` | `class` |
 | `i` | `interface` |
+| `n` | Named reference, e.g. marking a variable as being a reference to another variable |
 | `p` | `private` |
 | `P` | `public` |
-| `r` | `byref` |
+| `r` | Reference, e.g. marking a type as being a reference type or a variable as containing a reference |
 | `s` | `struct` |
 | `S` | `static` |
-| `v` | `byval` |
+| `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
 
 ## `reflection invocations`
 
@@ -145,7 +151,6 @@ local BASH_VAR_PREFIX_TYPE="T_TYPE_"
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | ... |
 | `$x` | ... |
@@ -161,7 +166,6 @@ local BASH_VAR_PREFIX_TYPE="T_TYPE_"
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | ... |
 | `$x` | ... |
@@ -177,7 +181,6 @@ local BASH_VAR_PREFIX_TYPE="T_TYPE_"
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | ... |
 | `$x` | ... |
@@ -188,7 +191,6 @@ local BASH_VAR_PREFIX_TYPE="T_TYPE_"
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | ... |
 | `$x` | ... |
@@ -201,7 +203,6 @@ Get the comment of a field, if present.
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getFieldComment` |
 | `$4` | Type name, e.g. `Dog` |
@@ -211,7 +212,6 @@ Get the comment of a field, if present.
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getFieldDefaultValue` |
 | `$x` | ... |
@@ -222,7 +222,6 @@ Get the comment of a field, if present.
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getFieldScope` |
 | `$x` | ... |
@@ -233,7 +232,6 @@ Get the comment of a field, if present.
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getFieldType` |
 | `$x` | ... |
@@ -245,7 +243,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getFieldVisibility` |
 | `$x` | ... |
@@ -257,7 +254,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodComment` |
 | `$x` | ... |
@@ -269,7 +265,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodParamNames` |
 | `$x` | ... |
@@ -281,7 +276,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodParamDefaultValue` |
 | `$x` | ... |
@@ -293,7 +287,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodParamType` |
 | `$x` | ... |
@@ -305,7 +298,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodReturnType` |
 | `$x` | ... |
@@ -317,7 +309,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodScope` |
 | `$x` | ... |
@@ -329,7 +320,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getMethodVisibility` |
 | `$x` | ... |
@@ -341,7 +331,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getTypeBaseClass` |
 | `$x` | ... |
@@ -353,7 +342,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getTypeComment` |
 | `$x` | ... |
@@ -365,7 +353,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getTypeOfType` |
 | `$x` | ... |
@@ -377,7 +364,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getTypeInterface` |
 | `$x` | ... |
@@ -389,7 +375,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | `getTypeStorageType` |
 | `$x` | ... |
@@ -401,7 +386,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | ... |
 | `$x` | ... |
@@ -412,7 +396,6 @@ UPDATE ME
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `types` |
 | `$3` | ... |
 | `$x` | ... |
@@ -434,80 +417,50 @@ Can reduce snapshot size as well with option to remove all type comments.
 
 Manages the TeaScript **Stack** where in-scope variables are allocated.
 
-### `reflection variables getObjectId`
-
-| | Parameter |
-|-|-----------|
-| `$1` | `reflection` |
-| `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
 ### `reflection variables getType`
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
-| `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
+| `$1` | `variables` |
+| `$2` | `getType` |
+| `$3` | Variable name |
 
 ### `reflection variables getValue`
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
-| `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
+| `$1` | `variables` |
+| `$2` | `getValue` |
+| `$3` | Variable name |
 
 ### `reflection variables list`
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
 
 ### `reflection variables set`
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
-| `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
+| `$1` | `variables` |
+| `$2` | `set` |
+| `$3` | Variable name |
+| `$4` | Type of variable (object `r`eference, literal `v`alue, or `n`amed reference) |
+| `$5` | Variable type (e.g. String or Integer) |
+| `$6` | Variable value (object ID, literal text value, or name of another variable) |
 
 ### `reflection variables show`
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
+| `$3` | Variable name |
 
 ### `reflection variables unset`
 
 | | Parameter |
 |-|-----------|
-| `$1` | `reflection` |
 | `$2` | `variables` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
+| `$3` | Variable name |
 
