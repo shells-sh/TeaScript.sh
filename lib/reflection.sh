@@ -28,6 +28,12 @@
 ## # => "Integer"
 ## ```
 ##
+## ## Reference
+##
+## - [`reflection objects`](#reflection-objects)
+## - [`reflection types`](#reflection-types)
+## - [`reflection variables`](#reflection-variables)
+##
 ## ## 💻 Developer Notes
 ##
 ## > _Inline all the things!_
@@ -43,6 +49,25 @@
 ## To the extent possible, **never** start any subshells or run other programs. This means NO `grep` or `sed` or `awk`. Use built-in BASH string manipulation when possible.
 ##
 ## Also try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_).
+##
+## ### `eval`
+##
+## To start with, various functions make use of `eval`. In fact, most do.
+##
+## This is to support Mac's built-in version of BASH, which is BASH `3.2.57` and will always be this version due to `GPL` licensing.
+##
+## After `reflection.sh` is mostly "complete" (_i.e. once `var` and `expression` and `class` and `def` are fully up-and-running_)
+## we will add Docker tests for both BASH `3.2.57` as well as the latest versions of BASH 5 which is distributed
+## with Linux and used on Windows as well and create 2 versions of `reflection.sh`, one targetting BASH 4.3+ which removes all use of `eval`.
+##
+## > ℹ️ `eval` is used for defining single-dimensional array variables with dynamic names
+## > and modifying or reading from those arrays. In BASH 4.3+ these operations are doable by making
+## > use of `declare -g` and `typeset -n`.
+## >
+## > When we create the `eval`less version of `reflection.sh`, we will do benchmarking to see if the `eval`less
+## > version is _faster_ on BASH 5 or if it's actually slower than `eval`.
+## > It might turn out that `typeset -n` is prohibitively slow and the copy of `reflection.sh`
+## > might just use `declare -g` but otherwise be identical. We will see! Can't wait to try and to benchmark :)
 ##
 ## ### `p` private -_vs_- `P` public
 ##
@@ -71,7 +96,10 @@
 ## | `v` | `byval` |
 ##
 reflection() {
+  # $1 is the reflection command, e.g. 'objects' or 'types' or 'variables'
+  
   # TODO REMOVE THIS VAR
+
   local reflectionCommand="$1"; shift
   case "$reflectionCommand" in
 
@@ -200,11 +228,31 @@ reflection() {
     ## local BASH_VAR_PREFIX_TYPE="T_TYPE_"
     ##
     types)
+      # TODO - reflection types methods getReturnType Dog bark
+      # TODO - reflection types fields add Dog ...
+      # or
+      # TODO - reflection methods getReturnType Dog bark
+      # TODO - reflection fields add Dog ...
+
       # REMOVE ALL THESE LOCALS AND USE INTEGERS IN CODE - don't want any variables being created for reflection calls please :)
       # ^--- remove this too
       local typesCommand="$1"; shift
       case "$typesCommand" in
         ## ### `reflection types addField`
+        ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
         ##
         addField)
           local typeName="$1"; shift
@@ -223,6 +271,20 @@ reflection() {
           eval "$bashVariableName+=(\"$fieldDefinition\")"
           ;;
         ## ### `reflection types addMethod`
+        ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
         ##
         addMethod)
           local typeName="$1"; shift
@@ -249,6 +311,15 @@ reflection() {
           ;;
         ## ### `reflection types define`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         define)
           local typeOfType="$1"; shift
           local typeName="$1"; shift
@@ -261,6 +332,15 @@ reflection() {
           ;;
         ## ### `reflection types undefine`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         undefine)
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
@@ -272,8 +352,11 @@ reflection() {
         ##
         ## | | Parameter |
         ## |-|-----------|
-        ## | `$1` | Type name, e.g. `Dog` |
-        ## | `$2` | Field name, e.g. `name` |
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getFieldComment` |
+        ## | `$4` | Type name, e.g. `Dog` |
+        ## | `$5` | Field name, e.g. `name` |
         ##
         getFieldComment)
           local localTempVariable
@@ -283,9 +366,7 @@ reflection() {
             localTempVariable="${localTempVariable#*;$2:}"
             localTempVariable="${localTempVariable%%;*}"
             eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
-            ## Gets the field comment from the field definition
-            ## 
-            ## e.g. ... `...`
+            # Return the field comment from the field definition:
             printf "${localTempVariable##*&}"
           else
             return 1
@@ -293,50 +374,68 @@ reflection() {
           ;;
         ## ### `reflection types getFieldDefaultValue`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getFieldDefaultValue` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getFieldDefaultValue)
-          local typeName="$1"; shift
-          local bashVariableName="T_TYPE_${typeName}"
-          local fieldName="$1"; shift
-          local fieldList
-          eval "fieldList=\"\${$bashVariableName[5]}\""
-          if [[ "$fieldList" = *";$fieldName:"* ]]
+          local localTempVariable
+          eval "localTempVariable=\"\${T_TYPE_$1[5]}\""
+          if [[ "$localTempVariable" = *";$2:"* ]]
           then
-            local fieldIndex="${fieldList#*;$fieldName:}"
-            local fieldIndex="${fieldIndex%%;*}"
-            local fieldDefinition
-            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
-            # Get the field default value from the field definition
-            local fieldDefaultValue="${fieldDefinition##*>}"
-            fieldDefaultValue="${fieldDefaultValue%%&*}"
-            printf "$fieldDefaultValue"
+            localTempVariable="${localTempVariable#*;$2:}"
+            localTempVariable="${localTempVariable%%;*}"
+            eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
+            # Return the field default value from the field definition
+            localTempVariable="${localTempVariable##*>}"
+            printf "${localTempVariable%%&*}"
           else
             return 1
           fi
           ;;
         ## ### `reflection types getFieldScope`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getFieldScope` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getFieldScope)
-          local typeName="$1"; shift
-          local bashVariableName="T_TYPE_${typeName}"
-          local fieldName="$1"; shift
-          local fieldList
-          eval "fieldList=\"\${$bashVariableName[5]}\""
-          if [[ "$fieldList" = *";$fieldName:"* ]]
+          local localTempVariable
+          eval "localTempVariable=\"\${T_TYPE_$1[5]}\""
+          if [[ "$localTempVariable" = *";$2:"* ]]
           then
-            local fieldIndex="${fieldList#*;$fieldName:}"
-            local fieldIndex="${fieldIndex%%;*}"
-            local fieldDefinition
-            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
-            # Get the field scope from the field definition
-            local fieldScope="${fieldDefinition%%!*}"
-            printf "$fieldScope"
+            localTempVariable="${localTempVariable#*;$2:}"
+            localTempVariable="${localTempVariable%%;*}"
+            eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
+            # Return the field scope from the field definition:
+            printf "${localTempVariable%%!*}"
           else
             return 1
           fi
           ;;
         ## ### `reflection types getFieldType`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getFieldType` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getFieldType)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local fieldName="$1"; shift
@@ -358,7 +457,17 @@ reflection() {
           ;;
         ## ### `reflection types getFieldVisibility`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getFieldVisibility` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getFieldVisibility)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local fieldName="$1"; shift
@@ -380,7 +489,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodComment`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodComment` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodComment)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -402,7 +521,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodParamNames`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodParamNames` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodParamNames)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -434,7 +563,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodParamDefaultValue`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodParamDefaultValue` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodParamDefaultValue)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -463,7 +602,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodParamType`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodParamType` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodParamType)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -491,7 +640,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodReturnType`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodReturnType` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodReturnType)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -513,7 +672,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodScope`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodScope` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodScope)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -534,7 +703,17 @@ reflection() {
           ;;
         ## ### `reflection types getMethodVisibility`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getMethodVisibility` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getMethodVisibility)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
@@ -556,47 +735,116 @@ reflection() {
           ;;
         ## ### `reflection types getTypeBaseClass`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getTypeBaseClass` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getTypeBaseClass)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           eval "printf '%s' \"\${$bashVariableName[3]}\""
           ;;
         ## ### `reflection types getTypeComment`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getTypeComment` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getTypeComment)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           eval "printf '%s' \"\${$bashVariableName[2]}\""
           ;;
         ## ### `reflection types getTypeOfType`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getTypeOfType` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getTypeOfType)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           eval "printf '%s' \"\${$bashVariableName[0]}\""
           ;;
         ## ### `reflection types getTypeInterface`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getTypeInterface` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getTypeInterface)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           eval "printf '%s' \"\${$bashVariableName[4]}\""
           ;;
         ## ### `reflection types getTypeStorageType`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | `getTypeStorageType` |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getTypeStorageType)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           eval "printf '%s' \"\${$bashVariableName[1]}\""
           ;;
         ## ### `reflection types list`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         list)
           ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_TYPE"
           ;;
         ## ### `reflection types show`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `types` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         show)
+          ## UPDATE ME
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           declare -p "$bashVariableName" | sed 's/^declare -a //'
@@ -629,43 +877,84 @@ reflection() {
     ## Manages the TeaScript **Stack** where in-scope variables are allocated.
     ##
     variables)
-      local BASH_VAR_PREFIX_VARIABLE="T_VAR_"
-      local INDEX_OF_VARIABLE_TYPE=0
-      local INDEX_OF_VARIABLE_VALUE=1
-      local INDEX_OF_VARIABLE_REFERENCE_ID=2
       local variablesCommand="$1"; shift
       case "$variablesCommand" in
         ## ### `reflection variables getObjectId`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getObjectId)
           local variableName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_VARIABLE_REFERENCE_ID]}\""
+          local bashVariableName="T_VAR_${variableName}"
+          eval "printf '%s' \"\${$bashVariableName[2]}\""
           ;;
         ## ### `reflection variables getType`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getType)
           local variableName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_VARIABLE_TYPE]}\""
+          local bashVariableName="T_VAR_${variableName}"
+          eval "printf '%s' \"\${$bashVariableName[0]}\""
           ;;
         ## ### `reflection variables getValue`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         getValue)
           local variableName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_VARIABLE_VALUE]}\""
+          local bashVariableName="T_VAR_${variableName}"
+          eval "printf '%s' \"\${$bashVariableName[1]}\""
           ;;
         ## ### `reflection variables list`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         list)
-          ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_VARIABLE"
+          ( set -o posix ; set ) | grep "^T_VAR_"
           ;;
         ## ### `reflection variables set`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         set)
           local variableName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          local bashVariableName="T_VAR_${variableName}"
           local variableType="$1"; shift
           local variableValue="$1"; shift
           local variableObjectId="$1"; shift
@@ -673,16 +962,34 @@ reflection() {
           ;;
         ## ### `reflection variables show`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         show)
           local variableName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          local bashVariableName="T_VAR_${variableName}"
           declare -p "$bashVariableName" | sed 's/^declare -a //'
           ;;
         ## ### `reflection variables unset`
         ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `reflection` |
+        ## | `$2` | `variables` |
+        ## | `$3` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ## | `$x` | ... |
+        ##
         unset)
           local variableName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_VARIABLE}${variableName}"
+          local bashVariableName="T_VAR_${variableName}"
           unset "$bashVariableName"
           ;;
       esac

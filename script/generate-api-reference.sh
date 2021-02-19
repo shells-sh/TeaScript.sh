@@ -1,0 +1,1 @@
+git grep -h "^[[:space:]]*##" lib/ | sed 's/^[[:space:]]*//' | sed 's/^##[[:space:]]\?//' > API_REFERENCE.md
