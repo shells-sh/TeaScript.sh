@@ -1,8 +1,77 @@
-## # `reflection`
+## # `$ reflection`
 ##
+## 🍵 TeaScript Reflection API
+##
+## TeaScript `reflection` provides a read-only interface for introspecting
+## on TeaScript types and variables as well as a write interface for defining
+## or making changes to types.
+##
+## ```sh
+## class Dog implements IAnimal do <<- _
+##   Represents a dog
+##   _
+##
+##   field name: String
+##   field age: Integer
+## end
+##
+## reflection types getTypeInterface Dog
+## # => "IAnimal"
+##
+## reflection types getTypeComment Dog
+## # => "Represents a dog"
+##
+## reflection types getFieldNames Dog
+## # => "name age"
+##
+## reflection types getFieldType Dog age
+## # => "Integer"
+## ```
+##
+## ## 💻 Developer Notes
+##
+## > _Inline all the things!_
+##
+## 🌶️ **Reminder:** most of this file is in the _very hot path_ of TeaScript!
+##
+## Do not attempt to "DRY" this code or refactor it to use meaningful variable names.
 ## 
+## This code should be "wet" with as much inline code as possible.
+## 
+## **Never** attempt to refactor code into utility methods and, for example, then call `reflection utils something` within you code. Just - NO.
+##
+## To the extent possible, **never** start any subshells or run other programs. This means NO `grep` or `sed` or `awk`. Use built-in BASH string manipulation when possible.
+##
+## Also try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_).
+##
+## ### `p` private -_vs_- `P` public
+##
+## Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
+##
+## This contains a lookup table for all characters.
+##
+## > Note: most of the read-only reflection functions such as `reflection types getFieldVisibility` return friendly names such as `public` or `private`.
+## >
+## > These functions are not used in any path of the core TeaScript engine and perform name conversions.
+## >
+## > Other functions such as `reflection types define` expect these characters to be provided as arguments and _do not support_ friendly names such as `public` (use `P` instead).
+## >
+## > All functions used by the core TeaScript engine are marked with the race horse 🐎
+##
+## | Character | Meaning |
+## |-----------|---------|
+## | `a` | `abstract` |
+## | `c` | `class` |
+## | `i` | `interface` |
+## | `p` | `private` |
+## | `P` | `public` |
+## | `r` | `byref` |
+## | `s` | `struct` |
+## | `S` | `static` |
+## | `v` | `byval` |
 ##
 reflection() {
+  # TODO REMOVE THIS VAR
   local reflectionCommand="$1"; shift
   case "$reflectionCommand" in
 
@@ -13,6 +82,7 @@ reflection() {
     ## Might also have a `reflection expressions` for validating and evaluating expressions :)
     ##
     invocations)
+      # TODO REMOVE THESE VARS
       local BASH_VAR_PREFIX_VARIABLE="T_VAR_"
       local invocationsCommand="$1"; shift
       case "$invocationsCommand" in
@@ -24,8 +94,17 @@ reflection() {
 
     ## ## `reflection objects`
     ##
+    ## Manages the TeaScript **Heap** where objects are allocated.
+    ##
+    ##
+    ##
+    ##
+    ##
+    ##
     objects)
+      # TODO REMOVE THIS VAR
       local BASH_VAR_PREFIX_OBJECT="T_OBJECT_"
+      # TODO REMOVE THIS VAR
       local objectsCommand="$1"; shift
       case "$objectsCommand" in
         ## ### `reflection objects create`
@@ -111,23 +190,25 @@ reflection() {
     ##   - `reflection` should do conversions only when responding to `getXY` and should check against them when `isPublic` etc
     ## - combine 'class' (c, i, s, e int stru enum) and value/object (v/o) and if it has literal support (y/n or l/n) <-- don't look at methods, would have to get method def to check if its static
     ##
+    ## local INDEX_OF_TYPE_OF_TYPE=0
+    ## local INDEX_OF_STORAGE_TYPE=1
+    ## local INDEX_OF_TYPE_COMMENT=2
+    ## local INDEX_OF_BASECLASS=3
+    ## local INDEX_OF_INTERFACE=4
+    ## local INDEX_OF_FIELD_LOOKUP=5
+    ## local INDEX_OF_METHOD_LOOKUP=6
+    ## local BASH_VAR_PREFIX_TYPE="T_TYPE_"
+    ##
     types)
       # REMOVE ALL THESE LOCALS AND USE INTEGERS IN CODE - don't want any variables being created for reflection calls please :)
-      local BASH_VAR_PREFIX_TYPE="T_TYPE_"
-      local INDEX_OF_TYPE_OF_TYPE=0
-      local INDEX_OF_STORAGE_TYPE=1
-      local INDEX_OF_TYPE_COMMENT=2
-      local INDEX_OF_BASECLASS=3
-      local INDEX_OF_INTERFACE=4
-      local INDEX_OF_FIELD_LOOKUP=5
-      local INDEX_OF_METHOD_LOOKUP=6
+      # ^--- remove this too
       local typesCommand="$1"; shift
       case "$typesCommand" in
         ## ### `reflection types addField`
         ##
         addField)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local fieldScope="$1"; shift
           local fieldVisibility="$1"; shift
           local fieldName="$1"; shift
@@ -136,16 +217,16 @@ reflection() {
           local fieldComment="$1"; shift
           local fieldDefinition="$fieldScope!$fieldVisibility|$fieldName<$fieldType>$fieldDefaultValue&$fieldComment"
           local fieldList
-          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          eval "fieldList=\"\${$bashVariableName[5]}\""
           fieldList="${fieldList};${fieldName}:\${#$bashVariableName[@]}"
-          eval "$bashVariableName[$INDEX_OF_FIELD_LOOKUP]=\"$fieldList\""
+          eval "$bashVariableName[5]=\"$fieldList\""
           eval "$bashVariableName+=(\"$fieldDefinition\")"
           ;;
         ## ### `reflection types addMethod`
         ##
         addMethod)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodScope="$1"; shift
           local methodVisibility="$1"; shift
           local methodName="$1"; shift
@@ -161,9 +242,9 @@ reflection() {
             methodDefinition="${methodDefinition}&${paramDefinition}"
           done
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           methodList="${methodList};${methodName}:\${#$bashVariableName[@]}"
-          eval "$bashVariableName[$INDEX_OF_METHOD_LOOKUP]=\"$methodList\""
+          eval "$bashVariableName[6]=\"$methodList\""
           eval "$bashVariableName+=(\"$methodDefinition\")"
           ;;
         ## ### `reflection types define`
@@ -171,7 +252,7 @@ reflection() {
         define)
           local typeOfType="$1"; shift
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local storageType="$1"; shift
           local comment="$1"; shift
           local baseClassName="$1"; shift
@@ -182,26 +263,30 @@ reflection() {
         ##
         undefine)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           unset "$bashVariableName"
           ;;
         ## ### `reflection types getFieldComment`
         ##
+        ## Get the comment of a field, if present.
+        ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | Type name, e.g. `Dog` |
+        ## | `$2` | Field name, e.g. `name` |
+        ##
         getFieldComment)
-          local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          local fieldName="$1"; shift
-          local fieldList
-          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
-          if [[ "$fieldList" = *";$fieldName:"* ]]
+          local localTempVariable
+          eval "localTempVariable=\"\${T_TYPE_$1[5]}\""
+          if [[ "$localTempVariable" = *";$2:"* ]]
           then
-            local fieldIndex="${fieldList#*;$fieldName:}"
-            local fieldIndex="${fieldIndex%%;*}"
-            local fieldDefinition
-            eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
-            # Get the field comment from the field definition
-            local fieldComment="${fieldDefinition##*&}"
-            printf "$fieldComment"
+            localTempVariable="${localTempVariable#*;$2:}"
+            localTempVariable="${localTempVariable%%;*}"
+            eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
+            ## Gets the field comment from the field definition
+            ## 
+            ## e.g. ... `...`
+            printf "${localTempVariable##*&}"
           else
             return 1
           fi
@@ -210,10 +295,10 @@ reflection() {
         ##
         getFieldDefaultValue)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local fieldName="$1"; shift
           local fieldList
-          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          eval "fieldList=\"\${$bashVariableName[5]}\""
           if [[ "$fieldList" = *";$fieldName:"* ]]
           then
             local fieldIndex="${fieldList#*;$fieldName:}"
@@ -232,10 +317,10 @@ reflection() {
         ##
         getFieldScope)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local fieldName="$1"; shift
           local fieldList
-          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          eval "fieldList=\"\${$bashVariableName[5]}\""
           if [[ "$fieldList" = *";$fieldName:"* ]]
           then
             local fieldIndex="${fieldList#*;$fieldName:}"
@@ -253,10 +338,10 @@ reflection() {
         ##
         getFieldType)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local fieldName="$1"; shift
           local fieldList
-          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          eval "fieldList=\"\${$bashVariableName[5]}\""
           if [[ "$fieldList" = *";$fieldName:"* ]]
           then
             local fieldIndex="${fieldList#*;$fieldName:}"
@@ -275,10 +360,10 @@ reflection() {
         ##
         getFieldVisibility)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local fieldName="$1"; shift
           local fieldList
-          eval "fieldList=\"\${$bashVariableName[$INDEX_OF_FIELD_LOOKUP]}\""
+          eval "fieldList=\"\${$bashVariableName[5]}\""
           if [[ "$fieldList" = *";$fieldName:"* ]]
           then
             local fieldIndex="${fieldList#*;$fieldName:}"
@@ -297,10 +382,10 @@ reflection() {
         ##
         getMethodComment)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -319,10 +404,10 @@ reflection() {
         ##
         getMethodParamNames)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -351,11 +436,11 @@ reflection() {
         ##
         getMethodParamDefaultValue)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local paramName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -380,11 +465,11 @@ reflection() {
         ##
         getMethodParamType)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local paramName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -408,10 +493,10 @@ reflection() {
         ##
         getMethodReturnType)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -430,10 +515,10 @@ reflection() {
         ##
         getMethodScope)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -451,10 +536,10 @@ reflection() {
         ##
         getMethodVisibility)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           local methodName="$1"; shift
           local methodList
-          eval "methodList=\"\${$bashVariableName[$INDEX_OF_METHOD_LOOKUP]}\""
+          eval "methodList=\"\${$bashVariableName[6]}\""
           if [[ "$methodList" = *";$methodName:"* ]]
           then
             local methodIndex="${methodList#*;$methodName:}"
@@ -473,36 +558,36 @@ reflection() {
         ##
         getTypeBaseClass)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_BASECLASS]}\""
+          local bashVariableName="T_TYPE_${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[3]}\""
           ;;
         ## ### `reflection types getTypeComment`
         ##
         getTypeComment)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_TYPE_COMMENT]}\""
+          local bashVariableName="T_TYPE_${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[2]}\""
           ;;
         ## ### `reflection types getTypeOfType`
         ##
         getTypeOfType)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_TYPE_OF_TYPE]}\""
+          local bashVariableName="T_TYPE_${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[0]}\""
           ;;
         ## ### `reflection types getTypeInterface`
         ##
         getTypeInterface)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_INTERFACE]}\""
+          local bashVariableName="T_TYPE_${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[4]}\""
           ;;
         ## ### `reflection types getTypeStorageType`
         ##
         getTypeStorageType)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
-          eval "printf '%s' \"\${$bashVariableName[$INDEX_OF_STORAGE_TYPE]}\""
+          local bashVariableName="T_TYPE_${typeName}"
+          eval "printf '%s' \"\${$bashVariableName[1]}\""
           ;;
         ## ### `reflection types list`
         ##
@@ -513,7 +598,7 @@ reflection() {
         ##
         show)
           local typeName="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_TYPE}${typeName}"
+          local bashVariableName="T_TYPE_${typeName}"
           declare -p "$bashVariableName" | sed 's/^declare -a //'
           ;;
       esac
@@ -540,6 +625,8 @@ reflection() {
       ;;
 
     ## ## `reflection variables`
+    ##
+    ## Manages the TeaScript **Stack** where in-scope variables are allocated.
     ##
     variables)
       local BASH_VAR_PREFIX_VARIABLE="T_VAR_"

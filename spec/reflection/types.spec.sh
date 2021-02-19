@@ -1,5 +1,15 @@
 source teascript.sh
 
+# Add a note on type of whether it supports literals? or check for method?
+
+# Also, whether the Storage Type is a: literal, object ID, OR fields (for struct)
+
+# Add ability to mark it as abstract vs concrete/class which are class types specifically
+
+# Get to these later:
+# - Nullable? <-- variable specific or part of the type itself? var/field/param specific
+# - Generics? <-- this is part of the type name, need T (et al) for methods and fields to be able to use as a type(s) :)
+
 @spec.define_and_delete_types() {
   expect { reflection types list } not toContain "Dog"
 
