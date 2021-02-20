@@ -79,7 +79,9 @@ with Linux and used on Windows as well and create 2 versions of `reflection.sh`,
 > It might turn out that `typeset -n` is prohibitively slow and the copy of `reflection.sh`
 > might just use `declare -g` but otherwise be identical. We will see! Can't wait to try and to benchmark :)
 
-#### `p` private -_vs_- `P` public
+#### Character Codes
+
+> `p` private -_vs_- `P` public
 
 Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
 
@@ -129,7 +131,7 @@ See [`reflection objects`](#reflection-objects), [`types`](#reflection-types), a
 
 Manages the TeaScript **Heap** where objects are allocated.
 
-Objects are `create`d (_allocated_) and `dispose`d of (_deallocated_).
+Objects are `create`'d (_allocated_) and `dispose`'d of (_deallocated_).
 
 All created objects are provided a unique Object ID identifier for
 referencing the object, e.g. from a variable.
@@ -291,9 +293,11 @@ TODO - update to show pretty things :)
 
 Manages the TeaScript types in the TeaScript type system.
 
-Types are `define`d and `undefine`d.
+Types are `define`'d and `undefine`'d.
 
 Types are used for describing the shape and behavior of objects and values.
+
+Every type has a "type", e.g. it is a `class` or a `struct` etc. We call these the 'descriptor' (_to reduce confusion, it's really the type type_).
 
 In addition to classes, value types such as literal primitives (`string`, `int`, et al)
 and `struct` are also described using TeaScript types.
@@ -302,25 +306,180 @@ and `struct` are also described using TeaScript types.
 
 Variables are represented in BASH single-dimensional array structures (see [TeaScript use of BASH arrays](#TeaScript-use-of-BASH-arrays) above)
 
-TODO: details
+```sh
+reflection types define Array [...]
+# => T_TYPE_Array
 
----
----
+reflection types define Array[T]
+# => T_TYPE_Array_GENERIC_T
 
-`TODO` - space optimizations, which'll make it all harder to read, use COMMENTS 
-- addField p s v main string[] args "" <-- public static void
-  - CALLER needs to use this arcane language so that `reflection` doesn't need any conditionals
-  - `reflection` should do conversions only when responding to `getXY` and should check against them when `isPublic` etc
-- combine 'class' (c, i, s, e int stru enum) and value/object (v/o) and if it has literal support (y/n or l/n) <-- don't look at methods, would have to get method def to check if its static
+reflection types define Map[K,V]
+# => T_TYPE_Map_GENERIC_K_V
+```
 
-local INDEX_OF_TYPE_OF_TYPE=0
-local INDEX_OF_STORAGE_TYPE=1
-local INDEX_OF_TYPE_COMMENT=2
-local INDEX_OF_BASECLASS=3
-local INDEX_OF_INTERFACE=4
-local INDEX_OF_FIELD_LOOKUP=5
-local INDEX_OF_METHOD_LOOKUP=6
-local BASH_VAR_PREFIX_TYPE="T_TYPE_"
+| `T_TYPE_` index | Description |
+|-----------------|-------------|
+| `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T|`, followed by base class and interfaces, with comment if provided |
+| `1` | Field lookup table, mapping field named to index value where field definition is stored |
+| `2` | Method lookup table, mapping method name to index value where method definition is stored |
+
+```sh
+T_TYPE_Array_GENERIC_T=([0]="Array[T];s|Object<IEnumerable,IComparable>This represents a typed array of a provided generic type.")
+```
+
+### `reflection types define`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `define` |
+| `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
+| `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
+| `$5` | Base class name (or empty string) |
+| `$6` | Interface names (comma-delimited without spaces) (or empty string) |
+| `$7` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
+
+### `reflection types exists`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `exists` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types getBaseClass`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getBaseClass` |
+| `$3` | ... |
+| `$4` | ... |
+| `$5` | ... |
+
+### `reflection types getBaseType`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getBaseType` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types getComment`
+
+Gets the comment text for the type, if any.
+
+Note: this is saved to reflection only if `T_COMMENTS=enabled` (default in development environment)
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getBaseClass` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types getDescriptorCode`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getDescriptorCode` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types getDescriptorName`
+
+TODO DESCRIBE
+
+> 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getDescriptorName` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types getGenericTypes`
+
+TODO DESCRIBE
+
+> 🚨 Slightly more expensive than your average function. Use with more caution than others. Ideally only used by users.
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getGenericTypes` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types getInterfaces`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `getInterfaces` |
+| `$3` | Type name (full name including generics, if any) |
+
+### `reflection types undefine`
+
+TODO DESCRIBE
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `undefine` |
+| `$3` | ... |
+| `$4` | ... |
+| `$5` | ... |
+
+### `reflection types fields define`
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `fields` |
+| `$3` | ... |
+| `$4` | ... |
+| `$5` | ... |
+
+### `reflection types fields undefine`
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `fields` |
+| `$3` | ... |
+| `$4` | ... |
+| `$5` | ... |
+
+### `reflection types methods define`
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `methods` |
+| `$3` | ... |
+| `$4` | ... |
+| `$5` | ... |
+
+### `reflection types methods undefine`
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `methods` |
+| `$3` | ... |
+| `$4` | ... |
+| `$5` | ... |
 
 ## `reflection snapshots`
 
@@ -396,6 +555,8 @@ for reference or a field index is the variable stores as `struct`.
 Get the type of this variable, e.g. object reference, literal value, or named reference.
 
 Specifically returns one of these values: `nameref`, `byref`, or `byval`.
+
+> 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
 
 > > | | Parameter |
 > > |-|-----------|
