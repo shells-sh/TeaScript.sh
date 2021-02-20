@@ -53,7 +53,7 @@ This code should be "wet" with as much inline code as possible.
 
 To the extent possible, **never** start any subshells or run other programs. This means NO `grep` or `sed` or `awk`. Use built-in BASH string manipulation when possible.
 
-Try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_).
+Try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_). All BASH locals should be prefixed `__T_`.
 
 Do not loop over values. Usually, if you are writing a loop, you are adding an `O(N)`` or worse, do not do it.
 Notable exception for [`addMethod`]() which takes a dynamic number of arguments for defining any number of parameters.
@@ -121,6 +121,8 @@ referencing the object, e.g. from a variable.
 
 You can think of objects as simple key/value stores.
 
+The object does *not* know the *types* of the keys/values, that information is stored on the type.
+
 Every object has:
 
   1. a unique object ID identifier (_see [Object IDs](#-Object-IDs) below for more info on how these are generated_)
@@ -160,21 +162,42 @@ by the garbage collector, you can run `reflection objects gc unused`
 
 ### `reflection objects create`
 
+Creates an object of a given type and allocates it on the heap.
+
+The object ID is provided to the caller by passing the name of a variable and this function
+will set the variable value to the object ID. This allows calling `reflection objects create`
+outside of a subshell.
+
+> ℹ️ At the time of writing, you cannot currently provide key/value fields to `reflection objects create`,
+> you must use `setField` for every individual field.
+
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `objects` |
 > > | `$2` | `create` |
-> > | `$3` | ... |
-> > | `$4` | ... |
-> > | `$5` | ... |
-> > | `$6` | ... |
+> > | `$3` | Type name, e.g. `String` or `Integer` |
+> > | `$4` | `out` variable name to persist the object ID |
 
 ### `reflection objects dispose`
+
+Deallocate the object.
+
+Note: this does no checking to see if the object leaves any orphans behind.
 
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `objects` |
 > > | `$2` | `dispose` |
+> > | `$3` | Object ID |
+
+### `reflection objects exists`
+
+Return 0 if an object with the provided ID exists / is currently allocated else returns 1.
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `objects` |
+> > | `$2` | `exists` |
 > > | `$3` | Object ID |
 
 ### `reflection objects gc`
@@ -188,6 +211,10 @@ Run the garbage collector (reap all unused objects -or- simply list all unused o
 > > | `$3` | `run` or `unused` |
 
 ### `reflection objects getField`
+
+Get the value of the field in this given object.
+
+If the field does not exist, returns 1.
 
 > > | | Parameter |
 > > |-|-----------|
@@ -217,16 +244,15 @@ Run the garbage collector (reap all unused objects -or- simply list all unused o
 
 ### `reflection objects show`
 
+TODO - update to show pretty things :)
+
 > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
 
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `objects` |
-> > | `$2` | `...` |
+> > | `$2` | `show` |
 > > | `$3` | Object ID |
-> > | `$4` | ... |
-> > | `$5` | ... |
-> > | `$6` | ... |
 
 ## `reflection types`
 
@@ -457,7 +483,7 @@ UPDATE ME
 | `$x` | ... |
 | `$x` | ... |
 
-UPDATE ME
+TODO
 ### `reflection types getTypeInterface`
 
 | | Parameter |

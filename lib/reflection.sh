@@ -53,7 +53,7 @@
 ##
 ## To the extent possible, **never** start any subshells or run other programs. This means NO `grep` or `sed` or `awk`. Use built-in BASH string manipulation when possible.
 ##
-## Try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_).
+## Try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_). All BASH locals should be prefixed `__T_`.
 ##
 ## Do not loop over values. Usually, if you are writing a loop, you are adding an `O(N)`` or worse, do not do it.
 ## Notable exception for [`addMethod`]() which takes a dynamic number of arguments for defining any number of parameters.
@@ -134,6 +134,8 @@ reflection() {
     ##
     ## You can think of objects as simple key/value stores.
     ##
+    ## The object does *not* know the *types* of the keys/values, that information is stored on the type.
+    ##
     ## Every object has:
     ## 
     ##   1. a unique object ID identifier (_see [Object IDs](#-Object-IDs) below for more info on how these are generated_)
@@ -172,35 +174,37 @@ reflection() {
     ## > ℹ️ Not sure when or how, but we'll build automatic running of the gc into TeaScript :)
     ##
     objects)
-
-      # TODO REMOVE THIS VAR
-      local BASH_VAR_PREFIX_OBJECT="T_OBJECT_"
-      # TODO REMOVE THIS VAR
-      local objectsCommand="$1"; shift
-      case "$objectsCommand" in
+      case "$2" in
 
         ## ### `reflection objects create`
+        ##
+        ## Creates an object of a given type and allocates it on the heap.
+        ##
+        ## The object ID is provided to the caller by passing the name of a variable and this function
+        ## will set the variable value to the object ID. This allows calling `reflection objects create`
+        ## outside of a subshell.
+        ##
+        ## > ℹ️ At the time of writing, you cannot currently provide key/value fields to `reflection objects create`,
+        ## > you must use `setField` for every individual field.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
         ## > > | `$1` | `objects` |
         ## > > | `$2` | `create` |
-        ## > > | `$3` | ... |
-        ## > > | `$4` | ... |
-        ## > > | `$5` | ... |
-        ## > > | `$6` | ... |
+        ## > > | `$3` | Type name, e.g. `String` or `Integer` |
+        ## > > | `$4` | `out` variable name to persist the object ID |
         ##
         create)
-          local typeName="$1"; shift
-          # TODO inline the random subshell here!
-          local objectId="$( cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )"
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
-          # In BASH 4.3+ use declare -g and typeset -n for safety (although eval might be faster than typeset, benchmark)
-          eval "$bashVariableName=(\"$typeName\" \"\")"
-          printf "$objectId"
+          local __T_objectId="$( cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )"
+          eval "printf -v \"$4\" '%s' "$__T_objectId""
+          eval "T_OBJECT_$__T_objectId=(\"$3\" \"\")"
           ;;
 
         ## ### `reflection objects dispose`
+        ##
+        ## Deallocate the object.
+        ##
+        ## Note: this does no checking to see if the object leaves any orphans behind.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -209,9 +213,21 @@ reflection() {
         ## > > | `$3` | Object ID |
         ##
         dispose)
-          local objectId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
-          unset "$bashVariableName"
+          unset "T_OBJECT_$3"
+          ;;
+
+        ## ### `reflection objects exists`
+        ##
+        ## Return 0 if an object with the provided ID exists / is currently allocated else returns 1.
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `exists` |
+        ## > > | `$3` | Object ID |
+        ##
+        exists)
+          eval "[ -n \"\${T_OBJECT_$3+x}\" ]"
           ;;
 
         ## ### `reflection objects gc`
@@ -225,10 +241,47 @@ reflection() {
         ## > > | `$3` | `run` or `unused` |
         ##
         gc)
-          :
+          case "$3" in
+            run)
+              local __T_objectId
+              for __T_objectId in $(( set -o posix ; set ) | grep "^T_OBJECT_" | sed "s/^T_OBJECT_\([^=]*\)=.*/\1/")
+              do
+                # If a reference to the object ID shows up in any variables or objects, then it's used.
+                # If it is not found in any variable or objects, then it's unused (print it).
+                # Ignore the allocation of the T_OBJECT, itself, when calculating unused.
+                #
+                # TODO - should the result of 'set' be stored in memory in a variable OR 'set' run each time? It'll be LARGE in memory.
+                #        benchmark this and look at memory size with a few thousand objects later on!
+                if ! ( set -o posix ; set ) | grep "^T_OBJECT_\|^T_VAR_" | grep -v "T_OBJECT_$__T_objectId=" | grep "$__T_objectId" &> /dev/null
+                then
+                  unset "T_OBJECT_$__T_objectId"
+                fi
+              done
+              ;;
+            unused)
+              local __T_objectId
+              for __T_objectId in $(( set -o posix ; set ) | grep "^T_OBJECT_" | sed "s/^T_OBJECT_\([^=]*\)=.*/\1/")
+              do
+                # If a reference to the object ID shows up in any variables or objects, then it's used.
+                # If it is not found in any variable or objects, then it's unused (print it).
+                # Ignore the allocation of the T_OBJECT, itself, when calculating unused.
+                #
+                # TODO - should the result of 'set' be stored in memory in a variable OR 'set' run each time? It'll be LARGE in memory.
+                #        benchmark this and look at memory size with a few thousand objects later on!
+                if ! ( set -o posix ; set ) | grep "^T_OBJECT_\|^T_VAR_" | grep -v "T_OBJECT_$__T_objectId=" | grep "$__T_objectId" &> /dev/null
+                then
+                  echo "$__T_objectId"
+                fi
+              done
+              ;;
+          esac
           ;;
 
         ## ### `reflection objects getField`
+        ##
+        ## Get the value of the field in this given object.
+        ##
+        ## If the field does not exist, returns 1.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -238,17 +291,13 @@ reflection() {
         ## > > | `$4` | Field name |
         ##
         getField)
-          local objectId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
-          local fieldName="$1"; shift
-          # In BASH 4.3+ use typeset -n for safety (although eval might be faster than typeset, benchmark)
-          local fieldList
-          eval "fieldList=\"\${$bashVariableName[1]}\""
-          if [[ "$fieldList" = *";$fieldName:"* ]]
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_OBJECT_$3[1]}\""
+          if [[ "$__T_tempVariable" = *";$4:"* ]]
           then
-            local fieldIndex="${fieldList#*;$fieldName:}"
-            local fieldIndex="${fieldIndex%%;*}"
-            eval "printf '%s' \"\${$bashVariableName[$fieldIndex]}\""
+            __T_tempVariable="${__T_tempVariable#*;$4:}"
+            __T_tempVariable="${__T_tempVariable%%;*}"
+            eval "printf '%s' \"\${T_OBJECT_$3[$__T_tempVariable]}\""
           else
             return 1
           fi
@@ -264,7 +313,8 @@ reflection() {
         ## > > | `$2` | `list` |
         ##
         list)
-          ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_OBJECT"
+          # TODO update to show the type and field names too (raw)
+          ( set -o posix ; set ) | grep "^T_OBJECT_"
           ;;
 
         ## ### `reflection objects setField`
@@ -278,41 +328,33 @@ reflection() {
         ## > > | `$5` | Field value |
         ##
         setField)
-          local objectId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
-          local fieldName="$1"; shift
-          local fieldValue="$1"; shift
-          # In BASH 4.3+ use typeset -n for safety (although eval might be faster than typeset, benchmark)
-          local fieldList
-          eval "fieldList=\"\${$bashVariableName[1]}\""
-          if [[ "$fieldList" = *";$fieldName:"* ]]
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_OBJECT_$3[1]}\""
+          if [[ "$__T_tempVariable" = *";$4:"* ]]
           then          
-            local fieldIndex="${fieldList#*;$fieldName:}"
-            local fieldIndex="${fieldIndex%%;*}"
-            eval "$bashVariableName[$fieldIndex]=\"$fieldValue\""
+            __T_tempVariable="${__T_tempVariable#*;$4:}"
+            __T_tempVariable="${__T_tempVariable%%;*}"
+            eval "T_OBJECT_$3[$__T_tempVariable]=\"$5\""
           else
-            eval "$bashVariableName[1]=\"${fieldList};${fieldName}:\${#$bashVariableName[@]}\";"
-            eval "$bashVariableName+=(\"$fieldValue\")"
+            eval "T_OBJECT_$3[1]=\"$__T_tempVariable;$4:\${#T_OBJECT_$3[@]}\";"
+            eval "T_OBJECT_$3+=(\"$5\")"
           fi
           ;;
 
         ## ### `reflection objects show`
+        ##
+        ## TODO - update to show pretty things :)
         ##
         ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
         ## > > | `$1` | `objects` |
-        ## > > | `$2` | `...` |
+        ## > > | `$2` | `show` |
         ## > > | `$3` | Object ID |
-        ## > > | `$4` | ... |
-        ## > > | `$5` | ... |
-        ## > > | `$6` | ... |
         ##
         show)
-          local objectId="$1"; shift
-          local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
-          declare -p "$bashVariableName" | sed 's/^declare -a //'
+          declare -p "T_OBJECT_$3" | sed 's/^declare -a //'
           ;;
       esac
       ;;
@@ -884,7 +926,7 @@ reflection() {
         ## | `$x` | ... |
         ##
         getTypeOfType)
-          ## UPDATE ME
+          ## TODO
           local typeName="$1"; shift
           local bashVariableName="T_TYPE_${typeName}"
           eval "printf '%s' \"\${$bashVariableName[0]}\""
@@ -1001,7 +1043,6 @@ reflection() {
         ##
         exists)
           eval "[ -n \"\${T_VAR_$3+x}\" ]"
-          return $?
           ;;
 
         ## ### `reflection variables getValueTypeCode`
@@ -1066,6 +1107,7 @@ reflection() {
         ## > > | `$3` | Variable name |
         ##
         getValueType)
+          # TODO rename this to start with __T_
           local valueTypeCode
           eval "printf -v valueTypeCode '%s' \"\${T_VAR_$3[0]%;*}\""
           case "$valueTypeCode" in
