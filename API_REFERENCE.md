@@ -114,7 +114,7 @@ Mac OS X uses a wicked old version of BASH: `3.2.57` (as mentioned above)
 
 TeaScript is built from the ground up to support `3.2.57` so that it works out-of-the-box on Mac OS X.
 
-However, even if TeaScript did make use of BASH associative arrays, they are still flat single-dimensional objects with a simple text value key or index and a simple text value string.
+However, even if TeaScript did make use of BASH associative arrays, they are still flat objects with a simple text value key/index and a simple text string value.
 
 BASH associative arrays wouldn't actually benefit the TeaScript implementation a whole lot.
 
