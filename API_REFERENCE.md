@@ -492,6 +492,14 @@ Returns a list of all defined variables including their type and value, one per 
 - For `struct` types, the value will appear empty. Use [`variables show`](#reflection-variables-show) to view details.
 - For named reference variables, the type will be empty. Named references do not copy the type of their target (_target may change_).
 
+Variable information is tab-delimited.
+
+To print just the variable names:
+
+```sh
+reflection variables list | awk '{print $1}'
+```
+
 > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
 
 > > | | Parameter |
@@ -523,6 +531,10 @@ reflection variables set myVariableAlias n "" myString
 > > | `$6` | Variable value (object ID, literal text value, or name of another variable) |
 
 ### `reflection variables show`
+
+Print out details about a variable.
+
+Print out details on separate lines including variable name, type, and value.
 
 > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
 
