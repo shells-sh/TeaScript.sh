@@ -53,7 +53,12 @@
 ##
 ## To the extent possible, **never** start any subshells or run other programs. This means NO `grep` or `sed` or `awk`. Use built-in BASH string manipulation when possible.
 ##
-## Also try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_).
+## Try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_).
+##
+## Do not loop over values. Usually, if you are writing a loop, you are adding an `O(N)`` or worse, do not do it.
+## Notable exception for [`addMethod`]() which takes a dynamic number of arguments for defining any number of parameters.
+## In general, keep everything `O(1)` as much as possible. User-friendly functions which are not on the hot path are allowed
+## to break these rules.
 ##
 ## ### `eval`
 ##
@@ -86,7 +91,7 @@
 ## >
 ## > Other functions such as `reflection types define` expect these characters to be provided as arguments and _do not support_ friendly names such as `public` (use `P` instead).
 ## >
-## > All functions used by the core TeaScript engine are marked with the race horse 🐎
+## > All functions used by the core TeaScript engine are marked with the hot pepper noting the hot path 🌶️ (TODO!)
 ##
 ## | Character | Meaning |
 ## |-----------|---------|
@@ -182,6 +187,8 @@ reflection() {
 
         ## ### `reflection objects list`
         ##
+        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ##
         list)
           ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_OBJECT"
           ;;
@@ -208,6 +215,8 @@ reflection() {
           ;;
 
         ## ### `reflection objects show`
+        ##
+        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
         show)
           local objectId="$1"; shift
@@ -854,6 +863,11 @@ reflection() {
           local bashVariableName="T_TYPE_${typeName}"
           declare -p "$bashVariableName" | sed 's/^declare -a //'
           ;;
+
+        *)
+          echo "Unknown 'reflection types' command: $2"
+          return 1
+          ;;
       esac
       ;;
 
@@ -883,7 +897,45 @@ reflection() {
     ##
     variables)
       case "$2" in
+
+        ## ### `reflection variables exists`
+        ##
+        ## Returns 1 if variable with provided name does not exist else returns 0.
+        ##
+        ## > | | Parameter |
+        ## > |-|-----------|
+        ## > | `$1` | `variables` |
+        ## > | `$2` | `getType` |
+        ## > | `$3` | Variable name |
+        ##
+        exists)
+          eval "[ -n \"\${T_VAR_$3+x}\" ]"
+          return $?
+          ;;
+
+        ## ### `reflection variables getValueTypeCode`
+        ##
+        ## Get the type of this variable, e.g. object reference, literal value, or named reference.
+        ##
+        ## ℹ️ Note: this returns the code for the value type, e.g. `r` or `v` or `n`.  
+        ##
+        ## See [`getValueType`](#reflection-variables-getValueType) to get friendly name.
+        ##
+        ## > | | Parameter |
+        ## > |-|-----------|
+        ## > | `$1` | `variables` |
+        ## > | `$2` | `getValueTypeCode` |
+        ## > | `$3` | Variable name |
+        ##
+        getValueTypeCode)
+          eval "printf '%s' \"\${T_VAR_$3[0]%;*}\""
+          ;;
+
         ## ### `reflection variables getType`
+        ##
+        ## Get the type stored in the variable, e.g. `String` or `Integer`.
+        ##
+        ## For named references this value is blank.
         ##
         ## | | Parameter |
         ## |-|-----------|
@@ -897,6 +949,9 @@ reflection() {
 
         ## ### `reflection variables getValue`
         ##
+        ## Get the value stored in this variable, e.g. a literal text value or an Object ID
+        ## for reference or a field index is the variable stores as `struct`.
+        ##
         ## | | Parameter |
         ## |-|-----------|
         ## | `$1` | `variables` |
@@ -907,17 +962,64 @@ reflection() {
           eval "printf '%s' \"\${T_VAR_$3[1]}\""
           ;;
 
+        ## ### `reflection variables getValueType`
+        ##
+        ## Get the type of this variable, e.g. object reference, literal value, or named reference.
+        ##
+        ## Specifically returns one of these values: `nameref`, `byref`, or `byval`.
+        ##
+        ## | | Parameter |
+        ## |-|-----------|
+        ## | `$1` | `variables` |
+        ## | `$2` | `getValueType` |
+        ## | `$3` | Variable name |
+        ##
+        getValueType)
+          local valueTypeCode
+          eval "printf -v valueTypeCode '%s' \"\${T_VAR_$3[0]%;*}\""
+          case "$valueTypeCode" in
+            n) printf nameref ;;
+            r) printf byref ;;
+            v) printf byval ;;
+            *) printf "$valueTypeCode" ;;
+          esac
+          ;;
+
         ## ### `reflection variables list`
+        ##
+        ## Returns a list of all defined variables including their type and value, one per line.
+        ##
+        ## - For `struct` types, the value will appear empty. Use [`variables show`](#reflection-variables-show) to view details.
+        ## - For named reference variables, the type will be empty. Named references do not copy the type of their target (_target may change_).
+        ##
+        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
         ## | | Parameter |
         ## |-|-----------|
         ## | `$2` | `variables` |
         ##
         list)
-          ( set -o posix ; set ) | grep "^T_VAR_"
+          local variableName
+          for variableName in $(( set -o posix ; set ) | grep "^T_VAR_" | sed 's/=.*//' | sed 's/^T_VAR_//' )
+          do
+            echo "$variableName\t$( reflection variables getValueType "$variableName" )\t$( reflection variables getType "$variableName" )\t$( reflection variables getValue "$variableName" )"
+          done
           ;;
 
         ## ### `reflection variables set`
+        ##
+        ## Set / allocate a new variable.
+        ##
+        ## ```sh
+        ## # Define a variable which stores the literal text value in the variable (no object heap allocation)
+        ## reflection variables set myString v String "This is the literal value"
+        ##
+        ## # Define a variable which references an object on the heap by its ID
+        ## reflection variables set myObject r Dog "<object ID referencing the Dog object>"
+        ##
+        ## # Define a special named reference which is an alias / pointer to another variable by its name
+        ## reflection variables set myVariableAlias n "" myString
+        ## ```
         ##
         ## | | Parameter |
         ## |-|-----------|
@@ -934,16 +1036,30 @@ reflection() {
 
         ## ### `reflection variables show`
         ##
+        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ##
         ## | | Parameter |
         ## |-|-----------|
         ## | `$2` | `variables` |
         ## | `$3` | Variable name |
         ##
         show)
-          declare -p "T_VAR_$3" | sed 's/^declare -a //'
+          if ! reflection variables exists "$3"
+          then
+            return 1
+          else
+            echo "Name: $3"
+            echo "Value Type: $( reflection variables getValueType "$3" )"
+            echo "Type: $( reflection variables getType "$3" )"
+            echo "Value: $( reflection variables getValue "$3" )"
+          fi
           ;;
 
         ## ### `reflection variables unset`
+        ##
+        ## Unset the given variable by name.
+        ##
+        ## Returns 1 if variable with provided name does not exist else returns 0.
         ##
         ## | | Parameter |
         ## |-|-----------|
@@ -953,7 +1069,17 @@ reflection() {
         unset)
           unset "T_VAR_$3"
           ;;
+
+        *)
+          echo "Unknown 'reflection variables' command: $2"
+          return 1
+          ;;
       esac
+      ;;
+
+    *)
+      echo "Unknown 'reflection' command: $1"
+      return 1
       ;;
   esac
 }
