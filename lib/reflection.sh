@@ -1,3 +1,6 @@
+T_GC_OBJECT_THRESHOLD=999
+T_GC_OBJECT_THRESHOLD_COUNT=0
+
 ## # `$ reflection`
 ##
 ## 🍵 TeaScript Reflection API
@@ -105,7 +108,6 @@
 ## | `s` | `struct` |
 ## | `S` | `static` |
 ## | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
-##
 reflection() {
   case "$1" in
     ## ## `reflection invocations`
@@ -187,6 +189,20 @@ reflection() {
         ## > ℹ️ At the time of writing, you cannot currently provide key/value fields to `reflection objects create`,
         ## > you must use `setField` for every individual field.
         ##
+        ## #### 🗑️ Garbage Collection
+        ##
+        ## TeaScript automatically runs a garbage collector when a certain number of objects have been allocated.
+        ##
+        ## This can be configured by setting the `T_GC_OBJECT_THRESHOLD` variable to an integer value (default: `1000`).
+        ##
+        ## To disable automatic garbage collection, `unset T_GC_OBJECT_THRESHOLD`.
+        ##
+        ## Be sure to set or unset `T_GC_OBJECT_THRESHOLD` _after_ sourcing `teascript.sh`.
+        ##
+        ## You can run the garbage collector manually at any time by running: `reflection objects gc run`.
+        ##
+        ## See [`objects gc`](#reflection-objects-gc) for more details.
+        ##
         ## > > | | Parameter |
         ## > > |-|-----------|
         ## > > | `$1` | `objects` |
@@ -195,6 +211,15 @@ reflection() {
         ## > > | `$4` | `out` variable name to persist the object ID |
         ##
         create)
+          if [ -n "$T_GC_OBJECT_THRESHOLD" ]
+          then
+            : $(( T_GC_OBJECT_THRESHOLD_COUNT++ ))
+            if [ $T_GC_OBJECT_THRESHOLD_COUNT -gt $T_GC_OBJECT_THRESHOLD ]
+            then
+              T_GC_OBJECT_THRESHOLD_COUNT=0
+              reflection objects gc run
+            fi
+          fi
           local __T_objectId="$( cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )"
           eval "printf -v \"$4\" '%s' "$__T_objectId""
           eval "T_OBJECT_$__T_objectId=(\"$3\" \"\")"
@@ -232,7 +257,7 @@ reflection() {
 
         ## ### `reflection objects gc`
         ##
-        ## Run the garbage collector (reap all unused objects -or- simply list all unused object IDs)
+        ## Run the garbage collector (_reap all unused objects -or- simply list all unused object IDs_)
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|

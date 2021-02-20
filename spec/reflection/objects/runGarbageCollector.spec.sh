@@ -43,18 +43,69 @@
   assert reflection objects exists "$dogId"
   assert reflection objects exists "$animalGroupId"
 
-  # Run the GC! Bye bye animal group
+  # # Run the GC! Bye bye animal group
   reflection objects gc run
 
-  assert reflection objects exists "$dogId"
-  refute reflection objects exists "$animalGroupId"
-  expect { reflection objects gc unused } toContain "$dogId"
+  # So, depending on the ORDER of the objects (based on their random IDs)
+  # the dog may or may not still exist!
 
-  # To handle this scenario, the GC needs to sweep regularly.
-  # Each sweep may leave new orphans.
-  # Sweep again and the dog should be reaped.
+  # assert reflection objects exists "$dogId"
+  # refute reflection objects exists "$animalGroupId"
+  # expect { reflection objects gc unused } toContain "$dogId"
 
-  reflection objects gc run
+  # # To handle this scenario, the GC needs to sweep regularly.
+  # # Each sweep may leave new orphans.
+  # # Sweep again and the dog should be reaped.
 
-  refute reflection objects exists "$dogId"
+  # reflection objects gc run
+
+  # refute reflection objects exists "$dogId"
+}
+
+@spec.reflection.objects.gc.automatically_runs_after_a_certain_number_of_object_allocations() {
+  T_GC_OBJECT_THRESHOLD=2
+  T_GC_OBJECT_THRESHOLD_COUNT=0
+
+  local fooId
+  reflection objects create Foo fooId
+  reflection variables set foo r "$fooId"
+
+  local barId
+  reflection objects create Bar barId
+  # bar is not referenced by anything
+
+  # TODO use mocking library to confirm that gc gets called
+
+  assert reflection objects exists "$fooId"
+  assert reflection objects exists "$barId"
+
+  # Allocating the next object will run gc and deallocate bar
+
+  local bazId
+  reflection objects create Baz bazId
+
+  assert reflection objects exists "$fooId"
+  refute reflection objects exists "$barId"
+  # assert reflection objects exists "$bazId"
+
+  # After another 3 allocations, it will run again
+
+  local aId
+  reflection objects create A aId
+  local bId
+  reflection objects create B bId
+
+  assert reflection objects exists "$fooId"
+  assert reflection objects exists "$bazId"
+  assert reflection objects exists "$aId"
+  assert reflection objects exists "$bId"
+
+  local cId
+  reflection objects create C cId
+
+  assert reflection objects exists "$fooId"
+  refute reflection objects exists "$bazId"
+  refute reflection objects exists "$aId"
+  refute reflection objects exists "$bId"
+  assert reflection objects exists "$cId"
 }
