@@ -129,6 +129,8 @@ See [`reflection objects`](#reflection-objects), [`types`](#reflection-types), a
 
 Manages the TeaScript **Heap** where objects are allocated.
 
+Objects are `create`d (_allocated_) and `dispose`d of (_deallocated_).
+
 All created objects are provided a unique Object ID identifier for
 referencing the object, e.g. from a variable.
 
@@ -289,6 +291,8 @@ TODO - update to show pretty things :)
 
 Manages the TeaScript types in the TeaScript type system.
 
+Types are `define`d and `undefine`d.
+
 Types are used for describing the shape and behavior of objects and values.
 
 In addition to classes, value types such as literal primitives (`string`, `int`, et al)
@@ -331,6 +335,8 @@ Can reduce snapshot size as well with option to remove all type comments.
 ## `reflection variables`
 
 Manages the TeaScript **Stack** where in-scope variables are allocated.
+
+Variables are `set` and `unset`.
 
 ### 🎨 BASH Data Representation
 
