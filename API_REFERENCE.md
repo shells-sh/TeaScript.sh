@@ -39,7 +39,7 @@ reflection types getFieldType Dog age
 >
 > Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
 
-## 💻 Developer Notes
+### 💻 Developer Notes
 
 > _Inline all the things!_
 
@@ -60,7 +60,7 @@ Notable exception for [`addMethod`]() which takes a dynamic number of arguments 
 In general, keep everything `O(1)` as much as possible. User-friendly functions which are not on the hot path are allowed
 to break these rules.
 
-### `eval`
+#### `eval`
 
 To start with, various functions make use of `eval`. In fact, most do.
 
@@ -79,7 +79,7 @@ with Linux and used on Windows as well and create 2 versions of `reflection.sh`,
 > It might turn out that `typeset -n` is prohibitively slow and the copy of `reflection.sh`
 > might just use `declare -g` but otherwise be identical. We will see! Can't wait to try and to benchmark :)
 
-### `p` private -_vs_- `P` public
+#### `p` private -_vs_- `P` public
 
 Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
 
@@ -105,6 +105,7 @@ This contains a lookup table for all characters.
 | `s` | `struct` |
 | `S` | `static` |
 | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
+
 ## `reflection invocations`
 
 This might be what we call to invoke methods and see if they're available etc (?)

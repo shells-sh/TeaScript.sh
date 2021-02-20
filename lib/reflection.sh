@@ -42,7 +42,7 @@ T_GC_OBJECT_THRESHOLD_COUNT=0
 ## >
 ## > Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
 ##
-## ## 💻 Developer Notes
+## ### 💻 Developer Notes
 ##
 ## > _Inline all the things!_
 ##
@@ -63,7 +63,7 @@ T_GC_OBJECT_THRESHOLD_COUNT=0
 ## In general, keep everything `O(1)` as much as possible. User-friendly functions which are not on the hot path are allowed
 ## to break these rules.
 ##
-## ### `eval`
+## #### `eval`
 ##
 ## To start with, various functions make use of `eval`. In fact, most do.
 ##
@@ -82,7 +82,7 @@ T_GC_OBJECT_THRESHOLD_COUNT=0
 ## > It might turn out that `typeset -n` is prohibitively slow and the copy of `reflection.sh`
 ## > might just use `declare -g` but otherwise be identical. We will see! Can't wait to try and to benchmark :)
 ##
-## ### `p` private -_vs_- `P` public
+## #### `p` private -_vs_- `P` public
 ##
 ## Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
 ##
@@ -108,6 +108,7 @@ T_GC_OBJECT_THRESHOLD_COUNT=0
 ## | `s` | `struct` |
 ## | `S` | `static` |
 ## | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
+##
 reflection() {
   case "$1" in
     ## ## `reflection invocations`
