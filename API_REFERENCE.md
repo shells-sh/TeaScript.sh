@@ -106,11 +106,24 @@ This contains a lookup table for all characters.
 | `S` | `static` |
 | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
 
-## `reflection invocations`
+#### TeaScript use of BASH arrays
 
-This might be what we call to invoke methods and see if they're available etc (?)
+BASH 4.0 introduces associative arrays.
 
-Might also have a `reflection expressions` for validating and evaluating expressions :)
+Mac OS X uses a wicked old version of BASH: `3.2.57` (as mentioned above)
+
+TeaScript is built from the ground up to support `3.2.57` so that it works out-of-the-box on Mac OS X.
+
+However, even if TeaScript did make use of BASH associative arrays, they are still flat single-dimensional objects with a simple text value key or index and a simple text value string.
+
+BASH associative arrays wouldn't actually benefit the TeaScript implementation a whole lot.
+
+So we make the best use of BASH arrays by:
+
+- Storing various bits of metadata inside of single indices
+- Proving out own key --> index lookups
+
+See [`reflection objects`](#reflection-objects), [`types`](#reflection-types), and [`variables`](#reflection-variables) for descriptions of how we store each of these using BASH arrays.
 
 ## `reflection objects`
 
@@ -129,7 +142,7 @@ Every object has:
   2. a Type name, e.g. `String` or `Integer`
   3. keys and values (these are stored as simple strings, each value in its own index of a single-dimensional BASH array)
 
-## ➗ Object IDs
+### ➗ Object IDs
 
 Object IDs are generated via [`/dev/urandom`](https://en.wikipedia.org/wiki//dev/random).
 
@@ -144,7 +157,7 @@ The specific command TeaScript uses to generate object IDs is:
 cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1
 ```
 
-## 🗑️ Garbage Collection
+### 🗑️ Garbage Collection
 
 Unlike variables, which are managed on the stack within a given scope,
 objects are not automatically disposed of when a variable goes out of scope.
@@ -157,6 +170,12 @@ You can run the garbage collector at any time via: `reflection objects gc run`
 
 To simply view objects which are no longer in use and would be reaped and disposed of
 by the garbage collector, you can run `reflection objects gc unused`
+
+### 🎨 BASH Data Representation
+
+Objects are represented in BASH single-dimensional array structures (see [TeaScript use of BASH arrays](#TeaScript-use-of-BASH-arrays) above)
+
+TODO: details
 
 ### `reflection objects create`
 
@@ -268,6 +287,22 @@ TODO - update to show pretty things :)
 
 ## `reflection types`
 
+Manages the TeaScript types in the TeaScript type system.
+
+Types are used for describing the shape and behavior of objects and values.
+
+In addition to classes, value types such as literal primitives (`string`, `int`, et al)
+and `struct` are also described using TeaScript types.
+
+### 🎨 BASH Data Representation
+
+Variables are represented in BASH single-dimensional array structures (see [TeaScript use of BASH arrays](#TeaScript-use-of-BASH-arrays) above)
+
+TODO: details
+
+---
+---
+
 `TODO` - space optimizations, which'll make it all harder to read, use COMMENTS 
 - addField p s v main string[] args "" <-- public static void
   - CALLER needs to use this arcane language so that `reflection` doesn't need any conditionals
@@ -283,262 +318,6 @@ local INDEX_OF_FIELD_LOOKUP=5
 local INDEX_OF_METHOD_LOOKUP=6
 local BASH_VAR_PREFIX_TYPE="T_TYPE_"
 
-### `reflection types addField`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types addMethod`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types define`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types undefine`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types getFieldComment`
-
-Get the comment of a field, if present.
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getFieldComment` |
-| `$4` | Type name, e.g. `Dog` |
-| `$5` | Field name, e.g. `name` |
-
-### `reflection types getFieldDefaultValue`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getFieldDefaultValue` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types getFieldScope`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getFieldScope` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types getFieldType`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getFieldType` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getFieldVisibility`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getFieldVisibility` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodComment`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodComment` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodParamNames`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodParamNames` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodParamDefaultValue`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodParamDefaultValue` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodParamType`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodParamType` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodReturnType`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodReturnType` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodScope`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodScope` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getMethodVisibility`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getMethodVisibility` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getTypeBaseClass`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getTypeBaseClass` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getTypeComment`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getTypeComment` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getTypeOfType`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getTypeOfType` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-TODO
-### `reflection types getTypeInterface`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getTypeInterface` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types getTypeStorageType`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | `getTypeStorageType` |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
-### `reflection types list`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-### `reflection types show`
-
-| | Parameter |
-|-|-----------|
-| `$2` | `types` |
-| `$3` | ... |
-| `$x` | ... |
-| `$x` | ... |
-| `$x` | ... |
-
-UPDATE ME
 ## `reflection snapshots`
 
 You can save the state of your TeaScript program to a snapshot and load it later.
@@ -552,6 +331,12 @@ Can reduce snapshot size as well with option to remove all type comments.
 ## `reflection variables`
 
 Manages the TeaScript **Stack** where in-scope variables are allocated.
+
+### 🎨 BASH Data Representation
+
+Variables are represented in BASH single-dimensional array structures (see [TeaScript use of BASH arrays](#TeaScript-use-of-BASH-arrays) above)
+
+TODO: details
 
 ### `reflection variables exists`
 
