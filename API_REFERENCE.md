@@ -158,8 +158,6 @@ You can run the garbage collector at any time via: `reflection objects gc run`
 To simply view objects which are no longer in use and would be reaped and disposed of
 by the garbage collector, you can run `reflection objects gc unused`
 
-> ℹ️ Not sure when or how, but we'll build automatic running of the gc into TeaScript :)
-
 ### `reflection objects create`
 
 Creates an object of a given type and allocates it on the heap.

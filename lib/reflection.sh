@@ -174,8 +174,6 @@ reflection() {
     ## To simply view objects which are no longer in use and would be reaped and disposed of
     ## by the garbage collector, you can run `reflection objects gc unused`
     ##
-    ## > ℹ️ Not sure when or how, but we'll build automatic running of the gc into TeaScript :)
-    ##
     objects)
       case "$2" in
 
