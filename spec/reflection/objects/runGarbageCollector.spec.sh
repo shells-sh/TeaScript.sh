@@ -86,7 +86,7 @@
 
   assert reflection objects exists "$fooId"
   refute reflection objects exists "$barId"
-  # assert reflection objects exists "$bazId"
+  assert reflection objects exists "$bazId"
 
   # After another 3 allocations, it will run again
 

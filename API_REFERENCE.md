@@ -55,7 +55,7 @@ To the extent possible, **never** start any subshells or run other programs. Thi
 
 Try not to allocate new native BASH variables. Instead, reuse variables as much as possible (_and limit use of variables, in general - prefer literal strings_). All BASH locals should be prefixed `__T_`.
 
-Do not loop over values. Usually, if you are writing a loop, you are adding an `O(N)`` or worse, do not do it.
+Do not loop over values. Usually, if you are writing a loop, you are adding an `O(N)` or worse, do not do it.
 Notable exception for [`addMethod`]() which takes a dynamic number of arguments for defining any number of parameters.
 In general, keep everything `O(1)` as much as possible. User-friendly functions which are not on the hot path are allowed
 to break these rules.
