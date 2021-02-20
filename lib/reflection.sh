@@ -129,23 +129,71 @@ reflection() {
     ##
     ## Manages the TeaScript **Heap** where objects are allocated.
     ##
+    ## All created objects are provided a unique Object ID identifier for
+    ## referencing the object, e.g. from a variable.
     ##
+    ## You can think of objects as simple key/value stores.
     ##
+    ## Every object has:
+    ## 
+    ##   1. a unique object ID identifier (_see [Object IDs](#-Object-IDs) below for more info on how these are generated_)
+    ##   2. a Type name, e.g. `String` or `Integer`
+    ##   3. keys and values (these are stored as simple strings, each value in its own index of a single-dimensional BASH array)
     ##
+    ## ## ➗ Object IDs
     ##
+    ## Object IDs are generated via [`/dev/urandom`](https://en.wikipedia.org/wiki//dev/random).
+    ##
+    ## > _In Unix-like operating systems, /dev/random, /dev/urandom and /dev/arandom are special files that serve as pseudorandom number generators._  
+    ## > ~ wikipedia
+    ##
+    ## The random portion of Object IDs is 32 characters long.
+    ##
+    ## The specific command TeaScript uses to generate object IDs is:
+    ##
+    ## ```sh
+    ## cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1
+    ## ```
+    ##
+    ## ## 🗑️ Garbage Collection
+    ##
+    ## Unlike variables, which are managed on the stack within a given scope,
+    ## objects are not automatically disposed of when a variable goes out of scope.
+    ##
+    ## To deallocate objects which are no longer being referenced,
+    ## the garbage collector must be run which disposes of all objects
+    ## which are no longer being references by: variables or other objects.
+    ##
+    ## You can run the garbage collector at any time via: `reflection objects gc run`
+    ##
+    ## To simply view objects which are no longer in use and would be reaped and disposed of
+    ## by the garbage collector, you can run `reflection objects gc unused`
+    ##
+    ## > ℹ️ Not sure when or how, but we'll build automatic running of the gc into TeaScript :)
     ##
     objects)
+
       # TODO REMOVE THIS VAR
       local BASH_VAR_PREFIX_OBJECT="T_OBJECT_"
       # TODO REMOVE THIS VAR
       local objectsCommand="$1"; shift
       case "$objectsCommand" in
+
         ## ### `reflection objects create`
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `create` |
+        ## > > | `$3` | ... |
+        ## > > | `$4` | ... |
+        ## > > | `$5` | ... |
+        ## > > | `$6` | ... |
         ##
         create)
           local typeName="$1"; shift
           # TODO inline the random subshell here!
-          local objectId="$( reflection objects generateId )"
+          local objectId="$( cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )"
           local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           # In BASH 4.3+ use declare -g and typeset -n for safety (although eval might be faster than typeset, benchmark)
           eval "$bashVariableName=(\"$typeName\" \"\")"
@@ -154,19 +202,40 @@ reflection() {
 
         ## ### `reflection objects dispose`
         ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `dispose` |
+        ## > > | `$3` | Object ID |
+        ##
         dispose)
           local objectId="$1"; shift
           local bashVariableName="${BASH_VAR_PREFIX_OBJECT}${objectId}"
           unset "$bashVariableName"
           ;;
-        ## ### `reflection objects generateId`
+
+        ## ### `reflection objects gc`
         ##
-        generateId)
-          # TODO MOVE THIS INTO THE define FUNCTION or create or whatever - or allocate
-          cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1
+        ## Run the garbage collector (reap all unused objects -or- simply list all unused object IDs)
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `gc` |
+        ## > > | `$3` | `run` or `unused` |
+        ##
+        gc)
+          :
           ;;
 
         ## ### `reflection objects getField`
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `getField` |
+        ## > > | `$3` | Object ID |
+        ## > > | `$4` | Field name |
         ##
         getField)
           local objectId="$1"; shift
@@ -189,11 +258,24 @@ reflection() {
         ##
         ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `list` |
+        ##
         list)
           ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_OBJECT"
           ;;
 
         ## ### `reflection objects setField`
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `setField` |
+        ## > > | `$3` | Object ID |
+        ## > > | `$4` | Field name |
+        ## > > | `$5` | Field value |
         ##
         setField)
           local objectId="$1"; shift
@@ -217,6 +299,15 @@ reflection() {
         ## ### `reflection objects show`
         ##
         ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `objects` |
+        ## > > | `$2` | `...` |
+        ## > > | `$3` | Object ID |
+        ## > > | `$4` | ... |
+        ## > > | `$5` | ... |
+        ## > > | `$6` | ... |
         ##
         show)
           local objectId="$1"; shift
