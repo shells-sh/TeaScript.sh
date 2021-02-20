@@ -430,11 +430,11 @@ Manages the TeaScript **Stack** where in-scope variables are allocated.
 
 Returns 1 if variable with provided name does not exist else returns 0.
 
-> | | Parameter |
-> |-|-----------|
-> | `$1` | `variables` |
-> | `$2` | `getType` |
-> | `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `getType` |
+> > | `$3` | Variable name |
 
 ### `reflection variables getValueTypeCode`
 
@@ -444,11 +444,11 @@ Get the type of this variable, e.g. object reference, literal value, or named re
 
 See [`getValueType`](#reflection-variables-getValueType) to get friendly name.
 
-> | | Parameter |
-> |-|-----------|
-> | `$1` | `variables` |
-> | `$2` | `getValueTypeCode` |
-> | `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `getValueTypeCode` |
+> > | `$3` | Variable name |
 
 ### `reflection variables getType`
 
@@ -456,22 +456,22 @@ Get the type stored in the variable, e.g. `String` or `Integer`.
 
 For named references this value is blank.
 
-| | Parameter |
-|-|-----------|
-| `$1` | `variables` |
-| `$2` | `getType` |
-| `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `getType` |
+> > | `$3` | Variable name |
 
 ### `reflection variables getValue`
 
 Get the value stored in this variable, e.g. a literal text value or an Object ID
 for reference or a field index is the variable stores as `struct`.
 
-| | Parameter |
-|-|-----------|
-| `$1` | `variables` |
-| `$2` | `getValue` |
-| `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `getValue` |
+> > | `$3` | Variable name |
 
 ### `reflection variables getValueType`
 
@@ -479,11 +479,11 @@ Get the type of this variable, e.g. object reference, literal value, or named re
 
 Specifically returns one of these values: `nameref`, `byref`, or `byval`.
 
-| | Parameter |
-|-|-----------|
-| `$1` | `variables` |
-| `$2` | `getValueType` |
-| `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `getValueType` |
+> > | `$3` | Variable name |
 
 ### `reflection variables list`
 
@@ -494,9 +494,9 @@ Returns a list of all defined variables including their type and value, one per 
 
 > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
 
-| | Parameter |
-|-|-----------|
-| `$2` | `variables` |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$2` | `variables` |
 
 ### `reflection variables set`
 
@@ -513,23 +513,23 @@ reflection variables set myObject r Dog "<object ID referencing the Dog object>"
 reflection variables set myVariableAlias n "" myString
 ```
 
-| | Parameter |
-|-|-----------|
-| `$1` | `variables` |
-| `$2` | `set` |
-| `$3` | Variable name |
-| `$4` | Type of variable (object `r`eference, literal `v`alue, or `n`amed reference) |
-| `$5` | Variable type (e.g. String or Integer) |
-| `$6` | Variable value (object ID, literal text value, or name of another variable) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `set` |
+> > | `$3` | Variable name |
+> > | `$4` | Type of variable (object `r`eference, literal `v`alue, or `n`amed reference) |
+> > | `$5` | Variable type (e.g. String or Integer) |
+> > | `$6` | Variable value (object ID, literal text value, or name of another variable) |
 
 ### `reflection variables show`
 
 > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
 
-| | Parameter |
-|-|-----------|
-| `$2` | `variables` |
-| `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$2` | `variables` |
+> > | `$3` | Variable name |
 
 ### `reflection variables unset`
 
@@ -537,8 +537,8 @@ Unset the given variable by name.
 
 Returns 1 if variable with provided name does not exist else returns 0.
 
-| | Parameter |
-|-|-----------|
-| `$2` | `variables` |
-| `$3` | Variable name |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$2` | `variables` |
+> > | `$3` | Variable name |
 

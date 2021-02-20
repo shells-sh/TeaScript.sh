@@ -902,11 +902,11 @@ reflection() {
         ##
         ## Returns 1 if variable with provided name does not exist else returns 0.
         ##
-        ## > | | Parameter |
-        ## > |-|-----------|
-        ## > | `$1` | `variables` |
-        ## > | `$2` | `getType` |
-        ## > | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `getType` |
+        ## > > | `$3` | Variable name |
         ##
         exists)
           eval "[ -n \"\${T_VAR_$3+x}\" ]"
@@ -921,11 +921,11 @@ reflection() {
         ##
         ## See [`getValueType`](#reflection-variables-getValueType) to get friendly name.
         ##
-        ## > | | Parameter |
-        ## > |-|-----------|
-        ## > | `$1` | `variables` |
-        ## > | `$2` | `getValueTypeCode` |
-        ## > | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `getValueTypeCode` |
+        ## > > | `$3` | Variable name |
         ##
         getValueTypeCode)
           eval "printf '%s' \"\${T_VAR_$3[0]%;*}\""
@@ -937,11 +937,11 @@ reflection() {
         ##
         ## For named references this value is blank.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `variables` |
-        ## | `$2` | `getType` |
-        ## | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `getType` |
+        ## > > | `$3` | Variable name |
         ##
         getType)
           eval "printf '%s' \"\${T_VAR_$3[0]#*;}\""
@@ -952,11 +952,11 @@ reflection() {
         ## Get the value stored in this variable, e.g. a literal text value or an Object ID
         ## for reference or a field index is the variable stores as `struct`.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `variables` |
-        ## | `$2` | `getValue` |
-        ## | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `getValue` |
+        ## > > | `$3` | Variable name |
         ##
         getValue)
           eval "printf '%s' \"\${T_VAR_$3[1]}\""
@@ -968,11 +968,11 @@ reflection() {
         ##
         ## Specifically returns one of these values: `nameref`, `byref`, or `byval`.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `variables` |
-        ## | `$2` | `getValueType` |
-        ## | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `getValueType` |
+        ## > > | `$3` | Variable name |
         ##
         getValueType)
           local valueTypeCode
@@ -994,9 +994,9 @@ reflection() {
         ##
         ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$2` | `variables` |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$2` | `variables` |
         ##
         list)
           local variableName
@@ -1021,14 +1021,14 @@ reflection() {
         ## reflection variables set myVariableAlias n "" myString
         ## ```
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `variables` |
-        ## | `$2` | `set` |
-        ## | `$3` | Variable name |
-        ## | `$4` | Type of variable (object `r`eference, literal `v`alue, or `n`amed reference) |
-        ## | `$5` | Variable type (e.g. String or Integer) |
-        ## | `$6` | Variable value (object ID, literal text value, or name of another variable) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `set` |
+        ## > > | `$3` | Variable name |
+        ## > > | `$4` | Type of variable (object `r`eference, literal `v`alue, or `n`amed reference) |
+        ## > > | `$5` | Variable type (e.g. String or Integer) |
+        ## > > | `$6` | Variable value (object ID, literal text value, or name of another variable) |
         ##
         set)
           eval "T_VAR_$3=(\"$4;$5\" \"$6\")"
@@ -1038,10 +1038,10 @@ reflection() {
         ##
         ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$2` | `variables` |
-        ## | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$2` | `variables` |
+        ## > > | `$3` | Variable name |
         ##
         show)
           if ! reflection variables exists "$3"
@@ -1061,10 +1061,10 @@ reflection() {
         ##
         ## Returns 1 if variable with provided name does not exist else returns 0.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$2` | `variables` |
-        ## | `$3` | Variable name |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$2` | `variables` |
+        ## > > | `$3` | Variable name |
         ##
         unset)
           unset "T_VAR_$3"
