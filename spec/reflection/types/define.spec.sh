@@ -29,18 +29,18 @@
   expect { reflection types getInterfaces DogCollection[T] } toEqual "IEnumerable IComparable"
   expect { reflection types getComment DogCollection[T] } toBeEmpty
 
-  reflection types define MyMap[K,V] s
+  reflection types define CollectionOfThings[A,B,C] s Collection IEnumerable,IComparable "Hello, world!"
 
-  expect { reflection types getBaseType MyMap[K,V] } toEqual MyMap
-  expect { reflection types getGenericTypes MyMap[K,V] } toEqual "K V"
-}
+  expect { reflection types getBaseType CollectionOfThings[A,B,C] } toEqual CollectionOfThings
+  expect { reflection types getGenericTypes CollectionOfThings[A,B,C] } toEqual "A B C"
+  expect { reflection types getDescriptorCode CollectionOfThings[A,B,C] } toEqual s
+  expect { reflection types getDescriptorName CollectionOfThings[A,B,C] } toEqual struct
+  expect { reflection types getBaseClass CollectionOfThings[A,B,C] } toEqual Collection
+  expect { reflection types getInterfaces CollectionOfThings[A,B,C] } toEqual "IEnumerable IComparable"
+  expect { reflection types getComment CollectionOfThings[A,B,C] } toEqual "Hello, world!"
 
-@spec.reflection.types.define.does_not_store_comment_if_disabled() {
-  reflection types define Dog c "" "" "This represents a dog"
-  expect { reflection types getComment Dog } toEqual "This represents a dog"
-
-  local T_COMMENTS=disabled
-
-  reflection types define Cat c "" "" "This represents a dog"
-  expect { reflection types getComment Cat } toBeEmpty
+  local BASHTypeVariables="$( ( set -o posix ; set ) | grep "^T_TYPE_" )"
+  expect "$BASHTypeVariables" toContain 'T_TYPE_CollectionOfThings_GENERIC_2=([0]="CollectionOfThings[A,B,C];s|Collection<IEnumerable,IComparable>Hello, world!" [1]="" [2]="")'
+  expect "$BASHTypeVariables" toContain 'T_TYPE_Dog=([0]="Dog;c|<>This represents a dog" [1]="" [2]="")'
+  expect "$BASHTypeVariables" toContain 'T_TYPE_DogCollection_GENERIC_0=([0]="DogCollection[T];s|Collection<IEnumerable,IComparable>" [1]="" [2]="")'
 }

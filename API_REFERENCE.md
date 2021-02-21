@@ -329,7 +329,11 @@ T_TYPE_Array_GENERIC_T=([0]="Array[T];s|Object<IEnumerable,IComparable>This repr
 
 ### `reflection types define`
 
-TODO DESCRIBE
+Define a new type, e.g. a `class` or a `struct`
+
+`TODO`: disallow defining both `Collection[A]` and `Collection[B]` because instantiating `Collection[Dog]` will not know which to choose from.
+        at the time of writing, `reflection types define` will allow both of these types to be defined.
+        considering taking the # of generics and using that? or... hmm. yes, I like this. If you really want `Collection`, `Collection[A]`, and `Collection[A,B]` - sure, go ahead. We can instantiate fine.
 
 | | Parameter |
 |-|-----------|
@@ -343,7 +347,11 @@ TODO DESCRIBE
 
 ### `reflection types exists`
 
-TODO DESCRIBE
+Return 0 if a type with the provided name exists else returns 1.
+
+Note: for generics, this should be the type name as it was originally defined.  
+e.g. if there is a defined `Collection[T]`, then `exists Collection[T]` will succeed
+but `exists Collection[K]` will fail.
 
 | | Parameter |
 |-|-----------|
@@ -353,19 +361,19 @@ TODO DESCRIBE
 
 ### `reflection types getBaseClass`
 
-TODO DESCRIBE
+Get the base or 'super' class of the provided type, if any.
+
+e.g. all `class` types inherit from `Object` by default
 
 | | Parameter |
 |-|-----------|
 | `$1` | `types` |
 | `$2` | `getBaseClass` |
-| `$3` | ... |
-| `$4` | ... |
-| `$5` | ... |
+| `$3` | Type name (full name including generics, if any) |
 
 ### `reflection types getBaseType`
 
-TODO DESCRIBE
+Get the type without generics, e.g. `getBaseType MyMap[K,V]` returns `MyMap`
 
 | | Parameter |
 |-|-----------|
@@ -437,9 +445,7 @@ TODO DESCRIBE
 |-|-----------|
 | `$1` | `types` |
 | `$2` | `undefine` |
-| `$3` | ... |
-| `$4` | ... |
-| `$5` | ... |
+| `$3` | Type name (full name including generics, if any) |
 
 ### `reflection types fields define`
 

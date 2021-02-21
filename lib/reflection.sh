@@ -443,7 +443,11 @@ reflection() {
 
         ## ### `reflection types define`
         ##
-        ## TODO DESCRIBE
+        ## Define a new type, e.g. a `class` or a `struct`
+        ##
+        ## `TODO`: disallow defining both `Collection[A]` and `Collection[B]` because instantiating `Collection[Dog]` will not know which to choose from.
+        ##         at the time of writing, `reflection types define` will allow both of these types to be defined.
+        ##         considering taking the # of generics and using that? or... hmm. yes, I like this. If you really want `Collection`, `Collection[A]`, and `Collection[A,B]` - sure, go ahead. We can instantiate fine.
         ##
         ## | | Parameter |
         ## |-|-----------|
@@ -458,9 +462,9 @@ reflection() {
         define)
           if [[ "$3" = *"["* ]]
           then
-            local __T_typeVariableName="T_TYPE_${3/[/_GENERIC_}"
-            __T_typeVariableName="${__T_typeVariableName/,/_}"
-            __T_typeVariableName="${__T_typeVariableName%]}"
+            local __T_typeVariableName="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            __T_typeVariableName="$__T_typeVariableName${#__T_genericTypeCount}"
           else
             local __T_typeVariableName="T_TYPE_$3"
           fi
@@ -474,7 +478,11 @@ reflection() {
 
         ## ### `reflection types exists`
         ##
-        ## TODO DESCRIBE
+        ## Return 0 if a type with the provided name exists else returns 1.
+        ##
+        ## Note: for generics, this should be the type name as it was originally defined.  
+        ## e.g. if there is a defined `Collection[T]`, then `exists Collection[T]` will succeed
+        ## but `exists Collection[K]` will fail.
         ##
         ## | | Parameter |
         ## |-|-----------|
@@ -485,9 +493,9 @@ reflection() {
         exists)
           if [[ "$3" = *"["* ]]
           then
-            local __T_typeVariableName="T_TYPE_${3/[/_GENERIC_}"
-            __T_typeVariableName="${__T_typeVariableName%]}"
-            eval "[ -n \"\${$__T_typeVariableName+x}\" ]"
+            local __T_typeVariableName="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            eval "[ -n \"\${$__T_typeVariableName${#__T_genericTypeCount}+x}\" ]"
           else
             eval "[ -n \"\${T_TYPE_$3+x}\" ]"
           fi
@@ -495,32 +503,33 @@ reflection() {
 
         ## ### `reflection types getBaseClass`
         ##
-        ## TODO DESCRIBE
+        ## Get the base or 'super' class of the provided type, if any.
+        ##
+        ## e.g. all `class` types inherit from `Object` by default
         ##
         ## | | Parameter |
         ## |-|-----------|
         ## | `$1` | `types` |
         ## | `$2` | `getBaseClass` |
-        ## | `$3` | ... |
-        ## | `$4` | ... |
-        ## | `$5` | ... |
+        ## | `$3` | Type name (full name including generics, if any) |
         ##
         getBaseClass)
           if [[ "$3" = *"["* ]]
           then
-            local __T_tempVariable="T_TYPE_${3/[/_GENERIC_}"
-            __T_tempVariable="${__T_tempVariable%]}"
+            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
           else
             local __T_tempVariable="T_TYPE_$3"
           fi
-          eval "__T_tempVariable=\"\${$__T_tempVariable[0]}\""
+          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
           __T_tempVariable="${__T_tempVariable#*|}"
           printf "${__T_tempVariable%%<*}"
           ;;
 
         ## ### `reflection types getBaseType`
         ##
-        ## TODO DESCRIBE
+        ## Get the type without generics, e.g. `getBaseType MyMap[K,V]` returns `MyMap`
         ##
         ## | | Parameter |
         ## |-|-----------|
@@ -547,13 +556,14 @@ reflection() {
         getComment)
           if [[ "$3" = *"["* ]]
           then
-            local __T_tempVariable="T_TYPE_${3/[/_GENERIC_}"
-            __T_tempVariable="${__T_tempVariable%]}"
+            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
           else
             local __T_tempVariable="T_TYPE_$3"
           fi
-          eval "__T_tempVariable=\"\${$__T_tempVariable[0]}\""
-          printf "${__T_tempVariable##*>}"
+          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
+          printf "${__T_tempVariable#*>}"
           ;;
 
         ## ### `reflection types getDescriptorCode`
@@ -569,12 +579,13 @@ reflection() {
         getDescriptorCode)
           if [[ "$3" = *"["* ]]
           then
-            local __T_tempVariable="T_TYPE_${3/[/_GENERIC_}"
-            __T_tempVariable="${__T_tempVariable%]}"
+            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
           else
             local __T_tempVariable="T_TYPE_$3"
           fi
-          eval "__T_tempVariable=\"\${$__T_tempVariable[0]}\""
+          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
           __T_tempVariable="${__T_tempVariable#*;}"
           printf "${__T_tempVariable%%|*}"
           ;;
@@ -594,12 +605,13 @@ reflection() {
         getDescriptorName)
           if [[ "$3" = *"["* ]]
           then
-            local __T_tempVariable="T_TYPE_${3/[/_GENERIC_}"
-            __T_tempVariable="${__T_tempVariable%]}"
+            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
           else
             local __T_tempVariable="T_TYPE_$3"
           fi
-          eval "__T_tempVariable=\"\${$__T_tempVariable[0]}\""
+          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
           __T_tempVariable="${__T_tempVariable#*;}"
           reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
           ;;
@@ -621,7 +633,7 @@ reflection() {
           then
             local __T_genericTypes="${3#*[}"
             __T_genericTypes="${__T_genericTypes%]}"
-            printf "${__T_genericTypes/,/ }"
+            printf "${__T_genericTypes//,/ }"
           fi
           ;;
 
@@ -638,12 +650,13 @@ reflection() {
         getInterfaces)
           if [[ "$3" = *"["* ]]
           then
-            local __T_tempVariable="T_TYPE_${3/[/_GENERIC_}"
-            __T_tempVariable="${__T_tempVariable%]}"
+            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
           else
             local __T_tempVariable="T_TYPE_$3"
           fi
-          eval "__T_tempVariable=\"\${$__T_tempVariable[0]}\""
+          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
           __T_tempVariable="${__T_tempVariable#*<}"
           __T_tempVariable="${__T_tempVariable%%>*}"
           printf "${__T_tempVariable/,/ }"
@@ -657,12 +670,17 @@ reflection() {
         ## |-|-----------|
         ## | `$1` | `types` |
         ## | `$2` | `undefine` |
-        ## | `$3` | ... |
-        ## | `$4` | ... |
-        ## | `$5` | ... |
+        ## | `$3` | Type name (full name including generics, if any) |
         ##
         undefine)
-          :
+          if [[ "$3" = *"["* ]]
+          then
+            local __T_typeVariableName="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_genericTypeCount="${3//[^,]}"
+            unset "$__T_typeVariableName${#__T_genericTypeCount}"
+          else
+            unset "T_TYPE_$3"
+          fi
           ;;
 
         fields)
