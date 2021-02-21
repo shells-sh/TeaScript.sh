@@ -1,3 +1,26 @@
+# `expression`
+
+Prints out an analysis of the provided expression, e.g. `x + 5`
+
+Used for debugging, not used by TeaScript.
+
+TeaScript uses `evaluate` to evaluate expressions using the same logic of expression.
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$@` | The expression, e.g. `new Dog` or `x + 5` |
+
+# `objectid`
+
+Get the Object ID of the specified variable.
+
+Returns 1 if the variable does not exist or is not a reference type.
+
+| | Parameter |
+|-|-----------|
+| `$1` | Variable name |
+| `$2` | (Optional) name of BASH variable to store Object ID in |
+
 # `$ reflection`
 
 🍵 TeaScript Reflection API
@@ -38,6 +61,50 @@ reflection types getFieldType Dog age
 > e.g. you can create a variable of a type that does not exist using `reflection variables`.
 >
 > Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
+
+### 📤 `out` BASH variables
+
+Every reflection `get[Something]` function supports providing one optional additional argument.
+
+When emitted, the `get[Something]` funtion will print the return value to console, e.g. `getType` might print `Dog`
+
+When the additional argument is provided, the `get[Something]` function prints nothing and, instead, sets the value of the provided variable name to the return value.
+
+This allows for getting return values without executing subshells.
+
+Example:
+
+```sh
+source teascript.sh
+
+var x = new Dog name: "Rover"
+
+reflection variables getType x
+# => prints "Dog"
+
+local variableType
+reflection variables getType x variableType
+# => prints nothing
+
+printf "$variableType"
+# => "Dog"
+```
+
+Other functions such as `typeof` also follow this pattern
+
+```sh
+var y = new Cat name: "Mittens"
+
+typeof y
+# => Cat
+
+local variableType
+typeof x variableType
+# => prints nothing
+
+printf "$variableType"
+# => "Cat"
+```
 
 ### 💻 Developer Notes
 
@@ -317,11 +384,11 @@ reflection types define Map[K,V]
 # => T_TYPE_Map_GENERIC_K_V
 ```
 
-| `T_TYPE_` index | Description |
-|-----------------|-------------|
-| `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T|`, followed by base class and interfaces, with comment if provided |
-| `1` | Field lookup table, mapping field named to index value where field definition is stored |
-| `2` | Method lookup table, mapping method name to index value where method definition is stored |
+> | `T_TYPE_` index | Description |
+> |-----------------|-------------|
+> | `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T|`, followed by base class and interfaces, with comment if provided |
+> | `1` | Field lookup table, mapping field named to index value where field definition is stored |
+> | `2` | Method lookup table, mapping method name to index value where method definition is stored |
 
 ```sh
 T_TYPE_Array_GENERIC_T=([0]="Array[T];s|Object<IEnumerable,IComparable>This represents a typed array of a provided generic type.")
@@ -335,15 +402,15 @@ Define a new type, e.g. a `class` or a `struct`
         at the time of writing, `reflection types define` will allow both of these types to be defined.
         considering taking the # of generics and using that? or... hmm. yes, I like this. If you really want `Collection`, `Collection[A]`, and `Collection[A,B]` - sure, go ahead. We can instantiate fine.
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `define` |
-| `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
-| `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
-| `$5` | Base class name (or empty string) |
-| `$6` | Interface names (comma-delimited without spaces) (or empty string) |
-| `$7` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `define` |
+> > | `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
+> > | `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
+> > | `$5` | Base class name (or empty string) |
+> > | `$6` | Interface names (comma-delimited without spaces) (or empty string) |
+> > | `$7` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
 
 ### `reflection types exists`
 
@@ -353,11 +420,11 @@ Note: for generics, this should be the type name as it was originally defined.
 e.g. if there is a defined `Collection[T]`, then `exists Collection[T]` will succeed
 but `exists Collection[K]` will fail.
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `exists` |
-| `$3` | Type name (full name including generics, if any) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `exists` |
+> > | `$3` | Type name (full name including generics, if any) |
 
 ### `reflection types getBaseClass`
 
@@ -365,21 +432,21 @@ Get the base or 'super' class of the provided type, if any.
 
 e.g. all `class` types inherit from `Object` by default
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getBaseClass` |
-| `$3` | Type name (full name including generics, if any) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getBaseClass` |
+> > | `$3` | Type name (full name including generics, if any) |
 
 ### `reflection types getBaseType`
 
 Get the type without generics, e.g. `getBaseType MyMap[K,V]` returns `MyMap`
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getBaseType` |
-| `$3` | Type name (full name including generics, if any) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getBaseType` |
+> > | `$3` | Type name (full name including generics, if any) |
 
 ### `reflection types getComment`
 
@@ -387,33 +454,37 @@ Gets the comment text for the type, if any.
 
 Note: this is saved to reflection only if `T_COMMENTS=enabled` (default in development environment)
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getBaseClass` |
-| `$3` | Type name (full name including generics, if any) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getBaseClass` |
+> > | `$3` | Type name (full name including generics, if any) |
 
 ### `reflection types getDescriptorCode`
 
 TODO DESCRIBE
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getDescriptorCode` |
-| `$3` | Type name (full name including generics, if any) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getDescriptorCode` |
+> > | `$3` | Type name (full name including generics, if any) |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types getDescriptorName`
 
 TODO DESCRIBE
 
 > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+>
+> Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getDescriptorName` |
-| `$3` | Type name (full name including generics, if any) |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getDescriptorName` |
+> > | `$3` | Type name (full name including generics, if any) |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types getGenericTypes`
 
@@ -519,6 +590,16 @@ Returns 1 if variable with provided name does not exist else returns 0.
 > > | `$2` | `getType` |
 > > | `$3` | Variable name |
 
+### `reflection variables isReferenceType`
+
+Returns 0 if variable is a `r` reference type else returns 1.
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `variables` |
+> > | `$2` | `getType` |
+> > | `$3` | Variable name |
+
 ### `reflection variables getValueTypeCode`
 
 Get the type of this variable, e.g. object reference, literal value, or named reference.
@@ -544,6 +625,7 @@ For named references this value is blank.
 > > | `$1` | `variables` |
 > > | `$2` | `getType` |
 > > | `$3` | Variable name |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection variables getValue`
 
@@ -555,6 +637,7 @@ for reference or a field index is the variable stores as `struct`.
 > > | `$1` | `variables` |
 > > | `$2` | `getValue` |
 > > | `$3` | Variable name |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection variables getValueType`
 
@@ -638,4 +721,17 @@ Returns 1 if variable with provided name does not exist else returns 0.
 > > |-|-----------|
 > > | `$2` | `variables` |
 > > | `$3` | Variable name |
+
+# `var`
+
+Sets a variable equal to the result of an expression.
+
+Used implicit typing, e.g. with `var x = 5` the `x` variable is set to an `int` type
+without using explicit typing using the alternate syntax: `int x = 5`
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | Variable name |
+> > | `$2` | `=` |
+> > | `$@` | Right hand side expression which is evaluated via `evaluate` |
 

@@ -49,6 +49,50 @@ T_COMMENTS=enabled
 ## >
 ## > Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
 ##
+## ### 📤 `out` BASH variables
+##
+## Every reflection `get[Something]` function supports providing one optional additional argument.
+## 
+## When emitted, the `get[Something]` funtion will print the return value to console, e.g. `getType` might print `Dog`
+##
+## When the additional argument is provided, the `get[Something]` function prints nothing and, instead, sets the value of the provided variable name to the return value.
+##
+## This allows for getting return values without executing subshells.
+##
+## Example:
+##
+## ```sh
+## source teascript.sh
+##
+## var x = new Dog name: "Rover"
+##
+## reflection variables getType x
+## # => prints "Dog"
+##
+## local variableType
+## reflection variables getType x variableType
+## # => prints nothing
+##
+## printf "$variableType"
+## # => "Dog"
+## ```
+##
+## Other functions such as `typeof` also follow this pattern
+##
+## ```sh
+## var y = new Cat name: "Mittens"
+##
+## typeof y
+## # => Cat
+##
+## local variableType
+## typeof x variableType
+## # => prints nothing
+##
+## printf "$variableType"
+## # => "Cat"
+## ```
+##
 ## ### 💻 Developer Notes
 ##
 ## > _Inline all the things!_
@@ -428,11 +472,11 @@ reflection() {
     ## # => T_TYPE_Map_GENERIC_K_V
     ## ```
     ##
-    ## | `T_TYPE_` index | Description |
-    ## |-----------------|-------------|
-    ## | `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T|`, followed by base class and interfaces, with comment if provided |
-    ## | `1` | Field lookup table, mapping field named to index value where field definition is stored |
-    ## | `2` | Method lookup table, mapping method name to index value where method definition is stored |
+    ## > | `T_TYPE_` index | Description |
+    ## > |-----------------|-------------|
+    ## > | `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T|`, followed by base class and interfaces, with comment if provided |
+    ## > | `1` | Field lookup table, mapping field named to index value where field definition is stored |
+    ## > | `2` | Method lookup table, mapping method name to index value where method definition is stored |
     ##
     ## ```sh
     ## T_TYPE_Array_GENERIC_T=([0]="Array[T];s|Object<IEnumerable,IComparable>This represents a typed array of a provided generic type.")
@@ -449,15 +493,15 @@ reflection() {
         ##         at the time of writing, `reflection types define` will allow both of these types to be defined.
         ##         considering taking the # of generics and using that? or... hmm. yes, I like this. If you really want `Collection`, `Collection[A]`, and `Collection[A,B]` - sure, go ahead. We can instantiate fine.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `define` |
-        ## | `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
-        ## | `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
-        ## | `$5` | Base class name (or empty string) |
-        ## | `$6` | Interface names (comma-delimited without spaces) (or empty string) |
-        ## | `$7` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `define` |
+        ## > > | `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
+        ## > > | `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
+        ## > > | `$5` | Base class name (or empty string) |
+        ## > > | `$6` | Interface names (comma-delimited without spaces) (or empty string) |
+        ## > > | `$7` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
         ##
         define)
           if [[ "$3" = *"["* ]]
@@ -484,11 +528,11 @@ reflection() {
         ## e.g. if there is a defined `Collection[T]`, then `exists Collection[T]` will succeed
         ## but `exists Collection[K]` will fail.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `exists` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `exists` |
+        ## > > | `$3` | Type name (full name including generics, if any) |
         ##
         exists)
           if [[ "$3" = *"["* ]]
@@ -507,11 +551,11 @@ reflection() {
         ##
         ## e.g. all `class` types inherit from `Object` by default
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getBaseClass` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getBaseClass` |
+        ## > > | `$3` | Type name (full name including generics, if any) |
         ##
         getBaseClass)
           if [[ "$3" = *"["* ]]
@@ -531,11 +575,11 @@ reflection() {
         ##
         ## Get the type without generics, e.g. `getBaseType MyMap[K,V]` returns `MyMap`
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getBaseType` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getBaseType` |
+        ## > > | `$3` | Type name (full name including generics, if any) |
         ##
         getBaseType)
           printf "${3%[*}"
@@ -547,11 +591,11 @@ reflection() {
         ##
         ## Note: this is saved to reflection only if `T_COMMENTS=enabled` (default in development environment)
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getBaseClass` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getBaseClass` |
+        ## > > | `$3` | Type name (full name including generics, if any) |
         ##
         getComment)
           if [[ "$3" = *"["* ]]
@@ -570,11 +614,12 @@ reflection() {
         ##
         ## TODO DESCRIBE
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getDescriptorCode` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getDescriptorCode` |
+        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptorCode)
           if [[ "$3" = *"["* ]]
@@ -586,8 +631,14 @@ reflection() {
             local __T_tempVariable="T_TYPE_$3"
           fi
           eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
+          [ -z "$__T_tempVariable" ] && return 1
           __T_tempVariable="${__T_tempVariable#*;}"
-          printf "${__T_tempVariable%%|*}"
+          if [ $# -eq 3 ]
+          then
+            printf "${__T_tempVariable%%|*}"
+          else
+            printf -v "$4" '%s' "${__T_tempVariable%%|*}"
+          fi
           ;;
 
         ## ### `reflection types getDescriptorName`
@@ -595,12 +646,15 @@ reflection() {
         ## TODO DESCRIBE
         ##
         ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## >
+        ## > Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getDescriptorName` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getDescriptorName` |
+        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptorName)
           if [[ "$3" = *"["* ]]
@@ -612,8 +666,14 @@ reflection() {
             local __T_tempVariable="T_TYPE_$3"
           fi
           eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
+          [ -z "$__T_tempVariable" ] && return 1
           __T_tempVariable="${__T_tempVariable#*;}"
-          reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
+          if [ $# -eq 3 ]
+          then
+            reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
+          else
+            printf -v "$4" '%s' "$( reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}" )"
+          fi
           ;;
 
         ## ### `reflection types getGenericTypes`
@@ -1435,6 +1495,20 @@ reflection() {
           eval "[ -n \"\${T_VAR_$3+x}\" ]"
           ;;
 
+        ## ### `reflection variables isReferenceType`
+        ##
+        ## Returns 0 if variable is a `r` reference type else returns 1.
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `variables` |
+        ## > > | `$2` | `getType` |
+        ## > > | `$3` | Variable name |
+        ##
+        isReferenceType)
+          eval "[ \"\${T_VAR_$3[0]%;*}\" = r ]"
+          ;;
+
         ## ### `reflection variables getValueTypeCode`
         ##
         ## Get the type of this variable, e.g. object reference, literal value, or named reference.
@@ -1464,9 +1538,20 @@ reflection() {
         ## > > | `$1` | `variables` |
         ## > > | `$2` | `getType` |
         ## > > | `$3` | Variable name |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getType)
-          eval "printf '%s' \"\${T_VAR_$3[0]#*;}\""
+          if eval "[ -n \"\${T_VAR_$3+x}\" ]"
+          then
+            if [ $# -eq 3 ]
+            then
+              eval "printf '%s' \"\${T_VAR_$3[0]#*;}\""
+            else
+              eval "printf -v \"$4\" '%s' \"\${T_VAR_$3[0]#*;}\""
+            fi
+          else
+            return 1
+          fi
           ;;
 
         ## ### `reflection variables getValue`
@@ -1479,9 +1564,15 @@ reflection() {
         ## > > | `$1` | `variables` |
         ## > > | `$2` | `getValue` |
         ## > > | `$3` | Variable name |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getValue)
-          eval "printf '%s' \"\${T_VAR_$3[1]}\""
+          if [ $# -eq 3 ]
+          then
+            eval "printf '%s' \"\${T_VAR_$3[1]}\""
+          else
+            eval "printf -v \"$4\" '%s' \"\${T_VAR_$3[1]}\""
+          fi
           ;;
 
         ## ### `reflection variables getValueType`
@@ -1498,7 +1589,7 @@ reflection() {
         ## > > | `$2` | `getValueType` |
         ## > > | `$3` | Variable name |
         ##
-        getValueType)
+        getValueTypeName)
           # TODO rename this to start with __T_
           local valueTypeCode
           eval "valueTypeCode=\"\${T_VAR_$3[0]%;*}\""
@@ -1530,7 +1621,7 @@ reflection() {
           local variableName
           for variableName in $(( set -o posix ; set ) | grep "^T_VAR_" | sed 's/=.*//' | sed 's/^T_VAR_//' )
           do
-            echo "$variableName\t$( reflection variables getValueType "$variableName" )\t$( reflection variables getType "$variableName" )\t$( reflection variables getValue "$variableName" )"
+            echo "$variableName\t$( reflection variables getValueTypeName "$variableName" )\t$( reflection variables getType "$variableName" )\t$( reflection variables getValue "$variableName" )"
           done
           ;;
 
@@ -1581,7 +1672,7 @@ reflection() {
             return 1
           else
             echo "Name: $3"
-            echo "Value Type: $( reflection variables getValueType "$3" )"
+            echo "Value Type: $( reflection variables getValueTypeName "$3" )"
             echo "Type: $( reflection variables getType "$3" )"
             echo "Value: $( reflection variables getValue "$3" )"
           fi
