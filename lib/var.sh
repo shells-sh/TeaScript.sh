@@ -21,5 +21,9 @@ var() {
   # Raise an exception if variable with same name already exists
 
   # Evaluate right hand side!
-  :
+  local __T_variableName="$1"; shift
+  shift; # "="
+
+  local __T_expressionReturnTypeDescriptorCode
+  # ...
 }

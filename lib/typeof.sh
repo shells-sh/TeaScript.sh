@@ -1,3 +1,3 @@
 typeof() {
-  reflection variables getType "$@" || reflection types getDescriptorName "$@"
+  reflection variables getType "$@" || reflection types getDescriptor "$@"
 }

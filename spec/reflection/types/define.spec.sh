@@ -8,7 +8,7 @@
   expect { reflection types getBaseType Dog } toEqual Dog
   expect { reflection types getGenericTypes Dog } toBeEmpty
   expect { reflection types getDescriptorCode Dog } toEqual c
-  expect { reflection types getDescriptorName Dog } toEqual class
+  expect { reflection types getDescriptor Dog } toEqual class
   expect { reflection types getBaseClass Dog } toBeEmpty
   expect { reflection types getInterfaces Dog } toBeEmpty
   expect { reflection types getComment Dog } toEqual "This represents a dog"
@@ -24,7 +24,7 @@
   expect { reflection types getBaseType DogCollection[T] } toEqual DogCollection
   expect { reflection types getGenericTypes DogCollection[T] } toEqual T
   expect { reflection types getDescriptorCode DogCollection[T] } toEqual s
-  expect { reflection types getDescriptorName DogCollection[T] } toEqual struct
+  expect { reflection types getDescriptor DogCollection[T] } toEqual struct
   expect { reflection types getBaseClass DogCollection[T] } toEqual Collection
   expect { reflection types getInterfaces DogCollection[T] } toEqual "IEnumerable IComparable"
   expect { reflection types getComment DogCollection[T] } toBeEmpty
@@ -34,7 +34,7 @@
   expect { reflection types getBaseType CollectionOfThings[A,B,C] } toEqual CollectionOfThings
   expect { reflection types getGenericTypes CollectionOfThings[A,B,C] } toEqual "A B C"
   expect { reflection types getDescriptorCode CollectionOfThings[A,B,C] } toEqual s
-  expect { reflection types getDescriptorName CollectionOfThings[A,B,C] } toEqual struct
+  expect { reflection types getDescriptor CollectionOfThings[A,B,C] } toEqual struct
   expect { reflection types getBaseClass CollectionOfThings[A,B,C] } toEqual Collection
   expect { reflection types getInterfaces CollectionOfThings[A,B,C] } toEqual "IEnumerable IComparable"
   expect { reflection types getComment CollectionOfThings[A,B,C] } toEqual "Hello, world!"

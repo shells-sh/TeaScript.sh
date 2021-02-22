@@ -1,0 +1,3 @@
+@pending.reflection.methods.define() {
+  :
+}

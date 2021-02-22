@@ -1,15 +1,10 @@
-# FIXME
-# setUp() {
-#   reflection types define Dog c
-# }
-
 @spec.expression.new_class_constructor_with_explicit_type() {
   reflection types define Dog c
 
   assert run { expression new Dog name: "Rover" }
 
   expect "$STDERR" toBeEmpty
-  expect "$STDOUT" toContain "class constructor: Dog"
+  expect "$STDOUT" toContain "class constructor new Dog(name: Rover)"
   expect "$STDOUT" toContain "Return type: Dog"
 }
 
@@ -22,6 +17,7 @@
   expect "$STDERR" toBeEmpty
   expect "$STDOUT" toContain "Type hint: Dog"
   expect "$STDOUT" toContain "class constructor: Dog"
+  expect "$STDOUT" toContain "param name: Rover"
   expect "$STDOUT" toContain "Return type: Dog"
 }
 
@@ -34,5 +30,6 @@
   expect "$STDERR" toBeEmpty
   expect "$STDOUT" toContain "Type hint: Dog"
   expect "$STDOUT" toContain "class constructor: Dog"
+  expect "$STDOUT" toContain "param name: Rover"
   expect "$STDOUT" toContain "Return type: Dog"
 }

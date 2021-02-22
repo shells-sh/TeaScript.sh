@@ -13,7 +13,7 @@
     expect { reflection types getBaseClass MyCollectionOfThings[A,B,C] } toEqual Object
     expect { reflection types getInterfaces MyCollectionOfThings[A,B,C] } toEqual "IAnimal ICritter"
     expect { reflection types getDescriptorCode MyCollectionOfThings[A,B,C] } toEqual c
-    expect { reflection types getDescriptorName MyCollectionOfThings[A,B,C] } toEqual class
+    expect { reflection types getDescriptor MyCollectionOfThings[A,B,C] } toEqual class
     expect { reflection types getGenericTypes MyCollectionOfThings[A,B,C] } toEqual "A B C"
     reflection types undefine Dog
   done

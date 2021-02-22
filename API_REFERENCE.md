@@ -194,6 +194,24 @@ So we make the best use of BASH arrays by:
 
 See [`reflection objects`](#reflection-objects), [`types`](#reflection-types), and [`variables`](#reflection-variables) for descriptions of how we store each of these using BASH arrays.
 
+#### Cost of Generics
+
+Quite annoyingly, allowing for types to be passed to `reflection` using natural generic names
+such as `CollectionOfThings[T,K]` results in code to convert that to a valid BASH name all over the place:
+
+```sh
+if [[ "$3" = *"["* ]]
+then
+  local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
+  local __T_genericTypeCount="${3//[^,]}"
+  __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
+else
+  local __T_tempVariable="T_TYPE_$3"
+fi
+```
+
+> 💡 Might want to update all of the `reflection` hot path methods to require generic types to be specified differently.
+
 ## `reflection objects`
 
 Manages the TeaScript **Heap** where objects are allocated.
@@ -471,7 +489,7 @@ TODO DESCRIBE
 > > | `$3` | Type name (full name including generics, if any) |
 > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
-### `reflection types getDescriptorName`
+### `reflection types getDescriptor`
 
 TODO DESCRIBE
 
@@ -482,7 +500,7 @@ TODO DESCRIBE
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `types` |
-> > | `$2` | `getDescriptorName` |
+> > | `$2` | `getDescriptor` |
 > > | `$3` | Type name (full name including generics, if any) |
 > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
@@ -527,6 +545,15 @@ TODO DESCRIBE
 | `$3` | ... |
 | `$4` | ... |
 | `$5` | ... |
+
+### `reflection types fields exists`
+
+| | Parameter |
+|-|-----------|
+| `$1` | `types` |
+| `$2` | `exists` |
+| `$3` | Type name |
+| `$4` | Field name |
 
 ### `reflection types fields undefine`
 
