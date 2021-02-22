@@ -114,7 +114,45 @@ T_COMMENTS=enabled
 ## In general, keep everything `O(1)` as much as possible. User-friendly functions which are not on the hot path are allowed
 ## to break these rules.
 ##
-## #### `eval`
+## #### 👥 User Functions
+##
+## TeaScript is an interpreted language which runs on the BASH interpreter.
+##
+## This is going to be slow. There's no way around it. But we can do everything we can to keep all TeaScript operations as optimized as possible!
+##
+## > This means making every operation `O(1)` if possible, please avoid `O(N)` in every way possible!
+##
+## To make `reflection` more user-friendly, a number of functions are provided for use by end-users only.
+##
+## These functions are annotated with `👥 User Function` and should _never_ be called by TeaScript core code.
+##
+## ##### `reflectionType`
+##
+## As a user, one of the biggest pieces of friction is: `reflectionType`
+##
+## I'm sorry users, but you cannot `reflection types listFieldNames MyCollection[T]`
+##
+## Instead, whenever working with type names, you must convert your type name to a format compatible with `reflection` functions:
+##
+## ```sh
+## reflection types listFieldNames $(reflection reflectionType MyCollection[T])
+##
+## # Alternatively, you can get the reflection-safe type name in a variable:
+## local reflectionSafeTypeName
+## reflection reflectionType MyCollection[T] reflectionSafeTypeName
+##
+## # Now call your reflection calls using the converted reflection-safe type variable:
+## reflection types listFieldNames $reflectionSafeTypeName
+## reflection types listMethodNames $reflectionSafeTypeName
+## ```
+##
+## > Implementation detail: this is only required for _generic type names_, e.g. `MyMap[K,V]`
+## >
+## > You can safely call `reflection` with direct type names when not providing generic names.
+## >
+## > For users, `reflectionType` is recommended so as to not create bugs when passing generic types.
+##
+## #### ⚠️ `eval`
 ##
 ## To start with, various functions make use of `eval`. In fact, most do.
 ##
@@ -180,24 +218,6 @@ T_COMMENTS=enabled
 ## - Proving out own key --> index lookups
 ##
 ## See [`reflection objects`](#reflection-objects), [`types`](#reflection-types), and [`variables`](#reflection-variables) for descriptions of how we store each of these using BASH arrays.
-##
-## #### Cost of Generics
-##
-## Quite annoyingly, allowing for types to be passed to `reflection` using natural generic names
-## such as `CollectionOfThings[T,K]` results in code to convert that to a valid BASH name all over the place:
-##
-## ```sh
-## if [[ "$3" = *"["* ]]
-## then
-##   local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
-##   local __T_genericTypeCount="${3//[^,]}"
-##   __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
-## else
-##   local __T_tempVariable="T_TYPE_$3"
-## fi
-## ```
-##
-## > 💡 Might want to update all of the `reflection` hot path methods to require generic types to be specified differently.
 ##
 reflection() {
   case "$1" in
@@ -302,7 +322,7 @@ reflection() {
             fi
           fi
           local __T_objectId="$( cat /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )"
-          eval "printf -v \"$4\" '%s' "$__T_objectId""
+          eval "printf -v \"$4\" "$__T_objectId""
           eval "T_OBJECT_$__T_objectId=(\"$3\" \"\")"
           ;;
 
@@ -400,7 +420,7 @@ reflection() {
           then
             __T_tempVariable="${__T_tempVariable#*;$4:}"
             __T_tempVariable="${__T_tempVariable%%;*}"
-            eval "printf '%s' \"\${T_OBJECT_$3[$__T_tempVariable]}\""
+            eval "printf \"\${T_OBJECT_$3[$__T_tempVariable]}\""
           else
             return 1
           fi
@@ -408,7 +428,7 @@ reflection() {
 
         ## ### `reflection objects list`
         ##
-        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -448,7 +468,7 @@ reflection() {
         ##
         ## TODO - update to show pretty things :)
         ##
-        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -550,7 +570,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `exists` |
-        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         exists)
           if [[ "$3" = *"["* ]]
@@ -573,7 +593,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseClass` |
-        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         getBaseClass)
           if [[ "$3" = *"["* ]]
@@ -597,7 +617,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseType` |
-        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         getBaseType)
           printf "${3%[*}"
@@ -613,7 +633,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseClass` |
-        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         getComment)
           if [[ "$3" = *"["* ]]
@@ -636,7 +656,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getDescriptorCode` |
-        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptorCode)
@@ -655,7 +675,7 @@ reflection() {
           then
             printf "${__T_tempVariable%%|*}"
           else
-            printf -v "$4" '%s' "${__T_tempVariable%%|*}"
+            printf -v "$4" "${__T_tempVariable%%|*}"
           fi
           ;;
 
@@ -663,7 +683,7 @@ reflection() {
         ##
         ## TODO DESCRIBE
         ##
-        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
         ## >
         ## > Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
         ##
@@ -671,7 +691,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getDescriptor` |
-        ## > > | `$3` | Type name (full name including generics, if any) |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptor)
@@ -690,7 +710,7 @@ reflection() {
           then
             reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
           else
-            printf -v "$4" '%s' "$( reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}" )"
+            printf -v "$4" "$( reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}" )"
           fi
           ;;
 
@@ -698,13 +718,13 @@ reflection() {
         ##
         ## TODO DESCRIBE
         ##
-        ## > 🚨 Slightly more expensive than your average function. Use with more caution than others. Ideally only used by users.
+        ## > 👥 Slightly more expensive than your average function. Use with more caution than others. Ideally only used by users.
         ##
         ## | | Parameter |
         ## |-|-----------|
         ## | `$1` | `types` |
         ## | `$2` | `getGenericTypes` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         getGenericTypes)
           if [[ "$3" = *"["* ]]
@@ -723,7 +743,7 @@ reflection() {
         ## |-|-----------|
         ## | `$1` | `types` |
         ## | `$2` | `getInterfaces` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         getInterfaces)
           if [[ "$3" = *"["* ]]
@@ -744,11 +764,11 @@ reflection() {
         ##
         ## TODO DESCRIBE
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `undefine` |
-        ## | `$3` | Type name (full name including generics, if any) |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `undefine` |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         undefine)
           if [[ "$3" = *"["* ]]
@@ -766,13 +786,13 @@ reflection() {
 
             ## ### `reflection types fields define`
             ##
-            ## | | Parameter |
-            ## |-|-----------|
-            ## | `$1` | `types` |
-            ## | `$2` | `fields` |
-            ## | `$3` | ... |
-            ## | `$4` | ... |
-            ## | `$5` | ... |
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | ... |
+            ## > > | `$4` | ... |
+            ## > > | `$5` | ... |
             ##
             define)
               :
@@ -780,12 +800,12 @@ reflection() {
 
             ## ### `reflection types fields exists`
             ##
-            ## | | Parameter |
-            ## |-|-----------|
-            ## | `$1` | `types` |
-            ## | `$2` | `exists` |
-            ## | `$3` | Type name |
-            ## | `$4` | Field name |
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `exists` |
+            ## > > | `$3` | Type name |
+            ## > > | `$4` | Field name |
             ##
             exists)
               if [[ "$3" = *"["* ]]
@@ -801,13 +821,13 @@ reflection() {
 
             ## ### `reflection types fields undefine`
             ##
-            ## | | Parameter |
-            ## |-|-----------|
-            ## | `$1` | `types` |
-            ## | `$2` | `fields` |
-            ## | `$3` | ... |
-            ## | `$4` | ... |
-            ## | `$5` | ... |
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | ... |
+            ## > > | `$4` | ... |
+            ## > > | `$5` | ... |
             ##
             undefine)
               :
@@ -824,13 +844,13 @@ reflection() {
 
             ## ### `reflection types methods define`
             ##
-            ## | | Parameter |
-            ## |-|-----------|
-            ## | `$1` | `types` |
-            ## | `$2` | `methods` |
-            ## | `$3` | ... |
-            ## | `$4` | ... |
-            ## | `$5` | ... |
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | ... |
+            ## > > | `$4` | ... |
+            ## > > | `$5` | ... |
             ##
             define)
               :
@@ -838,13 +858,13 @@ reflection() {
 
             ## ### `reflection types methods undefine`
             ##
-            ## | | Parameter |
-            ## |-|-----------|
-            ## | `$1` | `types` |
-            ## | `$2` | `methods` |
-            ## | `$3` | ... |
-            ## | `$4` | ... |
-            ## | `$5` | ... |
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | ... |
+            ## > > | `$4` | ... |
+            ## > > | `$5` | ... |
             ##
             undefine)
               :
@@ -1377,7 +1397,7 @@ reflection() {
       #     ## UPDATE ME
       #     local typeName="$1"; shift
       #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf '%s' \"\${$bashVariableName[3]}\""
+      #     eval "printf \"\${$bashVariableName[3]}\""
       #     ;;
 
       #   ## ### `reflection types getTypeComment`
@@ -1394,7 +1414,7 @@ reflection() {
       #     ## UPDATE ME
       #     local typeName="$1"; shift
       #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf '%s' \"\${$bashVariableName[2]}\""
+      #     eval "printf \"\${$bashVariableName[2]}\""
       #     ;;
 
       #   ## ### `reflection types getTypeOfType`
@@ -1411,7 +1431,7 @@ reflection() {
       #     ## TODO
       #     local typeName="$1"; shift
       #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf '%s' \"\${$bashVariableName[0]}\""
+      #     eval "printf \"\${$bashVariableName[0]}\""
       #     ;;
 
       #   ## ### `reflection types getTypeInterface`
@@ -1428,7 +1448,7 @@ reflection() {
       #     ## UPDATE ME
       #     local typeName="$1"; shift
       #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf '%s' \"\${$bashVariableName[4]}\""
+      #     eval "printf "\${$bashVariableName[4]}\""
       #     ;;
 
       #   ## ### `reflection types getTypeStorageType`
@@ -1445,7 +1465,7 @@ reflection() {
       #     ## UPDATE ME
       #     local typeName="$1"; shift
       #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf '%s' \"\${$bashVariableName[1]}\""
+      #     eval "printf \"\${$bashVariableName[1]}\""
       #     ;;
 
       #   ## ### `reflection types list`
@@ -1567,7 +1587,7 @@ reflection() {
         ## > > | `$3` | Variable name |
         ##
         getValueTypeCode)
-          eval "printf '%s' \"\${T_VAR_$3[0]%;*}\""
+          eval "printf \"\${T_VAR_$3[0]%;*}\""
           ;;
 
         ## ### `reflection variables getType`
@@ -1588,9 +1608,9 @@ reflection() {
           then
             if [ $# -eq 3 ]
             then
-              eval "printf '%s' \"\${T_VAR_$3[0]#*;}\""
+              eval "printf \"\${T_VAR_$3[0]#*;}\""
             else
-              eval "printf -v \"$4\" '%s' \"\${T_VAR_$3[0]#*;}\""
+              eval "printf -v \"$4\" \"\${T_VAR_$3[0]#*;}\""
             fi
           else
             return 1
@@ -1612,9 +1632,9 @@ reflection() {
         getValue)
           if [ $# -eq 3 ]
           then
-            eval "printf '%s' \"\${T_VAR_$3[1]}\""
+            eval "printf \"\${T_VAR_$3[1]}\""
           else
-            eval "printf -v \"$4\" '%s' \"\${T_VAR_$3[1]}\""
+            eval "printf -v \"$4\" \"\${T_VAR_$3[1]}\""
           fi
           ;;
 
@@ -1742,6 +1762,53 @@ reflection() {
           ;;
       esac
       ;;
+
+      ## ## `reflection reflectionType`
+      ##
+      ## > 👥 User Function
+      ##
+      ## Given a type name, e.g. `Dog` or `MyMap[K,V]`, get a type identifier which can be used to pass this type name to any other `reflection` function.
+      ##
+      ## Calling `reflection types exists MyMap[K,V]` does NOT WORK.
+      ##
+      ## Instead, use `reflectionType` to convert your type name for use with `reflection` functions:
+      ##
+      ## ```sh
+      ## reflection types listFieldNames $(reflection reflectionType MyCollection[T])
+      ##
+      ## # Alternatively, you can get the reflection-safe type name in a variable:
+      ## local reflectionSafeTypeName
+      ## reflection reflectionType MyCollection[T] reflectionSafeTypeName
+      ##
+      ## # Now call your reflection calls using the converted reflection-safe type variable:
+      ## reflection types listFieldNames $reflectionSafeTypeName
+      ## reflection types listMethodNames $reflectionSafeTypeName
+      ## ```
+      ##
+      ## Note: it is always safe to use `reflectionType` without "quotation marks"
+      ##
+      ## > > | | Parameter |
+      ## > > |-|-----------|
+      ## > > | `$1` | `reflectionType` |
+      ## > > | `$2` | Full type name, including generics if any, e.g. `MyMap[K,V]`. All other reflection methods require a differently formatted type name for generic types. |
+      ## > > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+      ##
+      reflectionType)
+        if [[ "$2" = *"["* ]]
+        then
+          local __T_tempVariable="${2%%[*}_GENERIC_"
+          local __T_genericTypeCount="${2//[^,]}"
+          __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
+        else
+          local __T_tempVariable="$2"
+        fi
+        if [ $# -eq 2 ]
+        then
+          printf "$__T_tempVariable"
+        else
+          printf -v "$3" "$__T_tempVariable"
+        fi
+        ;;
 
     utils)
       case "$2" in
