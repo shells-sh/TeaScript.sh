@@ -21,7 +21,7 @@ Returns 1 if the variable does not exist or is not a reference type.
 | `$1` | Variable name |
 | `$2` | (Optional) name of BASH variable to store Object ID in |
 
-# `$ reflection`
+# `reflection`
 
 🍵 TeaScript Reflection API
 
@@ -50,7 +50,7 @@ reflection types getTypeInterface Dog
 reflection types getTypeComment Dog
 # => "Represents a dog"
 
-reflection types getFieldNames Dog
+reflection types methods listNames Dog
 # => "name age"
 
 reflection types getFieldType Dog age
@@ -61,6 +61,30 @@ reflection types getFieldType Dog age
 > e.g. you can create a variable of a type that does not exist using `reflection variables`.
 >
 > Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
+
+### 🔍 `reflectionType`
+
+Whenever working with type names, you must convert your type name to a format compatible with `reflection` functions.
+
+This allows the core `reflection` code to remain efficient while also supporting type syntax such as generics, e.g. `MyMap[K,V]`
+
+```sh
+reflection types listFieldNames $(reflection reflectionType MyCollection[T])
+
+# Alternatively, you can get the reflection-safe type name in a variable:
+local reflectionSafeTypeName
+reflection reflectionType MyCollection[T] reflectionSafeTypeName
+
+# Now call your reflection calls using the converted reflection-safe type variable:
+reflection types listFieldNames $reflectionSafeTypeName
+reflection types listMethodNames $reflectionSafeTypeName
+```
+
+> Implementation detail: this is only required for _generic type names_, e.g. `MyMap[K,V]`
+>
+> You can safely call `reflection` with direct type names when not providing generic names.
+>
+> For users, `reflectionType` is recommended so as to not create bugs when passing generic types.
 
 ### 📤 `out` BASH variables
 
@@ -139,32 +163,6 @@ To make `reflection` more user-friendly, a number of functions are provided for 
 
 These functions are annotated with `👥 User Function` and should _never_ be called by TeaScript core code.
 
-##### `reflectionType`
-
-As a user, one of the biggest pieces of friction is: `reflectionType`
-
-I'm sorry users, but you cannot `reflection types listFieldNames MyCollection[T]`
-
-Instead, whenever working with type names, you must convert your type name to a format compatible with `reflection` functions:
-
-```sh
-reflection types listFieldNames $(reflection reflectionType MyCollection[T])
-
-# Alternatively, you can get the reflection-safe type name in a variable:
-local reflectionSafeTypeName
-reflection reflectionType MyCollection[T] reflectionSafeTypeName
-
-# Now call your reflection calls using the converted reflection-safe type variable:
-reflection types listFieldNames $reflectionSafeTypeName
-reflection types listMethodNames $reflectionSafeTypeName
-```
-
-> Implementation detail: this is only required for _generic type names_, e.g. `MyMap[K,V]`
->
-> You can safely call `reflection` with direct type names when not providing generic names.
->
-> For users, `reflectionType` is recommended so as to not create bugs when passing generic types.
-
 #### ⚠️ `eval`
 
 To start with, various functions make use of `eval`. In fact, most do.
@@ -197,8 +195,6 @@ This contains a lookup table for all characters.
 > These functions are not used in any path of the core TeaScript engine and perform name conversions.
 >
 > Other functions such as `reflection types define` expect these characters to be provided as arguments and _do not support_ friendly names such as `public` (use `P` instead).
->
-> All functions used by the core TeaScript engine are marked with the hot pepper noting the hot path 🌶️ (TODO!)
 
 | Character | Meaning |
 |-----------|---------|
@@ -436,15 +432,11 @@ T_TYPE_Array_GENERIC_T=([0]="Array[T];s|Object<IEnumerable,IComparable>This repr
 
 Define a new type, e.g. a `class` or a `struct`
 
-`TODO`: disallow defining both `Collection[A]` and `Collection[B]` because instantiating `Collection[Dog]` will not know which to choose from.
-        at the time of writing, `reflection types define` will allow both of these types to be defined.
-        considering taking the # of generics and using that? or... hmm. yes, I like this. If you really want `Collection`, `Collection[A]`, and `Collection[A,B]` - sure, go ahead. We can instantiate fine.
-
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `types` |
 > > | `$2` | `define` |
-> > | `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
+> > | `$3` | Full type name, including generics if any, e.g. `MyMap[K,V]`. All other reflection methods require a differently formatted type name for generic types. |
 > > | `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
 > > | `$5` | Base class name (or empty string) |
 > > | `$6` | Interface names (comma-delimited without spaces) (or empty string) |
@@ -475,16 +467,7 @@ e.g. all `class` types inherit from `Object` by default
 > > | `$1` | `types` |
 > > | `$2` | `getBaseClass` |
 > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
-
-### `reflection types getBaseType`
-
-Get the type without generics, e.g. `getBaseType MyMap[K,V]` returns `MyMap`
-
-> > | | Parameter |
-> > |-|-----------|
-> > | `$1` | `types` |
-> > | `$2` | `getBaseType` |
-> > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types getComment`
 
@@ -497,10 +480,11 @@ Note: this is saved to reflection only if `T_COMMENTS=enabled` (default in devel
 > > | `$1` | `types` |
 > > | `$2` | `getBaseClass` |
 > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types getDescriptorCode`
 
-TODO DESCRIBE
+Get the short code of this type's "type" or "descriptor", e.g. `c` for `class` or `s` for `struct`
 
 > > | | Parameter |
 > > |-|-----------|
@@ -511,10 +495,10 @@ TODO DESCRIBE
 
 ### `reflection types getDescriptor`
 
-TODO DESCRIBE
+Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct`
 
-> 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
->
+> 👥 User Function
+
 > Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
 
 > > | | Parameter |
@@ -526,29 +510,33 @@ TODO DESCRIBE
 
 ### `reflection types getGenericTypes`
 
-TODO DESCRIBE
+Get the original names of the 
 
-> 👥 Slightly more expensive than your average function. Use with more caution than others. Ideally only used by users.
+> 👥 User Function
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getGenericTypes` |
-| `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getGenericTypes` |
+> > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types getInterfaces`
 
 TODO DESCRIBE
 
-| | Parameter |
-|-|-----------|
-| `$1` | `types` |
-| `$2` | `getInterfaces` |
-| `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `getInterfaces` |
+> > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types undefine`
 
-TODO DESCRIBE
+Undefine type with provided name.
+
+Note: like all other `reflection` functions (_excluding [types define](#reflection-types-define)_), this required a `reflectionType` converted type name.
 
 > > | | Parameter |
 > > |-|-----------|

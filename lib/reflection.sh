@@ -8,7 +8,7 @@ T_GC_OBJECT_THRESHOLD_COUNT=0
 #      are not persisted if this is disabled (not = enabled)
 T_COMMENTS=enabled
 
-## # `$ reflection`
+## # `reflection`
 ##
 ## 🍵 TeaScript Reflection API
 ##
@@ -37,7 +37,7 @@ T_COMMENTS=enabled
 ## reflection types getTypeComment Dog
 ## # => "Represents a dog"
 ##
-## reflection types getFieldNames Dog
+## reflection types methods listNames Dog
 ## # => "name age"
 ##
 ## reflection types getFieldType Dog age
@@ -48,6 +48,30 @@ T_COMMENTS=enabled
 ## > e.g. you can create a variable of a type that does not exist using `reflection variables`.
 ## >
 ## > Higher-level functions such as `var` and `class` and `def` perform these assertions and type-checking.
+##
+## ### 🔍 `reflectionType`
+##
+## Whenever working with type names, you must convert your type name to a format compatible with `reflection` functions.
+##
+## This allows the core `reflection` code to remain efficient while also supporting type syntax such as generics, e.g. `MyMap[K,V]`
+##
+## ```sh
+## reflection types listFieldNames $(reflection reflectionType MyCollection[T])
+##
+## # Alternatively, you can get the reflection-safe type name in a variable:
+## local reflectionSafeTypeName
+## reflection reflectionType MyCollection[T] reflectionSafeTypeName
+##
+## # Now call your reflection calls using the converted reflection-safe type variable:
+## reflection types listFieldNames $reflectionSafeTypeName
+## reflection types listMethodNames $reflectionSafeTypeName
+## ```
+##
+## > Implementation detail: this is only required for _generic type names_, e.g. `MyMap[K,V]`
+## >
+## > You can safely call `reflection` with direct type names when not providing generic names.
+## >
+## > For users, `reflectionType` is recommended so as to not create bugs when passing generic types.
 ##
 ## ### 📤 `out` BASH variables
 ##
@@ -126,32 +150,6 @@ T_COMMENTS=enabled
 ##
 ## These functions are annotated with `👥 User Function` and should _never_ be called by TeaScript core code.
 ##
-## ##### `reflectionType`
-##
-## As a user, one of the biggest pieces of friction is: `reflectionType`
-##
-## I'm sorry users, but you cannot `reflection types listFieldNames MyCollection[T]`
-##
-## Instead, whenever working with type names, you must convert your type name to a format compatible with `reflection` functions:
-##
-## ```sh
-## reflection types listFieldNames $(reflection reflectionType MyCollection[T])
-##
-## # Alternatively, you can get the reflection-safe type name in a variable:
-## local reflectionSafeTypeName
-## reflection reflectionType MyCollection[T] reflectionSafeTypeName
-##
-## # Now call your reflection calls using the converted reflection-safe type variable:
-## reflection types listFieldNames $reflectionSafeTypeName
-## reflection types listMethodNames $reflectionSafeTypeName
-## ```
-##
-## > Implementation detail: this is only required for _generic type names_, e.g. `MyMap[K,V]`
-## >
-## > You can safely call `reflection` with direct type names when not providing generic names.
-## >
-## > For users, `reflectionType` is recommended so as to not create bugs when passing generic types.
-##
 ## #### ⚠️ `eval`
 ##
 ## To start with, various functions make use of `eval`. In fact, most do.
@@ -184,8 +182,6 @@ T_COMMENTS=enabled
 ## > These functions are not used in any path of the core TeaScript engine and perform name conversions.
 ## >
 ## > Other functions such as `reflection types define` expect these characters to be provided as arguments and _do not support_ friendly names such as `public` (use `P` instead).
-## >
-## > All functions used by the core TeaScript engine are marked with the hot pepper noting the hot path 🌶️ (TODO!)
 ##
 ## | Character | Meaning |
 ## |-----------|---------|
@@ -527,15 +523,11 @@ reflection() {
         ##
         ## Define a new type, e.g. a `class` or a `struct`
         ##
-        ## `TODO`: disallow defining both `Collection[A]` and `Collection[B]` because instantiating `Collection[Dog]` will not know which to choose from.
-        ##         at the time of writing, `reflection types define` will allow both of these types to be defined.
-        ##         considering taking the # of generics and using that? or... hmm. yes, I like this. If you really want `Collection`, `Collection[A]`, and `Collection[A,B]` - sure, go ahead. We can instantiate fine.
-        ##
         ## > > | | Parameter |
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `define` |
-        ## > > | `$3` | Full type name with generic, e.g. `Array[T]` or `Map[K,V]` or `Dog` |
+        ## > > | `$3` | Full type name, including generics if any, e.g. `MyMap[K,V]`. All other reflection methods require a differently formatted type name for generic types. |
         ## > > | `$4` | Descriptor name or code, e.g. `c` for `class` or `s` for `struct`. For extensibility, this is stored/used raw if not a known built-in code, allowing definition of one's own descriptors. |
         ## > > | `$5` | Base class name (or empty string) |
         ## > > | `$6` | Interface names (comma-delimited without spaces) (or empty string) |
@@ -544,17 +536,17 @@ reflection() {
         define)
           if [[ "$3" = *"["* ]]
           then
-            local __T_typeVariableName="T_TYPE_${3%%[*}_GENERIC_"
+            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
             local __T_genericTypeCount="${3//[^,]}"
-            __T_typeVariableName="$__T_typeVariableName${#__T_genericTypeCount}"
+            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
           else
-            local __T_typeVariableName="T_TYPE_$3"
+            local __T_tempVariable="T_TYPE_$3"
           fi
           if [ "$T_COMMENTS" = enabled ]
           then
-            eval "$__T_typeVariableName=(\"$3;$4|$5<$6>$7\" \"\" \"\")"
+            eval "$__T_tempVariable=(\"$3;$4|$5<$6>$7\" \"\" \"\")"
           else
-            eval "$__T_typeVariableName=(\"$3;$4|$5<$6>\" \"\" \"\")"
+            eval "$__T_tempVariable=(\"$3;$4|$5<$6>\" \"\" \"\")"
           fi
           ;;
 
@@ -573,14 +565,7 @@ reflection() {
         ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         exists)
-          if [[ "$3" = *"["* ]]
-          then
-            local __T_typeVariableName="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            eval "[ -n \"\${$__T_typeVariableName${#__T_genericTypeCount}+x}\" ]"
-          else
-            eval "[ -n \"\${T_TYPE_$3+x}\" ]"
-          fi
+          eval "[ -n \"\${T_TYPE_$3+x}\" ]"
           ;;
 
         ## ### `reflection types getBaseClass`
@@ -594,33 +579,17 @@ reflection() {
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseClass` |
         ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getBaseClass)
-          if [[ "$3" = *"["* ]]
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_TYPE_$3[0]#*|}\""
+          if [ $# -eq 3 ]
           then
-            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
+            printf "${__T_tempVariable%%<*}"
           else
-            local __T_tempVariable="T_TYPE_$3"
+            printf -v "$4" "${__T_tempVariable%%<*}"
           fi
-          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
-          __T_tempVariable="${__T_tempVariable#*|}"
-          printf "${__T_tempVariable%%<*}"
-          ;;
-
-        ## ### `reflection types getBaseType`
-        ##
-        ## Get the type without generics, e.g. `getBaseType MyMap[K,V]` returns `MyMap`
-        ##
-        ## > > | | Parameter |
-        ## > > |-|-----------|
-        ## > > | `$1` | `types` |
-        ## > > | `$2` | `getBaseType` |
-        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
-        ##
-        getBaseType)
-          printf "${3%[*}"
           ;;
 
         ## ### `reflection types getComment`
@@ -634,23 +603,20 @@ reflection() {
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseClass` |
         ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getComment)
-          if [[ "$3" = *"["* ]]
+          if [ $# -eq 3 ]
           then
-            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
+            eval "printf \"\${T_TYPE_$3[0]#*>}\""
           else
-            local __T_tempVariable="T_TYPE_$3"
+            eval "printf -v \"$4\" \"\${T_TYPE_$3[0]#*>}\""
           fi
-          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
-          printf "${__T_tempVariable#*>}"
           ;;
 
         ## ### `reflection types getDescriptorCode`
         ##
-        ## TODO DESCRIBE
+        ## Get the short code of this type's "type" or "descriptor", e.g. `c` for `class` or `s` for `struct`
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -660,17 +626,8 @@ reflection() {
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptorCode)
-          if [[ "$3" = *"["* ]]
-          then
-            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
-          else
-            local __T_tempVariable="T_TYPE_$3"
-          fi
-          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
-          [ -z "$__T_tempVariable" ] && return 1
-          __T_tempVariable="${__T_tempVariable#*;}"
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_TYPE_$3[0]#*;}\""S
           if [ $# -eq 3 ]
           then
             printf "${__T_tempVariable%%|*}"
@@ -681,10 +638,10 @@ reflection() {
 
         ## ### `reflection types getDescriptor`
         ##
-        ## TODO DESCRIBE
+        ## Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct`
         ##
-        ## > 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
-        ## >
+        ## > 👥 User Function
+        ## 
         ## > Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
         ##
         ## > > | | Parameter |
@@ -695,17 +652,8 @@ reflection() {
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptor)
-          if [[ "$3" = *"["* ]]
-          then
-            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
-          else
-            local __T_tempVariable="T_TYPE_$3"
-          fi
-          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
-          [ -z "$__T_tempVariable" ] && return 1
-          __T_tempVariable="${__T_tempVariable#*;}"
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_TYPE_$3[0]#*;}\""S
           if [ $# -eq 3 ]
           then
             reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
@@ -716,22 +664,29 @@ reflection() {
 
         ## ### `reflection types getGenericTypes`
         ##
-        ## TODO DESCRIBE
+        ## Get the original names of the 
         ##
-        ## > 👥 Slightly more expensive than your average function. Use with more caution than others. Ideally only used by users.
+        ## > 👥 User Function
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getGenericTypes` |
-        ## | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getGenericTypes` |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getGenericTypes)
-          if [[ "$3" = *"["* ]]
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_TYPE_$3[0]}\""
+          __T_tempVariable="${__T_tempVariable%%;*}" # Get rid of everything but the type name
+          [[ "$__T_tempVariable" = *"["* ]] || return 1 # If the type name doesn't contain '[' for generics, return 1 (no generic types)
+          __T_tempVariable="${__T_tempVariable#*[}" # Get rid of everything but the generic definition
+          __T_tempVariable="${__T_tempVariable%]}" # Get rid of the trailing ']'
+          if [ $# -eq 3 ]
           then
-            local __T_genericTypes="${3#*[}"
-            __T_genericTypes="${__T_genericTypes%]}"
-            printf "${__T_genericTypes//,/ }"
+            printf "${__T_tempVariable//,/ }" # Replace all , with " " to return a value such as "K V" for MyMap[K,V]
+          else
+            printf -v "$4" "${__T_tempVariable//,/ }" # Replace all , with " " to return a value such as "K V" for MyMap[K,V]
           fi
           ;;
 
@@ -739,30 +694,30 @@ reflection() {
         ##
         ## TODO DESCRIBE
         ##
-        ## | | Parameter |
-        ## |-|-----------|
-        ## | `$1` | `types` |
-        ## | `$2` | `getInterfaces` |
-        ## | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getInterfaces` |
+        ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getInterfaces)
-          if [[ "$3" = *"["* ]]
-          then
-            local __T_tempVariable="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            __T_tempVariable="$__T_tempVariable${#__T_genericTypeCount}"
-          else
-            local __T_tempVariable="T_TYPE_$3"
-          fi
-          eval "__T_tempVariable=\"\${${__T_tempVariable//,/_}[0]}\""
-          __T_tempVariable="${__T_tempVariable#*<}"
+          local __T_tempVariable
+          eval "__T_tempVariable=\"\${T_TYPE_$3[0]#*<}\""S
           __T_tempVariable="${__T_tempVariable%%>*}"
-          printf "${__T_tempVariable/,/ }"
+          if [ $# -eq 3 ]
+          then
+            printf "${__T_tempVariable/,/ }"
+          else
+            printf -v "$4" "${__T_tempVariable/,/ }"
+          fi
           ;;
 
         ## ### `reflection types undefine`
         ##
-        ## TODO DESCRIBE
+        ## Undefine type with provided name.
+        ##
+        ## Note: like all other `reflection` functions (_excluding [types define](#reflection-types-define)_), this required a `reflectionType` converted type name.
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -771,14 +726,7 @@ reflection() {
         ## > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         undefine)
-          if [[ "$3" = *"["* ]]
-          then
-            local __T_typeVariableName="T_TYPE_${3%%[*}_GENERIC_"
-            local __T_genericTypeCount="${3//[^,]}"
-            unset "$__T_typeVariableName${#__T_genericTypeCount}"
-          else
-            unset "T_TYPE_$3"
-          fi
+          unset "T_TYPE_$3"
           ;;
 
         fields)
@@ -874,6 +822,10 @@ reflection() {
               echo "Unknown 'reflection types methods' command: $2"
               ;;
           esac
+          ;;
+
+        *)
+          echo "Unknown 'reflection types' command: $2"
           ;;
       esac
       ;;

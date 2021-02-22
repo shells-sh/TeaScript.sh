@@ -1,4 +1,4 @@
-@spec.reflection.fields.define() {
+@pending.reflection.fields.define() {
   refute reflection types fields exists Dog name
 
   reflection types fields define Dog name P i String "This represents the dog name"
