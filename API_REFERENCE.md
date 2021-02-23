@@ -40,7 +40,7 @@ or making changes to types.
 ```sh
 class Dog implements IAnimal do <<- _
   Represents a dog
-  _
+_
 
   field name: String
   field age: Integer

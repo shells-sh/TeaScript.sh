@@ -27,7 +27,7 @@ T_COMMENTS=enabled
 ## ```sh
 ## class Dog implements IAnimal do <<- _
 ##   Represents a dog
-##   _
+## _
 ##
 ##   field name: String
 ##   field age: Integer
