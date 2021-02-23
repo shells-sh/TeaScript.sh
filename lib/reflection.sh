@@ -1,3 +1,5 @@
+# TODO split into multiple files and compile back into this file with the tree of case statements
+
 # TODO. Note: rather than checking T_ENV in the code, we'll probably LOAD/source a *different* implementation of `reflection` when T_ENV=production (e.g. without comments and maybe no type checking assertions)
 T_ENV=development
 
@@ -813,7 +815,12 @@ reflection() {
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               eval "T_TYPE_$4[1]=\"\${T_TYPE_$4[1]};$5:\${#T_TYPE_$4[@]}\""
-              eval "T_TYPE_$4+=(\"$7!$8|$5<$6>$9&${10}\")"
+              if [ "$T_COMMENTS" = enabled ]
+              then
+                eval "T_TYPE_$4+=(\"$7!$8|$5<$6>$9&${10}\")"
+              else
+                eval "T_TYPE_$4+=(\"$7!$8|$5<$6>$9&\")"
+              fi
               ;;
 
             ## ### `reflection types fields exists`
@@ -1163,21 +1170,7 @@ reflection() {
       esac
       ;;
 
-
       #   ## ### `reflection types addMethod`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
       #   ##
       #   addMethod)
       #     local typeName="$1"; shift
@@ -1187,6 +1180,8 @@ reflection() {
       #     local methodName="$1"; shift
       #     local methodReturnType="$1"; shift
       #     local methodComment="$1"; shift
+      #     custom function name
+      #
       #     local methodDefinition="$methodScope!$methodVisibility|$methodName<$methodReturnType>$methodComment"
       #     while [ $# -gt 0 ]
       #     do

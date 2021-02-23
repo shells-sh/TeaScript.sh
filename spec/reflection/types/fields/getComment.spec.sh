@@ -57,3 +57,17 @@
 
   expect "$var" toEqual "This represents a dog!"
 }
+
+@spec.reflection.types.fields.getComment.does_not_store_comment_if_disabled() {
+  reflection types define Dog c
+  reflection types fields define Dog name String i P "" "This represents a dog!"
+
+  expect { reflection types fields getComment Dog name } toEqual "This represents a dog!"
+
+  local T_COMMENTS=disabled
+
+  reflection types define Cat c
+  reflection types fields define Cat name String i P "" "This represents a cat!"
+
+  expect { reflection types fields getComment Cat name } toBeEmpty
+}
