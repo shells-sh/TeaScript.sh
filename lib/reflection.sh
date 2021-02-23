@@ -1151,6 +1151,17 @@ reflection() {
         ##
         ## `TODO` talk about methods!
         ##
+        ## - [`reflection types methods define`](#reflection-types-methods-define)
+        ## - [`reflection types methods exists`](#reflection-types-methods-exists)
+        ## - [`reflection types methods getComment`](#reflection-types-methods-getComment)
+        ## - [`reflection types methods getMethodName`](#reflection-types-methods-getMethodName)
+        ## - [`reflection types methods getReturnType`](#reflection-types-methods-getReturnType)
+        ## - [`reflection types methods getScope`](#reflection-types-methods-getScope)
+        ## - [`reflection types methods getScopeCode`](#reflection-types-methods-getScopeCode)
+        ## - [`reflection types methods getVisibility`](#reflection-types-methods-getVisibility)
+        ## - [`reflection types methods getVisibilityCode`](#reflection-types-methods-getVisibilityCode)
+        ## - [`reflection types methods undefine`](#reflection-types-methods-undefine)
+        ##
         methods)
           case "$3" in
 
@@ -1158,6 +1169,8 @@ reflection() {
             ##
             ## `TODO` add code example
             ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `define` |
