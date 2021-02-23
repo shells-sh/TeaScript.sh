@@ -836,7 +836,7 @@ Returns the method comment, if any.
 > > |-|-----------|
 > > | `$1` | `types` |
 > > | `$2` | `methods` |
-> > | `$3` | `getMethodName` |
+> > | `$3` | `getComment` |
 > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
