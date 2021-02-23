@@ -546,6 +546,10 @@ Note: like all other `reflection` functions (_excluding [types define](#reflecti
 > > | `$2` | `undefine` |
 > > | `$3` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 
+## `reflection types fields`
+
+`TODO` talk about fields!
+
 ### `reflection types fields define`
 
 Define a field on this type.
@@ -681,6 +685,10 @@ Returns the short code for this field's visibility, e.g. `P` for `public` and `p
 > > | `$3` | ... |
 > > | `$4` | ... |
 > > | `$5` | ... |
+
+## `reflection types methods`
+
+`TODO` talk about methods!
 
 ### `reflection types methods define`
 

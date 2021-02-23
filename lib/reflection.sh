@@ -731,6 +731,10 @@ reflection() {
           unset "T_TYPE_$3"
           ;;
 
+        ## ## `reflection types fields`
+        ##
+        ## `TODO` talk about fields!
+        ##
         fields)
           case "$3" in
 
@@ -987,6 +991,10 @@ reflection() {
           esac
           ;;
 
+        ## ## `reflection types methods`
+        ##
+        ## `TODO` talk about methods!
+        ##
         methods)
           case "$3" in
 
