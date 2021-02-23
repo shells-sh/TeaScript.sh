@@ -973,16 +973,36 @@ reflection() {
 
             ## ### `reflection types fields undefine`
             ##
+            ## Remove the given field from the type definition.
+            ##
+            ## > ℹ️ Implementation Detail
+            ## >
+            ## > The underlying BASH variable which stores this type definition will keep
+            ## > an empty array index value where this field definition previously was,
+            ## > so this does not reduce the size of the type definition BASH variable.
+            ##
             ## > > | | Parameter |
             ## > > |-|-----------|
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
-            ## > > | `$3` | ... |
-            ## > > | `$4` | ... |
-            ## > > | `$5` | ... |
+            ## > > | `$3` | `undefine` |
+            ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Field name |
             ##
             undefine)
-              :
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
+              eval "T_TYPE_$4[$__T_tempVariable]=\"\"" # Clear the field definition (leaving the array index, `undefine` does not rearrange the array)
+              if shopt -q extglob
+              then
+                eval "T_TYPE_$4[1]=\"\${T_TYPE_$4[1]/;$5:+([0-9])}\"" # Remove the field name from the field index lookup
+              else
+                shopt -s extglob
+                eval "T_TYPE_$4[1]=\"\${T_TYPE_$4[1]/;$5:+([0-9])}\"" # Remove the field name from the field index lookup
+                shopt -u extglob
+              fi
               ;;
 
             *)

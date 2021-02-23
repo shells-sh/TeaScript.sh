@@ -678,13 +678,21 @@ Returns the short code for this field's visibility, e.g. `P` for `public` and `p
 
 ### `reflection types fields undefine`
 
+Remove the given field from the type definition.
+
+> ℹ️ Implementation Detail
+>
+> The underlying BASH variable which stores this type definition will keep
+> an empty array index value where this field definition previously was,
+> so this does not reduce the size of the type definition BASH variable.
+
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `types` |
 > > | `$2` | `fields` |
-> > | `$3` | ... |
-> > | `$4` | ... |
-> > | `$5` | ... |
+> > | `$3` | `undefine` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
 
 ## `reflection types methods`
 
