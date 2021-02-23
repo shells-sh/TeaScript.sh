@@ -5,9 +5,9 @@
 }
 
 @spec.reflection.types.getDescriptorCode.single_generic_type_parameter() {
-  reflection types define DogCollection[T] s Collection IEnumerable,IComparable
+  reflection types define MyCollection[T] s Collection IEnumerable,IComparable
 
-  expect { reflection types getDescriptorCode $(reflection reflectionType DogCollection[T]) } toEqual s
+  expect { reflection types getDescriptorCode $(reflection reflectionType MyCollection[T]) } toEqual s
 }
 
 @spec.reflection.types.getDescriptorCode.multiple_generic_type_parameters() {

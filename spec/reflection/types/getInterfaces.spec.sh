@@ -8,9 +8,9 @@
 }
 
 @spec.reflection.types.getInterfaces.single_generic_type_parameter() {
-  reflection types define DogCollection[T] s Collection IEnumerable,IComparable
+  reflection types define MyCollection[T] s Collection IEnumerable,IComparable
 
-  expect { reflection types getInterfaces $(reflection reflectionType DogCollection[T]) } toEqual "IEnumerable IComparable"
+  expect { reflection types getInterfaces $(reflection reflectionType MyCollection[T]) } toEqual "IEnumerable IComparable"
 }
 
 @spec.reflection.types.getInterfaces.multiple_generic_type_parameters() {

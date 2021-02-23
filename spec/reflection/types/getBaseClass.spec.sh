@@ -5,9 +5,9 @@
 }
 
 @spec.reflection.types.getBaseClass.single_generic_type_parameter() {
-  reflection types define DogCollection[T] s Collection IEnumerable,IComparable
+  reflection types define MyCollection[T] s Collection IEnumerable,IComparable
 
-  expect { reflection types getBaseClass $(reflection reflectionType DogCollection[T]) } toEqual Collection
+  expect { reflection types getBaseClass $(reflection reflectionType MyCollection[T]) } toEqual Collection
 }
 
 @spec.reflection.types.getBaseClass.multiple_generic_type_parameters() {

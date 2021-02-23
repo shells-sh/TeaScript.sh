@@ -163,28 +163,9 @@ To make `reflection` more user-friendly, a number of functions are provided for 
 
 These functions are annotated with `👥 User Function` and should _never_ be called by TeaScript core code.
 
-#### ⚠️ `eval`
-
-To start with, various functions make use of `eval`. In fact, most do.
-
-This is to support Mac's built-in version of BASH, which is BASH `3.2.57` and will always be this version due to `GPL` licensing.
-
-After `reflection.sh` is mostly "complete" (_i.e. once `var` and `expression` and `class` and `def` are fully up-and-running_)
-we will add Docker tests for both BASH `3.2.57` as well as the latest versions of BASH 5 which is distributed
-with Linux and used on Windows as well and create 2 versions of `reflection.sh`, one targetting BASH 4.3+ which removes all use of `eval`.
-
-> ℹ️ `eval` is used for defining single-dimensional array variables with dynamic names
-> and modifying or reading from those arrays. In BASH 4.3+ these operations are doable by making
-> use of `declare -g` and `typeset -n`.
->
-> When we create the `eval`less version of `reflection.sh`, we will do benchmarking to see if the `eval`less
-> version is _faster_ on BASH 5 or if it's actually slower than `eval`.
-> It might turn out that `typeset -n` is prohibitively slow and the copy of `reflection.sh`
-> might just use `declare -g` but otherwise be identical. We will see! Can't wait to try and to benchmark :)
-
 #### Character Codes
 
-> `p` private -_vs_- `P` public
+> e.g. `p` for private -_vs_- `P` for public
 
 Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
 
@@ -227,6 +208,25 @@ So we make the best use of BASH arrays by:
 - Proving out own key --> index lookups
 
 See [`reflection objects`](#reflection-objects), [`types`](#reflection-types), and [`variables`](#reflection-variables) for descriptions of how we store each of these using BASH arrays.
+
+#### ⚠️ `eval`
+
+To start with, various functions make use of `eval`. In fact, most do.
+
+This is to support Mac's built-in version of BASH, which is BASH `3.2.57` and will always be this version due to `GPL` licensing.
+
+After `reflection.sh` is mostly "complete" (_i.e. once `var` and `expression` and `class` and `def` are fully up-and-running_)
+we will add Docker tests for both BASH `3.2.57` as well as the latest versions of BASH 5 which is distributed
+with Linux and used on Windows as well and create 2 versions of `reflection.sh`, one targetting BASH 4.3+ which removes all use of `eval`.
+
+> ℹ️ `eval` is used for defining single-dimensional array variables with dynamic names
+> and modifying or reading from those arrays. In BASH 4.3+ these operations are doable by making
+> use of `declare -g` and `typeset -n`.
+>
+> When we create the `eval`less version of `reflection.sh`, we will do benchmarking to see if the `eval`less
+> version is _faster_ on BASH 5 or if it's actually slower than `eval`.
+> It might turn out that `typeset -n` is prohibitively slow and the copy of `reflection.sh`
+> might just use `declare -g` but otherwise be identical. We will see! Can't wait to try and to benchmark :)
 
 ## `reflection objects`
 
@@ -523,7 +523,7 @@ Get the original names of the
 
 ### `reflection types getInterfaces`
 
-TODO DESCRIBE
+Return a space-delimited list of all the interfaces this type implements.
 
 > > | | Parameter |
 > > |-|-----------|
@@ -546,22 +546,60 @@ Note: like all other `reflection` functions (_excluding [types define](#reflecti
 
 ### `reflection types fields define`
 
+Define a field on this type.
+
+Fields must be of a certain type.
+
+Fields can have optional default values.
+
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `types` |
 > > | `$2` | `fields` |
-> > | `$3` | ... |
-> > | `$4` | ... |
-> > | `$5` | ... |
+> > | `$3` | `define` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name, e.g. `name` |
+> > | `$6` | Full type name for this field, including generics if any, e.g. `MyMap[K,V]`. All other reflection methods require a differently formatted type name for generic types. |
+> > | `$7` | Scope code, e.g. `s` for `static` or `i` for `instance` |
+> > | `$8` | Visibility code, e.g. `p` for `private` or `P` for `public` |
+> > | `$9` | Default value, e.g. `"Hello, world!"` |
+> > | `$10` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
 
 ### `reflection types fields exists`
 
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `types` |
-> > | `$2` | `exists` |
-> > | `$3` | Type name |
-> > | `$4` | Field name |
+> > | `$2` | `fields` |
+> > | `$3` | `exists` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+
+### `reflection types fields getDefaultValue`
+
+Returns the default value for this field, if any.
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getType` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types fields getType`
+
+Returns the full type name of this field.
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getType` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ### `reflection types fields undefine`
 

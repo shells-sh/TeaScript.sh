@@ -18,22 +18,22 @@
 
 @spec.reflection.types.define.single_generic_type_parameter() {
   refute reflection types exists DogCollection
-  refute reflection types exists $(reflection reflectionType DogCollection[T])
+  refute reflection types exists $(reflection reflectionType MyCollection[T])
 
-  reflection types define DogCollection[T] s Collection IEnumerable,IComparable
+  reflection types define MyCollection[T] s Collection IEnumerable,IComparable
 
   refute reflection types exists DogCollection
-  assert reflection types exists $(reflection reflectionType DogCollection[T])
+  assert reflection types exists $(reflection reflectionType MyCollection[T])
 
-  expect { reflection types getGenericTypes $(reflection reflectionType DogCollection[T]) } toEqual T
-  expect { reflection types getDescriptorCode $(reflection reflectionType DogCollection[T]) } toEqual s
-  expect { reflection types getDescriptor $(reflection reflectionType DogCollection[T]) } toEqual struct
-  expect { reflection types getBaseClass $(reflection reflectionType DogCollection[T]) } toEqual Collection
-  expect { reflection types getInterfaces $(reflection reflectionType DogCollection[T]) } toEqual "IEnumerable IComparable"
-  expect { reflection types getComment $(reflection reflectionType DogCollection[T]) } toBeEmpty
+  expect { reflection types getGenericTypes $(reflection reflectionType MyCollection[T]) } toEqual T
+  expect { reflection types getDescriptorCode $(reflection reflectionType MyCollection[T]) } toEqual s
+  expect { reflection types getDescriptor $(reflection reflectionType MyCollection[T]) } toEqual struct
+  expect { reflection types getBaseClass $(reflection reflectionType MyCollection[T]) } toEqual Collection
+  expect { reflection types getInterfaces $(reflection reflectionType MyCollection[T]) } toEqual "IEnumerable IComparable"
+  expect { reflection types getComment $(reflection reflectionType MyCollection[T]) } toBeEmpty
 
   local BASHTypeVariables="$( ( set -o posix ; set ) | grep "^T_TYPE_" )"
-  expect "$BASHTypeVariables" toContain 'T_TYPE_DogCollection_GENERIC_0=([0]="DogCollection[T];s|Collection<IEnumerable,IComparable>" [1]="" [2]="")'
+  expect "$BASHTypeVariables" toContain 'T_TYPE_MyCollection_GENERIC_0=([0]="MyCollection[T];s|Collection<IEnumerable,IComparable>" [1]="" [2]="")'
 }
 
 @spec.reflection.types.define.multiple_generic_type_parameters() {
