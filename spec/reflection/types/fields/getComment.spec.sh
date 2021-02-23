@@ -24,7 +24,7 @@
   assert reflection types fields define $safeTypeName age String i P ""
   expect { reflection types fields getComment $safeTypeName age } toBeEmpty
 
-  assert reflection types fields define $safeTypeName breed String i P "" "Breed name"
+  assert reflection types fields define $safeTypeName breed Array[String] i P "" "Breed name"
   expect { reflection types fields getComment $safeTypeName breed } toEqual "Breed name"
 }
 
@@ -39,7 +39,7 @@
   assert reflection types fields define $safeTypeName age String i P ""
   expect { reflection types fields getComment $safeTypeName age } toBeEmpty
 
-  assert reflection types fields define $safeTypeName breed String i P "" "Breed name"
+  assert reflection types fields define $safeTypeName breed Map[K,V] i P "" "Breed name"
   expect { reflection types fields getComment $safeTypeName breed } toEqual "Breed name"
 }
 

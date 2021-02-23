@@ -983,6 +983,38 @@ reflection() {
               fi
               ;;
 
+            ## ### `reflection types fields listNames`
+            ##
+            ## Returns a space-demilimited list of field names for this type
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `getVisibilityCode` |
+            ## > > | `$4` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            listNames)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              if shopt -q extglob
+              then
+                __T_tempVariable="${__T_tempVariable//:+([0-9])}"
+              else
+                shopt -s extglob
+                __T_tempVariable="${__T_tempVariable//:+([0-9])}"
+                shopt -u extglob
+              fi
+              __T_tempVariable="${__T_tempVariable//;/ }"
+              if [ $# -eq 4 ]
+              then
+                printf "${__T_tempVariable# }"
+              else
+                printf -v "$5" "${__T_tempVariable# }"
+              fi
+              ;;
+
             ## ### `reflection types fields undefine`
             ##
             ## Remove the given field from the type definition.

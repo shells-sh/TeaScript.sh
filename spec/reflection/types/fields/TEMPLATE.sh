@@ -4,7 +4,6 @@
   assert reflection types define $typeName c
 
   assert reflection types fields define $safeTypeName name String i P
-
   expect { reflection types fields getXXX $safeTypeName name } toEqual "???"
 }
 
@@ -14,8 +13,10 @@
   assert reflection types define $typeName c
 
   assert reflection types fields define $safeTypeName name String i P
-
   expect { reflection types fields getXXX $safeTypeName name } toEqual "???"
+
+  assert reflection types fields define $safeTypeName siblings Array[Dog] i P
+  expect { reflection types fields getXXX $safeTypeName siblings } toEqual "???"
 }
 
 @spec.reflection.types.fields.getXXX.multiple_generic_type_parameters() {
@@ -24,8 +25,10 @@
   assert reflection types define $typeName c
 
   assert reflection types fields define $safeTypeName name String i P
-
   expect { reflection types fields getXXX $safeTypeName name } toEqual "???"
+
+  assert reflection types fields define $safeTypeName siblings Map[String,Dog] i P
+  expect { reflection types fields getXXX $safeTypeName siblings } toEqual "???"
 }
 
 @spec.reflection.types.fields.getXXX.as_variable() {

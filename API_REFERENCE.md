@@ -688,6 +688,18 @@ Returns the short code for this field's visibility, e.g. `P` for `public` and `p
 > > | `$5` | Field name |
 > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
+### `reflection types fields listNames`
+
+Returns a space-demilimited list of field names for this type
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getVisibilityCode` |
+> > | `$4` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
 ### `reflection types fields undefine`
 
 Remove the given field from the type definition.

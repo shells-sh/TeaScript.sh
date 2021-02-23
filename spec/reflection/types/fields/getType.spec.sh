@@ -13,9 +13,9 @@
   local safeTypeName="$(reflection reflectionType $typeName)"
   assert reflection types define $typeName c
 
-  assert reflection types fields define $safeTypeName name String i P
+  assert reflection types fields define $safeTypeName name Array[Dog] i P
 
-  expect { reflection types fields getType $safeTypeName name } toEqual String
+  expect { reflection types fields getType $safeTypeName name } toEqual Array[Dog]
 }
 
 @spec.reflection.types.fields.getType.multiple_generic_type_parameters() {
@@ -23,9 +23,9 @@
   local safeTypeName="$(reflection reflectionType $typeName)"
   assert reflection types define $typeName c
 
-  assert reflection types fields define $safeTypeName name String i P
+  assert reflection types fields define $safeTypeName name Map[String,Dog] i P
 
-  expect { reflection types fields getType $safeTypeName name } toEqual String
+  expect { reflection types fields getType $safeTypeName name } toEqual Map[String,Dog]
 }
 
 @spec.reflection.types.fields.getType.as_variable() {
