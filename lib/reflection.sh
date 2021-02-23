@@ -156,9 +156,35 @@ T_COMMENTS=enabled
 ##
 ## > e.g. `p` for private -_vs_- `P` for public
 ##
-## Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
-##
 ## This contains a lookup table for all characters.
+##
+## To convert programmatically:
+##
+## ```sh
+## # Get code for a value
+##
+## reflection getCode class
+## # => "c"
+##
+## local var
+## reflection getCode class var
+## # => ""
+##
+## printf "$var"
+## # => "c"
+##
+## # Get value from a code
+##
+## reflection getCodeValue c
+## # => "class"
+##
+## local var
+## reflection getCodeValue c var
+## # => ""
+##
+## printf "$var"
+## # => "class"
+## ```
 ##
 ## > Note: most of the read-only reflection functions such as `reflection types getFieldVisibility` return friendly names such as `public` or `private`.
 ## >
@@ -666,13 +692,14 @@ reflection() {
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptor)
+          reflection types exists "$3" || return 1
           local __T_tempVariable
           eval "__T_tempVariable=\"\${T_TYPE_$3[0]#*;}\""
           if [ $# -eq 3 ]
           then
-            reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
+            reflection getCodeValue "${__T_tempVariable%%|*}"
           else
-            printf -v "$4" "$( reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}" )"
+            printf -v "$4" "$( reflection getCodeValue "${__T_tempVariable%%|*}" )"
           fi
           ;;
 
@@ -746,6 +773,19 @@ reflection() {
         ## ## `reflection types fields`
         ##
         ## `TODO` talk about fields!
+        ##
+        ## - [`reflection types fields define`](#reflection-types-fields-define)
+        ## - [`reflection types fields exists`](#reflection-types-fields-exists)
+        ## - [`reflection types fields getComment`](#reflection-types-fields-getComment)
+        ## - [`reflection types fields getDefaultValue`](#reflection-types-fields-getDefaultValue)
+        ## - [`reflection types fields getScope`](#reflection-types-fields-getScope)
+        ## - [`reflection types fields getScopeCode`](#reflection-types-fields-getScopeCode)
+        ## - [`reflection types fields getType`](#reflection-types-fields-getType)
+        ## - [`reflection types fields getVisibility`](#reflection-types-fields-getVisibility)
+        ## - [`reflection types fields getVisibilityCode`](#reflection-types-fields-getVisibilityCode)
+        ## - [`reflection types fields list`](#reflection-types-fields-list)
+        ## - [`reflection types fields listNames`](#reflection-types-fields-listNames)
+        ## - [`reflection types fields undefine`](#reflection-types-fields-undefine)
         ##
         fields)
           case "$3" in
@@ -868,9 +908,9 @@ reflection() {
               eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]%%!*}\"" # This gets the field definition + removes everything to the right of the scope code
               if [ $# -eq 5 ]
               then
-                reflection utils getCharacterCodeDisplayName "${__T_tempVariable}"
+                reflection getCodeValue "${__T_tempVariable}"
               else
-                printf -v "$6" "$(reflection utils getCharacterCodeDisplayName "${__T_tempVariable}")"
+                printf -v "$6" "$(reflection getCodeValue "${__T_tempVariable}")"
               fi
               ;;
 
@@ -950,9 +990,9 @@ reflection() {
               eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*!}\"" # This gets the field definition + removes everything to the left of the visibility code
               if [ $# -eq 5 ]
               then
-                reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
+                reflection getCodeValue "${__T_tempVariable%%|*}"
               else
-                printf -v "$6" "$(reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}")"
+                printf -v "$6" "$(reflection getCodeValue "${__T_tempVariable%%|*}")"
               fi
               ;;
 
@@ -983,6 +1023,29 @@ reflection() {
               fi
               ;;
 
+            ## ### `reflection types fields list`
+            ##
+            ## > 👥 User Function
+            ##
+            ## Print a list of each of this type's fields with details including the scope, visibility, default value, and comment.
+            ##
+            ## Prints one field per line
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `list` |
+            ## > > | `$4` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ##
+            list)
+              local __T_fieldName
+              for __T_fieldName in $(reflection types fields listNames $4)
+              do
+                echo "$(reflection types fields getVisibility $4 $__T_fieldName)\t$(reflection types fields getScope $4 $__T_fieldName)\t$(reflection types fields getType $4 $__T_fieldName)\t$__T_fieldName\t$(reflection types fields getDefaultValue $4 $__T_fieldName)\t$(reflection types fields getComment $4 $__T_fieldName)"
+              done
+              ;;
+
             ## ### `reflection types fields listNames`
             ##
             ## Returns a space-demilimited list of field names for this type
@@ -991,7 +1054,7 @@ reflection() {
             ## > > |-|-----------|
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
-            ## > > | `$3` | `getVisibilityCode` |
+            ## > > | `$3` | `listNames` |
             ## > > | `$4` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1679,7 +1742,7 @@ reflection() {
           # TODO rename this to start with __T_
           local valueTypeCode
           eval "valueTypeCode=\"\${T_VAR_$3[0]%;*}\""
-          reflection utils getCharacterCodeDisplayName "$valueTypeCode"
+          reflection getCodeValue "$valueTypeCode"
           ;;
 
         ## ### `reflection variables list`
@@ -1833,29 +1896,111 @@ reflection() {
         fi
         ;;
 
-    utils)
+    ## ## `reflection getCode`
+    ##
+    ## > 👥 User Function
+    ##
+    ## Returns the special code for values such as "class", "private", "public", "static", et al for use with `reflection`
+    ##
+    ## ```sh
+    ## reflection getCode public
+    ## # => P
+    ##
+    ## reflection getCode private
+    ## # => p
+    ##
+    ## # Or get the code as a variable
+    ## local code
+    ##
+    ## reflection getCode private code
+    ## # => prints nothing
+    ##
+    ## printf "$code"
+    ## #=> p
+    ## ```
+    ##
+    ## See [`getCodeValue`](#reflection-getCodeValue) to get the value from a code
+    ##
+    ## > > | | Parameter |
+    ## > > |-|-----------|
+    ## > > | `$1` | `getCode` |
+    ## > > | `$2` | Value such as "class" or "private" or "static" |
+    ## > > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+    ##
+    getCode)
+      local __T_code="$2"
       case "$2" in
-        getCharacterCodeDisplayName)
-          case "$3" in
-            c) printf class ;;
-            i) printf instance ;;
-            n) printf nameref ;;
-            p) printf private ;;
-            P) printf public ;;
-            r) printf byref ;;
-            s) printf struct ;;
-            S) printf static ;;
-            v) printf byval ;;
-            *)
-              printf "$3"
-              ;;
-          esac
-          ;;
-        *)
-          echo "Unknown 'reflection utils' command: $2"
-          return 1
-          ;;
+        class) __T_code=c ;;
+        instance) __T_code=i ;;
+        nameref) __T_code=n ;;
+        private) __T_code=p ;;
+        public) __T_code=P ;;
+        byref) __T_code=r ;;
+        struct) __T_code=s ;;
+        static) __T_code=S ;;
+        byval) __T_code=v ;;
       esac
+      # TODO: update all functions to use -n "$x" for this logic, it's much more sensible!
+      if [ -n "$3" ]
+      then
+        printf -v "$3" "$__T_code"
+      else
+        printf "$__T_code"
+      fi
+      ;;
+
+    ## ## `reflection getCodeValue`
+    ##
+    ## > 👥 User Function
+    ##
+    ## Returns the full value for a code such as `private` for `p` and `public` for `P`.
+    ##
+    ## These codes are used all throughout `reflection`
+    ##
+    ## See [`getCode`](#reflection-getCode) to get the code from a value
+    ##
+    ## ```sh
+    ## reflection getCode public
+    ## # => P
+    ##
+    ## reflection getCode private
+    ## # => p
+    ##
+    ## # Or get the code as a variable
+    ## local code
+    ##
+    ## reflection getCode private code
+    ## # => prints nothing
+    ##
+    ## printf "$code"
+    ## #=> p
+    ## ```
+    ##
+    ## > > | | Parameter |
+    ## > > |-|-----------|
+    ## > > | `$1` | `getCodeValue` |
+    ## > > | `$2` | Code such as "class" or "private" or "static" |
+    ## > > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+    ##
+    getCodeValue)
+      local __T_codeValue="$2"
+      case "$2" in
+        c) __T_codeValue=class ;;
+        i) __T_codeValue=instance ;;
+        n) __T_codeValue=nameref ;;
+        p) __T_codeValue=private ;;
+        P) __T_codeValue=public ;;
+        r) __T_codeValue=byref ;;
+        s) __T_codeValue=struct ;;
+        S) __T_codeValue=static ;;
+        v) __T_codeValue=byval ;;
+      esac
+      if [ -n "$3" ]
+      then
+        printf -v "$3" "$__T_codeValue"
+      else
+        printf "$__T_codeValue"
+      fi
       ;;
 
     *)

@@ -169,9 +169,35 @@ These functions are annotated with `👥 User Function` and should _never_ be ca
 
 > e.g. `p` for private -_vs_- `P` for public
 
-Some of this code uses user-unfriendly archaic looking characters to represent various bits of type metadata.
-
 This contains a lookup table for all characters.
+
+To convert programmatically:
+
+```sh
+# Get code for a value
+
+reflection getCode class
+# => "c"
+
+local var
+reflection getCode class var
+# => ""
+
+printf "$var"
+# => "c"
+
+# Get value from a code
+
+reflection getCodeValue c
+# => "class"
+
+local var
+reflection getCodeValue c var
+# => ""
+
+printf "$var"
+# => "class"
+```
 
 > Note: most of the read-only reflection functions such as `reflection types getFieldVisibility` return friendly names such as `public` or `private`.
 >
@@ -562,6 +588,19 @@ Note: like all other `reflection` functions (_excluding [types define](#reflecti
 
 `TODO` talk about fields!
 
+- [`reflection types fields define`](#reflection-types-fields-define)
+- [`reflection types fields exists`](#reflection-types-fields-exists)
+- [`reflection types fields getComment`](#reflection-types-fields-getComment)
+- [`reflection types fields getDefaultValue`](#reflection-types-fields-getDefaultValue)
+- [`reflection types fields getScope`](#reflection-types-fields-getScope)
+- [`reflection types fields getScopeCode`](#reflection-types-fields-getScopeCode)
+- [`reflection types fields getType`](#reflection-types-fields-getType)
+- [`reflection types fields getVisibility`](#reflection-types-fields-getVisibility)
+- [`reflection types fields getVisibilityCode`](#reflection-types-fields-getVisibilityCode)
+- [`reflection types fields list`](#reflection-types-fields-list)
+- [`reflection types fields listNames`](#reflection-types-fields-listNames)
+- [`reflection types fields undefine`](#reflection-types-fields-undefine)
+
 ### `reflection types fields define`
 
 Define a field on this type.
@@ -688,6 +727,21 @@ Returns the short code for this field's visibility, e.g. `P` for `public` and `p
 > > | `$5` | Field name |
 > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
+### `reflection types fields list`
+
+> 👥 User Function
+
+Print a list of each of this type's fields with details including the scope, visibility, default value, and comment.
+
+Prints one field per line
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `list` |
+> > | `$4` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+
 ### `reflection types fields listNames`
 
 Returns a space-demilimited list of field names for this type
@@ -696,7 +750,7 @@ Returns a space-demilimited list of field names for this type
 > > |-|-----------|
 > > | `$1` | `types` |
 > > | `$2` | `fields` |
-> > | `$3` | `getVisibilityCode` |
+> > | `$3` | `listNames` |
 > > | `$4` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
@@ -934,6 +988,70 @@ Note: it is always safe to use `reflectionType` without "quotation marks"
 > > |-|-----------|
 > > | `$1` | `reflectionType` |
 > > | `$2` | Full type name, including generics if any, e.g. `MyMap[K,V]`. All other reflection methods require a differently formatted type name for generic types. |
+> > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+## `reflection getCode`
+
+> 👥 User Function
+
+Returns the special code for values such as "class", "private", "public", "static", et al for use with `reflection`
+
+```sh
+reflection getCode public
+# => P
+
+reflection getCode private
+# => p
+
+# Or get the code as a variable
+local code
+
+reflection getCode private code
+# => prints nothing
+
+printf "$code"
+#=> p
+```
+
+See [`getCodeValue`](#reflection-getCodeValue) to get the value from a code
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `getCode` |
+> > | `$2` | Value such as "class" or "private" or "static" |
+> > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+## `reflection getCodeValue`
+
+> 👥 User Function
+
+Returns the full value for a code such as `private` for `p` and `public` for `P`.
+
+These codes are used all throughout `reflection`
+
+See [`getCode`](#reflection-getCode) to get the code from a value
+
+```sh
+reflection getCode public
+# => P
+
+reflection getCode private
+# => p
+
+# Or get the code as a variable
+local code
+
+reflection getCode private code
+# => prints nothing
+
+printf "$code"
+#=> p
+```
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `getCodeValue` |
+> > | `$2` | Code such as "class" or "private" or "static" |
 > > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 # `var`

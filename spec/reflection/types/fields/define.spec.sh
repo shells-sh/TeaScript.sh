@@ -3,17 +3,17 @@
 
   refute reflection types fields exists Dog name
   expect { reflection types fields listNames Dog } not toContain "name" "age" "another"
-  # expect { reflection types fields list Dog } not toContain "name" "age" "another"
+  expect { reflection types fields list Dog } not toContain "name" "age" "another"
 
   reflection types fields define Dog name String i P "Rover" "This represents the dog name"
   reflection types fields define Dog age Integer i P
-  reflection types fields define Dog another Foo s p
+  reflection types fields define Dog another Foo S p
 
   assert reflection types fields exists Dog name
   expect { reflection types fields listNames Dog } toEqual "name age another"
-  # expect { reflection types fields list Dog } toContain "name" "age" "another"
-  # expect { reflection types fields list Dog } toContain "String" "Integer" "Foo"
-  # expect { reflection types fields list Dog } toContain "instance" "static" "public" "private"
+  expect { reflection types fields list Dog } toContain "name" "age" "another"
+  expect { reflection types fields list Dog } toContain "String" "Integer" "Foo"
+  expect { reflection types fields list Dog } toContain "instance" "static" "public" "private"
 
   expect { reflection types fields getType Dog name } toEqual String
 
@@ -30,4 +30,5 @@
   reflection types fields undefine Dog name
 
   refute reflection types fields exists Dog name
+  expect { reflection types fields listNames Dog } not toContain "name"
 }

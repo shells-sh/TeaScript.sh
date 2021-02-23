@@ -1,12 +1,18 @@
 @spec.reflection.types.getDescriptor.no_generics() {
+  refute reflection types getDescriptor Dog
+
   reflection types define Dog c "" "" "This represents a dog"
 
+  assert reflection types getDescriptor Dog
   expect { reflection types getDescriptor Dog } toEqual class
 }
 
 @spec.reflection.types.getDescriptor.single_generic_type_parameter() {
+  refute reflection types getDescriptor $(reflection reflectionType MyCollection[T])
+
   reflection types define MyCollection[T] s Collection IEnumerable,IComparable
 
+  assert reflection types getDescriptor $(reflection reflectionType MyCollection[T])
   expect { reflection types getDescriptor $(reflection reflectionType MyCollection[T]) } toEqual struct
 }
 
