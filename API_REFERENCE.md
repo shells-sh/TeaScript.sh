@@ -33,6 +33,8 @@ or making changes to types.
 
 - [`reflection objects`](#reflection-objects)
 - [`reflection types`](#reflection-types)
+  - [`reflection types fields`](#reflection-types-fields)
+  - [`reflection types methods`](#reflection-types-methods)
 - [`reflection variables`](#reflection-variables)
 
 ```sh
