@@ -510,7 +510,7 @@ reflection() {
     ##
     ## > | `T_TYPE_` index | Description |
     ## > |-----------------|-------------|
-    ## > | `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T|`, followed by base class and interfaces, with comment if provided |
+    ## > | `0` | Descriptor name or code, e.g. `c` for `class`, `s` for `struct` et al (see [codes reference](#Character-Codes) above), followed b full type name, e.g. `Array` or `Array[T]`, followed by base class and interfaces, with comment if provided |
     ## > | `1` | Field lookup table, mapping field named to index value where field definition is stored |
     ## > | `2` | Method lookup table, mapping method name to index value where method definition is stored |
     ##
