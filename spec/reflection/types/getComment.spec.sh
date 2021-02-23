@@ -13,7 +13,7 @@
     expect { reflection types getInterfaces $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "IAnimal ICritter"
     expect { reflection types getDescriptorCode $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual c
     expect { reflection types getDescriptor $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual class
-    expect { reflection types getGenericTypeParams $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "A B C"
+    expect { reflection types getGenericParams $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "A B C"
     reflection types undefine Dog
   done
 }

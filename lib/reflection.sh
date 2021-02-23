@@ -703,20 +703,18 @@ reflection() {
           fi
           ;;
 
-        ## ### `reflection types getGenericTypeParams`
+        ## ### `reflection types getGenericParams`
         ##
-        ## > 👥 User Function
-        ## 
         ## Get the names of the generic type parameters for a class, e.g. for `MyMap[K,V]` the generic type parametners are `K` and `V`
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
-        ## > > | `$2` | `getGenericTypeParams` |
+        ## > > | `$2` | `getGenericParams` |
         ## > > | `$3` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
-        getGenericTypeParams)
+        getGenericParams)
           local __T_tempVariable
           eval "__T_tempVariable=\"\${T_TYPE_$3[0]}\""
           __T_tempVariable="${__T_tempVariable%%;*}" # Get rid of everything but the type name

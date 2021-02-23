@@ -548,16 +548,14 @@ Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct
 > > | `$3` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
-### `reflection types getGenericTypeParams`
-
-> 👥 User Function
+### `reflection types getGenericParams`
 
 Get the names of the generic type parameters for a class, e.g. for `MyMap[K,V]` the generic type parametners are `K` and `V`
 
 > > | | Parameter |
 > > |-|-----------|
 > > | `$1` | `types` |
-> > | `$2` | `getGenericTypeParams` |
+> > | `$2` | `getGenericParams` |
 > > | `$3` | Reflection-safe Type Name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
