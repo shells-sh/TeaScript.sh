@@ -774,6 +774,32 @@ reflection() {
               eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]"
               ;;
 
+            ## ### `reflection types fields getComment`
+            ##
+            ## Returns the field comment, if any.
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `getComment` |
+            ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Field name |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getComment)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
+              if [ $# -eq 5 ]
+              then
+                eval "printf \"\${T_TYPE_$4[$__T_tempVariable]#*&}\"" # This gets the field definition + removes everything to the left of the comment
+              else
+                eval "printf -v \"$6\" \"\${T_TYPE_$4[$__T_tempVariable]#*&}\"" # This gets the field definition + removes everything to the left of the comment
+              fi
+              ;;
+
             ## ### `reflection types fields getDefaultValue`
             ##
             ## Returns the default value for this field, if any.
@@ -782,7 +808,7 @@ reflection() {
             ## > > |-|-----------|
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
-            ## > > | `$3` | `getType` |
+            ## > > | `$3` | `getDefaultValue` |
             ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
@@ -792,12 +818,67 @@ reflection() {
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
-              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*>}\"" # This gets the field definition + removes everything to the left of the Type
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*>}\"" # This gets the field definition + removes everything to the left of the default value
               if [ $# -eq 5 ]
               then
                 printf "${__T_tempVariable%%&*}"
               else
                 printf -v "$6" "${__T_tempVariable%%&*}"
+              fi
+              ;;
+
+            ## ### `reflection types fields getScope`
+            ##
+            ## Returns this this field's scope, e.g. `static` or `instance`
+            ##
+            ## > 👥 User Function
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `getScope` |
+            ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Field name |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getScope)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]%%!*}\"" # This gets the field definition + removes everything to the right of the scope code
+              if [ $# -eq 5 ]
+              then
+                reflection utils getCharacterCodeDisplayName "${__T_tempVariable}"
+              else
+                printf -v "$6" "$(reflection utils getCharacterCodeDisplayName "${__T_tempVariable}")"
+              fi
+              ;;
+
+            ## ### `reflection types fields getScopeCode`
+            ##
+            ## Returns the short code for this field's scope, e.g. `S` for `static` and `i` for instance
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `getScopeCode` |
+            ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Field name |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getScopeCode)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
+              if [ $# -eq 5 ]
+              then
+                eval "printf \"\${T_TYPE_$4[$__T_tempVariable]%%!*}\"" # This gets the field definition + removes everything to the right of the scope code
+              else
+                eval "printf -v \"$6\" \"\${T_TYPE_$4[$__T_tempVariable]%%!*}\"" # This gets the field definition + removes everything to the right of the scope code
               fi
               ;;
 
@@ -819,12 +900,68 @@ reflection() {
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
-              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*<}\"" # This gets the field definition + removes everything to the left of the Type
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*<}\"" # This gets the field definition + removes everything to the left of the type name
               if [ $# -eq 5 ]
               then
                 printf "${__T_tempVariable%%>*}"
               else
                 printf -v "$6" "${__T_tempVariable%%>*}"
+              fi
+              ;;
+
+            ## ### `reflection types fields getVisibility`
+            ##
+            ## Get this fields's visibility, e.g. `public` or `private`
+            ##
+            ## > 👥 User Function
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `getVisibility` |
+            ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Field name |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getVisibility)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*!}\"" # This gets the field definition + removes everything to the left of the visibility code
+              if [ $# -eq 5 ]
+              then
+                reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}"
+              else
+                printf -v "$6" "$(reflection utils getCharacterCodeDisplayName "${__T_tempVariable%%|*}")"
+              fi
+              ;;
+
+            ## ### `reflection types fields getVisibilityCode`
+            ##
+            ## Returns the short code for this field's visibility, e.g. `P` for `public` and `p` for `private`
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `fields` |
+            ## > > | `$3` | `getVisibilityCode` |
+            ## > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Field name |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getVisibilityCode)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*!}\"" # This gets the field definition + removes everything to the left of the visibility code
+              if [ $# -eq 5 ]
+              then
+                printf "${__T_tempVariable%%|*}"
+              else
+                printf -v "$6" "${__T_tempVariable%%|*}"
               fi
               ;;
 
@@ -892,48 +1029,6 @@ reflection() {
       ;;
 
 
-      # # TODO - reflection types methods getReturnType Dog bark
-      # # TODO - reflection types fields add Dog ...
-      # # or
-      # # TODO - reflection methods getReturnType Dog bark
-      # # TODO - reflection fields add Dog ...
-
-      # # REMOVE ALL THESE LOCALS AND USE INTEGERS IN CODE - don't want any variables being created for reflection calls please :)
-      # # ^--- remove this too
-      # local typesCommand="$1"; shift
-      # case "$typesCommand" in
-      #   ## ### `reflection types addField`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   addField)
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local fieldScope="$1"; shift
-      #     local fieldVisibility="$1"; shift
-      #     local fieldName="$1"; shift
-      #     local fieldType="$1"; shift
-      #     local fieldDefaultValue="$1"; shift
-      #     local fieldComment="$1"; shift
-      #     local fieldDefinition="$fieldScope!$fieldVisibility|$fieldName<$fieldType>$fieldDefaultValue&$fieldComment"
-      #     local fieldList
-      #     eval "fieldList=\"\${$bashVariableName[5]}\""
-      #     fieldList="${fieldList};${fieldName}:\${#$bashVariableName[@]}"
-      #     eval "$bashVariableName[5]=\"$fieldList\""
-      #     eval "$bashVariableName+=(\"$fieldDefinition\")"
-      #     ;;
-
       #   ## ### `reflection types addMethod`
       #   ##
       #   ## | | Parameter |
@@ -990,146 +1085,6 @@ reflection() {
       #     unset "$bashVariableName"
       #     ;;
 
-      #   ## ### `reflection types getFieldComment`
-      #   ##
-      #   ## Get the comment of a field, if present.
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getFieldComment` |
-      #   ## | `$4` | Type name, e.g. `Dog` |
-      #   ## | `$5` | Field name, e.g. `name` |
-      #   ##
-      #   getFieldComment)
-      #     local localTempVariable
-      #     eval "localTempVariable=\"\${T_TYPE_$1[5]}\""
-      #     if [[ "$localTempVariable" = *";$2:"* ]]
-      #     then
-      #       localTempVariable="${localTempVariable#*;$2:}"
-      #       localTempVariable="${localTempVariable%%;*}"
-      #       eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
-      #       # Return the field comment from the field definition:
-      #       printf "${localTempVariable##*&}"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getFieldDefaultValue`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getFieldDefaultValue` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getFieldDefaultValue)
-      #     local localTempVariable
-      #     eval "localTempVariable=\"\${T_TYPE_$1[5]}\""
-      #     if [[ "$localTempVariable" = *";$2:"* ]]
-      #     then
-      #       localTempVariable="${localTempVariable#*;$2:}"
-      #       localTempVariable="${localTempVariable%%;*}"
-      #       eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
-      #       # Return the field default value from the field definition
-      #       localTempVariable="${localTempVariable##*>}"
-      #       printf "${localTempVariable%%&*}"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getFieldScope`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getFieldScope` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getFieldScope)
-      #     local localTempVariable
-      #     eval "localTempVariable=\"\${T_TYPE_$1[5]}\""
-      #     if [[ "$localTempVariable" = *";$2:"* ]]
-      #     then
-      #       localTempVariable="${localTempVariable#*;$2:}"
-      #       localTempVariable="${localTempVariable%%;*}"
-      #       eval "localTempVariable=\"\${T_TYPE_$1[$localTempVariable]}\""
-      #       # Return the field scope from the field definition:
-      #       printf "${localTempVariable%%!*}"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getFieldType`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getFieldType` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getFieldType)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local fieldName="$1"; shift
-      #     local fieldList
-      #     eval "fieldList=\"\${$bashVariableName[5]}\""
-      #     if [[ "$fieldList" = *";$fieldName:"* ]]
-      #     then
-      #       local fieldIndex="${fieldList#*;$fieldName:}"
-      #       local fieldIndex="${fieldIndex%%;*}"
-      #       local fieldDefinition
-      #       eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
-      #       # Get the field type from the field definition
-      #       local fieldType="${fieldDefinition#*<}"
-      #       fieldType="${fieldType%%>*}"
-      #       printf "$fieldType"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getFieldVisibility`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getFieldVisibility` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getFieldVisibility)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local fieldName="$1"; shift
-      #     local fieldList
-      #     eval "fieldList=\"\${$bashVariableName[5]}\""
-      #     if [[ "$fieldList" = *";$fieldName:"* ]]
-      #     then
-      #       local fieldIndex="${fieldList#*;$fieldName:}"
-      #       local fieldIndex="${fieldIndex%%;*}"
-      #       local fieldDefinition
-      #       eval "fieldDefinition=\"\${$bashVariableName[$fieldIndex]}\""
-      #       # Get the field visibility from the field definition
-      #       local fieldVisibility="${fieldDefinition%%|*}"
-      #       fieldVisibility="${fieldVisibility##*!}"
-      #       printf "$fieldVisibility"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
 
       #   ## ### `reflection types getMethodComment`
       #   ##
@@ -1809,11 +1764,14 @@ reflection() {
         getCharacterCodeDisplayName)
           case "$3" in
             c) printf class ;;
+            i) printf instance ;;
             n) printf nameref ;;
+            p) printf private ;;
+            P) printf public ;;
             r) printf byref ;;
             s) printf struct ;;
+            S) printf static ;;
             v) printf byval ;;
-            *) printf "$valueTypeCode" ;;
             *)
               printf "$3"
               ;;

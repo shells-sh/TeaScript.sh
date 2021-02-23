@@ -575,6 +575,19 @@ Fields can have optional default values.
 > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | Field name |
 
+### `reflection types fields getComment`
+
+Returns the field comment, if any.
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getComment` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
 ### `reflection types fields getDefaultValue`
 
 Returns the default value for this field, if any.
@@ -583,7 +596,35 @@ Returns the default value for this field, if any.
 > > |-|-----------|
 > > | `$1` | `types` |
 > > | `$2` | `fields` |
-> > | `$3` | `getType` |
+> > | `$3` | `getDefaultValue` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types fields getScope`
+
+Returns this this field's scope, e.g. `static` or `instance`
+
+> 👥 User Function
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getScope` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types fields getScopeCode`
+
+Returns the short code for this field's scope, e.g. `S` for `static` and `i` for instance
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getScopeCode` |
 > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | Field name |
 > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
@@ -597,6 +638,34 @@ Returns the full type name of this field.
 > > | `$1` | `types` |
 > > | `$2` | `fields` |
 > > | `$3` | `getType` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types fields getVisibility`
+
+Get this fields's visibility, e.g. `public` or `private`
+
+> 👥 User Function
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getVisibility` |
+> > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | Field name |
+> > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types fields getVisibilityCode`
+
+Returns the short code for this field's visibility, e.g. `P` for `public` and `p` for `private`
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `fields` |
+> > | `$3` | `getVisibilityCode` |
 > > | `$4` | Reflection-safe Type Name (use reflectionType to acquire) which converts generic type names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | Field name |
 > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
