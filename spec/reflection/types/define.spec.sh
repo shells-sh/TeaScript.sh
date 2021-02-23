@@ -5,7 +5,7 @@
 
   assert reflection types exists Dog
 
-  expect { reflection types getGenericTypes Dog } toBeEmpty
+  expect { reflection types getGenericTypeParams Dog } toBeEmpty
   expect { reflection types getDescriptorCode Dog } toEqual c
   expect { reflection types getDescriptor Dog } toEqual class
   expect { reflection types getBaseClass Dog } toBeEmpty
@@ -25,7 +25,7 @@
   refute reflection types exists DogCollection
   assert reflection types exists $(reflection reflectionType MyCollection[T])
 
-  expect { reflection types getGenericTypes $(reflection reflectionType MyCollection[T]) } toEqual T
+  expect { reflection types getGenericTypeParams $(reflection reflectionType MyCollection[T]) } toEqual T
   expect { reflection types getDescriptorCode $(reflection reflectionType MyCollection[T]) } toEqual s
   expect { reflection types getDescriptor $(reflection reflectionType MyCollection[T]) } toEqual struct
   expect { reflection types getBaseClass $(reflection reflectionType MyCollection[T]) } toEqual Collection
@@ -39,7 +39,7 @@
 @spec.reflection.types.define.multiple_generic_type_parameters() {
   reflection types define CollectionOfThings[A,B,C] s Collection IEnumerable,IComparable "Hello, world!"
 
-  expect { reflection types getGenericTypes $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "A B C"
+  expect { reflection types getGenericTypeParams $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "A B C"
   expect { reflection types getDescriptorCode $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual s
   expect { reflection types getDescriptor $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual struct
   expect { reflection types getBaseClass $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual Collection
