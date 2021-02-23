@@ -464,9 +464,9 @@ reflection() {
 
         ## ### `reflection objects show`
         ##
-        ## TODO - update to show pretty things :)
-        ##
         ## > 👥 User Function
+        ##
+        ## TODO - update to show pretty things :)
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -652,9 +652,9 @@ reflection() {
 
         ## ### `reflection types getDescriptor`
         ##
-        ## Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct`
-        ##
         ## > 👥 User Function
+        ##
+        ## Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct`
         ## 
         ## > Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
         ##
@@ -678,9 +678,9 @@ reflection() {
 
         ## ### `reflection types getGenericTypes`
         ##
-        ## Get the original names of the 
-        ##
         ## > 👥 User Function
+        ##
+        ## Get the original names of the 
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -847,9 +847,9 @@ reflection() {
 
             ## ### `reflection types fields getScope`
             ##
-            ## Returns this this field's scope, e.g. `static` or `instance`
-            ##
             ## > 👥 User Function
+            ##
+            ## Returns this this field's scope, e.g. `static` or `instance`
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
@@ -929,9 +929,9 @@ reflection() {
 
             ## ### `reflection types fields getVisibility`
             ##
-            ## Get this fields's visibility, e.g. `public` or `private`
-            ##
             ## > 👥 User Function
+            ##
+            ## Get this fields's visibility, e.g. `public` or `private`
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
@@ -1631,11 +1631,11 @@ reflection() {
 
         ## ### `reflection variables getValueType`
         ##
+        ## > 👥 User Function
+        ##
         ## Get the type of this variable, e.g. object reference, literal value, or named reference.
         ##
         ## Specifically returns one of these values: `nameref`, `byref`, or `byval`.
-        ##
-        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -1652,6 +1652,8 @@ reflection() {
 
         ## ### `reflection variables list`
         ##
+        ## > 👥 User Function
+        ##
         ## Returns a list of all defined variables including their type and value, one per line.
         ##
         ## - For `struct` types, the value will appear empty. Use [`variables show`](#reflection-variables-show) to view details.
@@ -1664,8 +1666,6 @@ reflection() {
         ## ```sh
         ## reflection variables list | awk '{print $1}'
         ## ```
-        ##
-        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -1709,11 +1709,11 @@ reflection() {
 
         ## ### `reflection variables show`
         ##
+        ## > 👥 User Function
+        ##
         ## Print out details about a variable.
         ##
         ## Print out details on separate lines including variable name, type, and value.
-        ##
-        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|

@@ -382,9 +382,9 @@ If the field does not exist, returns 1.
 
 ### `reflection objects show`
 
-TODO - update to show pretty things :)
-
 > 👥 User Function
+
+TODO - update to show pretty things :)
 
 > > | | Parameter |
 > > |-|-----------|
@@ -509,9 +509,9 @@ Get the short code of this type's "type" or "descriptor", e.g. `c` for `class` o
 
 ### `reflection types getDescriptor`
 
-Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct`
-
 > 👥 User Function
+
+Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct`
 
 > Note: this is used by `typeof`. Please do not use `typeof` in core TeaScript code, it is for users.
 
@@ -524,9 +524,9 @@ Get the full name of this type's "type" or "descriptor", e.g. `class` or `struct
 
 ### `reflection types getGenericTypes`
 
-Get the original names of the 
-
 > 👥 User Function
+
+Get the original names of the 
 
 > > | | Parameter |
 > > |-|-----------|
@@ -621,9 +621,9 @@ Returns the default value for this field, if any.
 
 ### `reflection types fields getScope`
 
-Returns this this field's scope, e.g. `static` or `instance`
-
 > 👥 User Function
+
+Returns this this field's scope, e.g. `static` or `instance`
 
 > > | | Parameter |
 > > |-|-----------|
@@ -662,9 +662,9 @@ Returns the full type name of this field.
 
 ### `reflection types fields getVisibility`
 
-Get this fields's visibility, e.g. `public` or `private`
-
 > 👥 User Function
+
+Get this fields's visibility, e.g. `public` or `private`
 
 > > | | Parameter |
 > > |-|-----------|
@@ -813,11 +813,11 @@ for reference or a field index is the variable stores as `struct`.
 
 ### `reflection variables getValueType`
 
+> 👥 User Function
+
 Get the type of this variable, e.g. object reference, literal value, or named reference.
 
 Specifically returns one of these values: `nameref`, `byref`, or `byval`.
-
-> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
@@ -826,6 +826,8 @@ Specifically returns one of these values: `nameref`, `byref`, or `byval`.
 > > | `$3` | Variable name |
 
 ### `reflection variables list`
+
+> 👥 User Function
 
 Returns a list of all defined variables including their type and value, one per line.
 
@@ -839,8 +841,6 @@ To print just the variable names:
 ```sh
 reflection variables list | awk '{print $1}'
 ```
-
-> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
@@ -872,11 +872,11 @@ reflection variables set myVariableAlias n "" myString
 
 ### `reflection variables show`
 
+> 👥 User Function
+
 Print out details about a variable.
 
 Print out details on separate lines including variable name, type, and value.
-
-> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
