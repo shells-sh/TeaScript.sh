@@ -484,6 +484,18 @@ reflection() {
     ##
     ## Manages the TeaScript types in the TeaScript type system.
     ##
+    ## - [`reflection types define`](#reflection-types-define)
+    ## - [`reflection types exists`](#reflection-types-exists)
+    ## - [`reflection types fields`](#reflection-types-fields)
+    ## - [`reflection types getBaseClass`](#reflection-types-getBaseClass)
+    ## - [`reflection types getComment`](#reflection-types-getComment)
+    ## - [`reflection types getDescriptorCode`](#reflection-types-getDescriptorCode)
+    ## - [`reflection types getDescriptor`](#reflection-types-getDescriptor)
+    ## - [`reflection types getGenericTypes`](#reflection-types-getGenericTypes)
+    ## - [`reflection types getInterfaces`](#reflection-types-getInterfaces)
+    ## - [`reflection types methods`](#reflection-types-methods)
+    ## - [`reflection types undefine`](#reflection-types-undefine)
+    ##
     ## Types are `define`'d and `undefine`'d.
     ##
     ## Types are used for describing the shape and behavior of objects and values.
