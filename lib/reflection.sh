@@ -426,7 +426,7 @@ reflection() {
 
         ## ### `reflection objects list`
         ##
-        ## > 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -466,7 +466,7 @@ reflection() {
         ##
         ## TODO - update to show pretty things :)
         ##
-        ## > 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -1635,7 +1635,7 @@ reflection() {
         ##
         ## Specifically returns one of these values: `nameref`, `byref`, or `byval`.
         ##
-        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -1665,7 +1665,7 @@ reflection() {
         ## reflection variables list | awk '{print $1}'
         ## ```
         ##
-        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
@@ -1713,7 +1713,7 @@ reflection() {
         ##
         ## Print out details on separate lines including variable name, type, and value.
         ##
-        ## > 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+        ## > 👥 User Function
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|

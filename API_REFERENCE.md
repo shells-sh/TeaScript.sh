@@ -363,7 +363,7 @@ If the field does not exist, returns 1.
 
 ### `reflection objects list`
 
-> 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
+> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
@@ -384,7 +384,7 @@ If the field does not exist, returns 1.
 
 TODO - update to show pretty things :)
 
-> 👥 Expensive. Reminder: do not use this in the hot path. This is for users.
+> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
@@ -817,7 +817,7 @@ Get the type of this variable, e.g. object reference, literal value, or named re
 
 Specifically returns one of these values: `nameref`, `byref`, or `byval`.
 
-> 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
@@ -840,7 +840,7 @@ To print just the variable names:
 reflection variables list | awk '{print $1}'
 ```
 
-> 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
@@ -876,7 +876,7 @@ Print out details about a variable.
 
 Print out details on separate lines including variable name, type, and value.
 
-> 🚨 Expensive. Reminder: do not use this in the hot path. This is for users.
+> 👥 User Function
 
 > > | | Parameter |
 > > |-|-----------|
