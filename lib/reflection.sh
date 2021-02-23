@@ -754,6 +754,26 @@ reflection() {
           fi
           ;;
 
+        ## ### `reflection types getTypeName`
+        ##
+        ## Given the reflection-safe type name, return the original full type name including generic type parameters.
+        ##
+        ## > > | | Parameter |
+        ## > > |-|-----------|
+        ## > > | `$1` | `types` |
+        ## > > | `$2` | `getTypeName` |
+        ## > > | `$3` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+        ##
+        getTypeName)
+          if [ $# -eq 3 ]
+          then
+            eval "printf \"\${T_TYPE_$3[0]%%;*}\""
+          else
+            eval "printf -v \"$\4\" \"\${T_TYPE_$3[0]%%;*}\""
+          fi
+          ;;
+
         ## ### `reflection types undefine`
         ##
         ## Undefine type with provided name.
@@ -826,6 +846,8 @@ reflection() {
               ;;
 
             ## ### `reflection types fields exists`
+            ##
+            ## Returns 0 if field with provided name exists on this type else returns 1.
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
@@ -1158,8 +1180,9 @@ reflection() {
               fi
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\"" # Get the method lookup list
-              local __T_methodDefinition="$7|$8<$6>"
+              local __T_methodDefinition="$5#$7|$8<$6>"
               local __T_typeName="$4"
+              local __T_comment="$9"
               shift; shift; shift; shift; shift; shift; shift; shift; shift;
               while [ $# -gt 0 ]
               do
@@ -1169,7 +1192,7 @@ reflection() {
               done
               if [ "$T_COMMENTS" = enabled ]
               then
-                __T_methodDefinition="$__T_methodDefinition!$9"
+                __T_methodDefinition="$__T_methodDefinition!$__T_comment"
               else
                 __T_methodDefinition="$__T_methodDefinition!"
               fi
@@ -1179,7 +1202,7 @@ reflection() {
 
             ## ### `reflection types methods exists`
             ##
-            ## `TODO` describe
+            ## Returns 0 if method with provided name exists on this type else returns 1.
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
@@ -1191,6 +1214,199 @@ reflection() {
             ##
             exists)
               eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]"
+              ;;
+
+            ## ### `reflection types methods getComment`
+            ##
+            ## Returns the method comment, if any.
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getMethodName` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getComment)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              if [ $# -eq 5 ]
+              then
+                eval "printf \"\${T_TYPE_$4[$__T_tempVariable]#*!}\"" # This gets the method definition + removes everything to the left of the method comment
+              else
+                eval "printf -v \"$6\" \"\${T_TYPE_$4[$__T_tempVariable]#*!}\"" # This gets the method definition + removes everything to the left of the method comment
+              fi
+              ;;
+
+            ## ### `reflection types methods getMethodName`
+            ##
+            ## Given the reflection-safe method name, return the original full method name including generic type parameters.
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getMethodName` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getMethodName)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              if [ $# -eq 5 ]
+              then
+                eval "printf \"\${T_TYPE_$4[$__T_tempVariable]%%#*}\"" # This gets the method definition + removes everything to the right of the original method name
+              else
+                eval "printf -v \"$6\" \"\${T_TYPE_$4[$__T_tempVariable]%%#*}\"" # This gets the method definition + removes everything to the right of the original method name
+              fi
+              ;;
+
+            ## ### `reflection types methods getReturnType`
+            ##
+            ## Returns the return type for this method.
+            ##
+            ## Must return a value. May return the `void` type.
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getReturnType` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getReturnType)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*<}\"" # This gets the method definition + removes everything to left of the return type
+              if [ $# -eq 5 ]
+              then
+                printf "${__T_tempVariable%%>*}" # Get rid of everything to the right of the return type
+              else
+                printf -v "$6" "${__T_tempVariable%%>*}" # Get rid of everything to the right of the return type
+              fi
+              ;;
+
+            ## ### `reflection types methods getScope`
+            ##
+            ## > 👥 User Function
+            ##
+            ## Returns this this method's scope, e.g. `static` or `instance`
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getScope` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getScope)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*#}\"" # This gets the method definition + removes everything to left of the scope code
+              if [ $# -eq 5 ]
+              then
+                printf "$( reflection getCodeValue "${__T_tempVariable%%|*}" )"
+              else
+                printf -v "$6" "$( reflection getCodeValue "${__T_tempVariable%%|*}" )"
+              fi
+              ;;
+
+            ## ### `reflection types methods getScopeCode`
+            ##
+            ## Returns the short code for this method's scope, e.g. `S` for `static` and `i` for instance
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getScopeCode` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getScopeCode)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*#}\"" # This gets the method definition + removes everything to left of the scope code
+              if [ $# -eq 5 ]
+              then
+                printf "${__T_tempVariable%%|*}" # Get rid of everything to the right of the scope code
+              else
+                printf -v "$6" "${__T_tempVariable%%|*}" # Get rid of everything to the right of the scope code
+              fi
+              ;;
+
+            ## ### `reflection types methods getVisibility`
+            ##
+            ## > 👥 User Function
+            ##
+            ## Get this method's visibility, e.g. `public` or `private`
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getVisibility` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getVisibility)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*|}\"" # This gets the method definition + removes everything to left of the visibility code
+              if [ $# -eq 5 ]
+              then
+                printf "$( reflection getCodeValue "${__T_tempVariable%%<*}" )"
+              else
+                printf -v "$6" "$( reflection getCodeValue "${__T_tempVariable%%<*}" )"
+              fi
+              ;;
+
+            ## ### `reflection types methods getVisibilityCode`
+            ##
+            ## Returns the short code for this method's visibility, e.g. `P` for `public` and `p` for `private`
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getVisibilityCode` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getVisibilityCode)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*|}\"" # This gets the method definition + removes everything to left of the visibility code
+              if [ $# -eq 5 ]
+              then
+                printf "${__T_tempVariable%%<*}" # Get rid of everything to the right of the visibility code
+              else
+                printf -v "$6" "${__T_tempVariable%%<*}" # Get rid of everything to the right of the visibility code
+              fi
               ;;
 
             ## ### `reflection types methods undefine`

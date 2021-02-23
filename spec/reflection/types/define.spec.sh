@@ -11,6 +11,7 @@
   expect { reflection types getBaseClass Dog } toBeEmpty
   expect { reflection types getInterfaces Dog } toBeEmpty
   expect { reflection types getComment Dog } toEqual "This represents a dog"
+  expect { reflection types getTypeName $(reflection reflectionType Dog) } toEqual Dog
 
   local BASHTypeVariables="$( ( set -o posix ; set ) | grep "^T_TYPE_" )"
   expect "$BASHTypeVariables" toContain 'T_TYPE_Dog=([0]="Dog;c|<>This represents a dog" [1]="" [2]="")'
@@ -31,6 +32,7 @@
   expect { reflection types getBaseClass $(reflection reflectionType MyCollection[T]) } toEqual Collection
   expect { reflection types getInterfaces $(reflection reflectionType MyCollection[T]) } toEqual "IEnumerable IComparable"
   expect { reflection types getComment $(reflection reflectionType MyCollection[T]) } toBeEmpty
+  expect { reflection types getTypeName $(reflection reflectionType MyCollection[T]) } toEqual MyCollection[T]
 
   local BASHTypeVariables="$( ( set -o posix ; set ) | grep "^T_TYPE_" )"
   expect "$BASHTypeVariables" toContain 'T_TYPE_MyCollection_GENERIC_0=([0]="MyCollection[T];s|Collection<IEnumerable,IComparable>" [1]="" [2]="")'

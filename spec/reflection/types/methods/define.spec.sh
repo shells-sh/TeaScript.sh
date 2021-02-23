@@ -4,18 +4,19 @@
   refute reflection types methods exists Dog bark
   # expect { reflection types methods listNames Dog } not toContain "bark"
 
-  assert reflection types methods define Dog bark String i P "The dog says 'woof'"
+  assert reflection types methods define Dog bark String i P "The dog says 'woof!'"
 
   assert reflection types methods exists Dog bark
+  expect { reflection types methods getMethodName Dog bark } toEqual "bark"
   # expect { reflection types methods listNames Dog } toContain "bark"
   # expect { reflection types methods listNames Dog } toContain "instance" "public" "String" "The dog says 'woof!'"
-  # expect { reflection types methods getScope Dog bark } toEqual ""
-  # expect { reflection types methods getScopeCode Dog bark } toEqual ""
-  # expect { reflection types methods getVisibility Dog bark } toEqual ""
-  # expect { reflection types methods getVisibilityCode Dog bark } toEqual ""
-  # expect { reflection types methods getReturnType Dog bark } toEqual ""
-  # expect { reflection types methods getGenericParams Dog bark } toEqual ""
-  # expect { reflection types methods getComment Dog bark } toEqual "The dog says 'woof!'"
+  expect { reflection types methods getScope Dog bark } toEqual instance
+  expect { reflection types methods getScopeCode Dog bark } toEqual i
+  expect { reflection types methods getVisibility Dog bark } toEqual public
+  expect { reflection types methods getVisibilityCode Dog bark } toEqual P
+  expect { reflection types methods getReturnType Dog bark } toEqual String
+  # expect { reflection types methods getGenericParams Dog bark } toBeEmpty
+  expect { reflection types methods getComment Dog bark } toEqual "The dog says 'woof!'"
   # expect { reflection types methods getParamNames Dog bark } toEqual ""
   # expect { reflection types methods getParamCount Dog bark } toEqual ""
 
