@@ -843,6 +843,42 @@ Remove the given field from the type definition.
 - [`reflection types methods params *`](#reflection-types-methods-params)
 - [`reflection types methods undefine`](#reflection-types-methods-undefine)
 
+> ℹ️ Implementation Detail
+
+Method definitions are encoded into a single BASH index with the method comment, parameter comments, and parameter default values all stored in separate indices.
+
+Unique characters (which are invalid in method and parameter names) are used as separators to improve lookup performance.
+
+Encoding:
+
+| | Description |
+|-|-------------|
+| | Method name, including any generics, e.g. `add[T]` |
+| `^` | |
+| | Scope code, e.g. `S` for `static` or `i` for instance |
+| <code>&#124;</code> | |
+| | Visibility code, e.g. `P` for `public` or `p` for `private` |
+| `<` | |
+| | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire) |
+| `>` | |
+| | Function type code, e.g. `b` for `BASH` function or `f` for TeaScript function (`fn`) |
+| `@` | |
+| | Function name to call when invoking this method |
+| `#` | |
+| | Index to access this method's comment, if present |
+| `&` | _This begins a parameter definition, every parameter definition starts with `&` - this section can be repeated_ |
+| | Method parameter name |
+| `:` | |
+| | Reflection-safe name for paramter type (use [`safeName`](#reflection-safeName) to acquire) |
+| `;` | |
+| | Parameter modifier, e.g. `o` for an `out` parameter or `r` for a `ref` parameter or `v` for `byval` |
+| `+` | |
+| |  Index to access this parameter's default value, if any |
+| `~` | |
+| | Index to access this paramter's comment, if any |
+| `&` | |
+| | ... _any number of additional parameters may be defined._ |
+
 ### `reflection types methods define`
 
 `TODO` add code example

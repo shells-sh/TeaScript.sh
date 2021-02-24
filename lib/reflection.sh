@@ -1209,6 +1209,42 @@ reflection() {
         ## - [`reflection types methods params *`](#reflection-types-methods-params)
         ## - [`reflection types methods undefine`](#reflection-types-methods-undefine)
         ##
+        ## > ℹ️ Implementation Detail
+        ##
+        ## Method definitions are encoded into a single BASH index with the method comment, parameter comments, and parameter default values all stored in separate indices.
+        ##
+        ## Unique characters (which are invalid in method and parameter names) are used as separators to improve lookup performance.
+        ##
+        ## Encoding:
+        ##
+        ## | | Description |
+        ## |-|-------------|
+        ## | | Method name, including any generics, e.g. `add[T]` |
+        ## | `^` | |
+        ## | | Scope code, e.g. `S` for `static` or `i` for instance |
+        ## | <code>&#124;</code> | |
+        ## | | Visibility code, e.g. `P` for `public` or `p` for `private` |
+        ## | `<` | |
+        ## | | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire) |
+        ## | `>` | |
+        ## | | Function type code, e.g. `b` for `BASH` function or `f` for TeaScript function (`fn`) |
+        ## | `@` | |
+        ## | | Function name to call when invoking this method |
+        ## | `#` | |
+        ## | | Index to access this method's comment, if present |
+        ## | `&` | _This begins a parameter definition, every parameter definition starts with `&` - this section can be repeated_ |
+        ## | | Method parameter name |
+        ## | `:` | |
+        ## | | Reflection-safe name for paramter type (use [`safeName`](#reflection-safeName) to acquire) |
+        ## | `;` | |
+        ## | | Parameter modifier, e.g. `o` for an `out` parameter or `r` for a `ref` parameter or `v` for `byval` |
+        ## | `+` | |
+        ## | |  Index to access this parameter's default value, if any |
+        ## | `~` | |
+        ## | | Index to access this paramter's comment, if any |
+        ## | `&` | |
+        ## | | ... _any number of additional parameters may be defined._ |
+        ##
         methods)
           case "$3" in
 
@@ -1241,6 +1277,7 @@ reflection() {
               fi
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\"" # Get the method lookup list
+              # TODO REMOVE THE '@' - or actually use it to separate the function type and function name
               local __T_methodDefinition="$5^$7|$8<$6>@$9"
               local __T_typeName="$4"
               local __T_comment="${10}"
@@ -2133,13 +2170,15 @@ reflection() {
     getCode)
       local __T_code="$2"
       case "$2" in
+        BASH) __T_code=b ;;
         class) __T_code=c ;;
+        fn) __T_code=f ;;
         instance) __T_code=i ;;
         nameref) __T_code=n ;;
         out) __T_code=o ;;
         private) __T_code=p ;;
         public) __T_code=P ;;
-        byref) __T_code=r ;;
+        ref) __T_code=r ;;
         struct) __T_code=s ;;
         static) __T_code=S ;;
         byval) __T_code=v ;;
@@ -2187,13 +2226,15 @@ reflection() {
     getCodeValue)
       local __T_codeValue="$2"
       case "$2" in
+        b) __T_codeValue=BASH ;;
         c) __T_codeValue=class ;;
         i) __T_codeValue=instance ;;
+        f) __T_codeValue=fn ;;
         o) __T_codeValue=out ;;
         i) __T_codeValue=nameref ;;
         p) __T_codeValue=private ;;
         P) __T_codeValue=public ;;
-        r) __T_codeValue=byref ;;
+        r) __T_codeValue=ref ;;
         s) __T_codeValue=struct ;;
         S) __T_codeValue=static ;;
         v) __T_codeValue=byval ;;
