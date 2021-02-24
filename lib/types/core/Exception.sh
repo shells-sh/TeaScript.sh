@@ -17,7 +17,7 @@ field sourceLine int << _
   Line of code in the `sourceFile` where the `Exception` was thrown.
 _
 
-field backtrace Backtrace << _
+field backtrace CallStack << _
   Copy of the TeaScript backtrace at the time the Exception was thrown.
 _
 

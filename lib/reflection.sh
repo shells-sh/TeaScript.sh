@@ -1,3 +1,5 @@
+# Change T_DO into a stack. class do, class do for an inner class. p3.
+
 # TODO split into multiple files and compile back into this file with the tree of case statements
 
 # TODO. Note: rather than checking T_ENV in the code, we'll probably LOAD/source a *different* implementation of `reflection` when T_ENV=production (e.g. without comments and maybe no type checking assertions)
@@ -5,8 +7,6 @@ T_ENV=development
 
 T_GC_OBJECT_THRESHOLD=999
 T_GC_OBJECT_THRESHOLD_COUNT=0
-
-# TODO - lots of optimizations, I forgot you can do: ${something#"${something#"${...}"}"}
 
 # TODO move this documentation to a sensible place
 ## ## `T_COMMENTS`
@@ -90,7 +90,9 @@ T_COMMENTS=disabled
 ## reflection types listMethodNames $reflectionSafeTypeName
 ## ```
 ##
-## > Implementation detail: this is only required for _generic type names_, e.g. `MyMap[K,V]`
+## > ℹ️ Implementation Detail
+## > 
+## > This is only required for _generic type names_, e.g. `MyMap[K,V]`
 ## >
 ## > You can safely call `reflection` with direct type names when not providing generic names.
 ## >
@@ -1199,7 +1201,8 @@ reflection() {
             ## > > | `$6` | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$7` | Scope code, e.g. `s` for `static` or `i` for `instance` |
             ## > > | `$8` | Visibility code, e.g. `p` for `private` or `P` for `public` |
-            ## > > | `$9` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
+            ## > > | `$9` | Name of BASH function to invoke when invoking this method |
+            ## > > | `$10` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
             ## > > | `$@` | Method parameter arguments, 4 arguments are required to define each parameter: (1) param type (2) param name (3) param default value or empty (4) param modifier, e.g. `out`, or empty. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out` |
             define)
               # Calculate a safe the method name (which may include generics)
@@ -1213,10 +1216,10 @@ reflection() {
               fi
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\"" # Get the method lookup list
-              local __T_methodDefinition="$5#$7|$8<$6>"
+              local __T_methodDefinition="$5^$7|$8<$6>@$9"
               local __T_typeName="$4"
-              local __T_comment="$9"
-              shift; shift; shift; shift; shift; shift; shift; shift; shift;
+              local __T_comment="${10}"
+              shift; shift; shift; shift; shift; shift; shift; shift; shift; shift;
               while [ $# -gt 0 ]
               do
                 local __T_paramDefinition="$1:$2;$3+$4"
@@ -1275,6 +1278,33 @@ reflection() {
               fi
               ;;
 
+            ## ### `reflection types methods getFunctionName`
+            ##
+            ## Get the name of the BASH function to invoke when invoking this method
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getFunctionName` |
+            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getFunctionName)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*@}\"" # This gets the method definition + removes everything to the left of the function name
+              if [ $# -eq 5 ]
+              then
+                printf "${__T_tempVariable%%!*}" # Get rid of everything to the right of the function name
+              else
+                printf -v "$6" "${__T_tempVariable%%!*}" # Get rid of everything to the right of the function name
+              fi
+              ;;
+
             ## ### `reflection types methods getMethodName`
             ##
             ## Given the reflection-safe method name, return the original full method name including generic type parameters.
@@ -1295,9 +1325,9 @@ reflection() {
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
               if [ $# -eq 5 ]
               then
-                eval "printf \"\${T_TYPE_$4[$__T_tempVariable]%%#*}\"" # This gets the method definition + removes everything to the right of the original method name
+                eval "printf \"\${T_TYPE_$4[$__T_tempVariable]%%^*}\"" # This gets the method definition + removes everything to the right of the original method name
               else
-                eval "printf -v \"$6\" \"\${T_TYPE_$4[$__T_tempVariable]%%#*}\"" # This gets the method definition + removes everything to the right of the original method name
+                eval "printf -v \"$6\" \"\${T_TYPE_$4[$__T_tempVariable]%%^*}\"" # This gets the method definition + removes everything to the right of the original method name
               fi
               ;;
 
@@ -1350,7 +1380,7 @@ reflection() {
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
-              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*#}\"" # This gets the method definition + removes everything to left of the scope code
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*^}\"" # This gets the method definition + removes everything to left of the scope code
               if [ $# -eq 5 ]
               then
                 printf "$( reflection getCodeValue "${__T_tempVariable%%|*}" )"
@@ -1377,7 +1407,7 @@ reflection() {
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
-              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*#}\"" # This gets the method definition + removes everything to left of the scope code
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*^}\"" # This gets the method definition + removes everything to left of the scope code
               if [ $# -eq 5 ]
               then
                 printf "${__T_tempVariable%%|*}" # Get rid of everything to the right of the scope code
@@ -1459,15 +1489,19 @@ reflection() {
             ##
             list)
               local __T_methodName
-              for __T_methodName in $(reflection types methods listNames $4)
+              for __T_methodName in $(reflection types methods listSafeNames $4)
               do
-                echo "$(reflection types methods getVisibility $4 $__T_methodName)\t$(reflection types methods getScope $4 $__T_methodName)\t$(reflection types methods getReturnType $4 $__T_methodName)\t$__T_methodName\t$(reflection types methods getName $4 $__T_methodName)\t$(reflection types methods getComment $4 $__T_methodName)"
+                echo "$(reflection types methods getVisibility $4 $__T_methodName)\t$(reflection types methods getScope $4 $__T_methodName)\t$(reflection types methods getReturnType $4 $__T_methodName)\t$__T_methodName\t$(reflection types methods getMethodName $4 $__T_methodName)\t$(reflection types methods getComment $4 $__T_methodName)"
               done
               ;;
 
             ## ### `reflection types methods listNames`
             ##
-            ## Returns a space-demilimited list of method names for this type
+            ## > 👥 User Function
+            ##
+            ## Returns a space-demilimited list of method names for this type.
+            ##
+            ## > `O(N)` looks up every method's definition to get the original method name (to account for generics)
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
@@ -1478,6 +1512,41 @@ reflection() {
             ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             listNames)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              local __T_methodNames=""
+              local __T_currentMethodIndex
+              while [[ "$__T_tempVariable" = *";"* ]]
+              do
+                __T_currentMethodIndex="${__T_tempVariable##*:}"
+                eval "__T_methodNames=\"\${T_TYPE_$4[\$__T_currentMethodIndex]%%^*} \${__T_methodNames}\""
+                __T_tempVariable="${__T_tempVariable%;*}"
+              done
+              if [ $# -eq 4 ]
+              then
+                printf "${__T_methodNames% }"
+              else
+                printf -v "$5" "${__T_methodNames% }"
+              fi
+
+              # ;bark_GENERIC_0:3;anotherMethod:4
+              ;;
+
+            ## ### `reflection types methods listSafeNames`
+            ##
+            ## Returns a space-demilimited list of the reflection-safe method names for this type.
+            ##
+            ## To get the original method names, i.e. with original generic parameter names, use `listNames`
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `listSafeNames` |
+            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            listSafeNames)
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               if shopt -q extglob
