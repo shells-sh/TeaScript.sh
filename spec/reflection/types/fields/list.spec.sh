@@ -2,7 +2,7 @@ T_COMMENTS=enabled
 
 @spec.reflection.types.fields.list.no_generics() {
   local typeName=Dog
-  local safeTypeName="$(reflection reflectionType $typeName)"
+  local safeTypeName="$(reflection safeName $typeName)"
   assert reflection types define $typeName c
 
   assert reflection types fields define $safeTypeName name String i P
@@ -11,7 +11,7 @@ T_COMMENTS=enabled
 
 @spec.reflection.types.fields.list.single_generic_type_parameter() {
   local typeName=Collection[T]
-  local safeTypeName="$(reflection reflectionType $typeName)"
+  local safeTypeName="$(reflection safeName $typeName)"
   assert reflection types define $typeName c
 
   assert reflection types fields define $safeTypeName name String i P "Rover" "Represents a dog, default name is Rover"
@@ -23,7 +23,7 @@ T_COMMENTS=enabled
 
 @spec.reflection.types.fields.list.multiple_generic_type_parameters() {
   local typeName=VariousThings[A,B,C]
-  local safeTypeName="$(reflection reflectionType $typeName)"
+  local safeTypeName="$(reflection safeName $typeName)"
   assert reflection types define $typeName c
 
   assert reflection types fields define $safeTypeName name String i P "Rover" "Represents a dog, default name is Rover"

@@ -1,20 +1,20 @@
 @spec.class.starts_a_new_type_definition_and_opens_class_for_modifications_if_do() {
   expect "$T_DO" toBeEmpty
-  refute reflection types exists $(reflection reflectionType AnimalCollection[T])
+  refute reflection types exists $(reflection safeName AnimalCollection[T])
 
   class AnimalCollection[T] do
 
-  assert reflection types exists $(reflection reflectionType AnimalCollection[T])
+  assert reflection types exists $(reflection safeName AnimalCollection[T])
   expect "$T_DO" toEqual AnimalCollection[T]
 }
 
 @spec.class.does_not_open_class_for_any_modification_without_do() {
   expect "$T_DO" toBeEmpty
-  refute reflection types exists $(reflection reflectionType AnimalCollection[T])
+  refute reflection types exists $(reflection safeName AnimalCollection[T])
 
   class AnimalCollection[T]
 
-  assert reflection types exists $(reflection reflectionType AnimalCollection[T])
+  assert reflection types exists $(reflection safeName AnimalCollection[T])
   expect "$T_DO" toBeEmpty
 }
 

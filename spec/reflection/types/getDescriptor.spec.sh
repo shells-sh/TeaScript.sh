@@ -8,18 +8,18 @@
 }
 
 @spec.reflection.types.getDescriptor.single_generic_type_parameter() {
-  refute reflection types getDescriptor $(reflection reflectionType MyCollection[T])
+  refute reflection types getDescriptor $(reflection safeName MyCollection[T])
 
   reflection types define MyCollection[T] s Collection IEnumerable,IComparable
 
-  assert reflection types getDescriptor $(reflection reflectionType MyCollection[T])
-  expect { reflection types getDescriptor $(reflection reflectionType MyCollection[T]) } toEqual struct
+  assert reflection types getDescriptor $(reflection safeName MyCollection[T])
+  expect { reflection types getDescriptor $(reflection safeName MyCollection[T]) } toEqual struct
 }
 
 @spec.reflection.types.getDescriptor.multiple_generic_type_parameters() {
   reflection types define CollectionOfThings[A,B,C] s Collection IEnumerable,IComparable "Hello, world!"
 
-  expect { reflection types getDescriptor $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual struct
+  expect { reflection types getDescriptor $(reflection safeName CollectionOfThings[A,B,C]) } toEqual struct
 }
 
 @spec.reflection.types.getDescriptor.as_variable() {
@@ -28,7 +28,7 @@
   local var
   expect "$var" toBeEmpty
 
-  expect { reflection types getDescriptor $(reflection reflectionType CollectionOfThings[A,B,C]) var } toBeEmpty
+  expect { reflection types getDescriptor $(reflection safeName CollectionOfThings[A,B,C]) var } toBeEmpty
 
   expect "$var" toEqual struct
 }

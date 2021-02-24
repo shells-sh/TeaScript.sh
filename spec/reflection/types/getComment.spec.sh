@@ -10,12 +10,12 @@ T_COMMENTS=enabled
   for commentString in "${crazyCommentStrings[@]}"
   do
     reflection types define CollectionOfThings[A,B,C] c Object IAnimal,ICritter "$commentString"
-    expect { reflection types getComment $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "$commentString"
-    expect { reflection types getBaseClass $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual Object
-    expect { reflection types getInterfaces $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "IAnimal ICritter"
-    expect { reflection types getDescriptorCode $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual c
-    expect { reflection types getDescriptor $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual class
-    expect { reflection types getGenericParams $(reflection reflectionType CollectionOfThings[A,B,C]) } toEqual "A B C"
+    expect { reflection types getComment $(reflection safeName CollectionOfThings[A,B,C]) } toEqual "$commentString"
+    expect { reflection types getBaseClass $(reflection safeName CollectionOfThings[A,B,C]) } toEqual Object
+    expect { reflection types getInterfaces $(reflection safeName CollectionOfThings[A,B,C]) } toEqual "IAnimal ICritter"
+    expect { reflection types getDescriptorCode $(reflection safeName CollectionOfThings[A,B,C]) } toEqual c
+    expect { reflection types getDescriptor $(reflection safeName CollectionOfThings[A,B,C]) } toEqual class
+    expect { reflection types getGenericParams $(reflection safeName CollectionOfThings[A,B,C]) } toEqual "A B C"
     reflection types undefine Dog
   done
 }

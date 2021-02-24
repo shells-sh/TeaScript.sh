@@ -70,5 +70,5 @@ field() {
     local __T_comment=""
   fi
 
-  reflection types fields define "$( reflection reflectionType "$__T_typeName" )" "$__T_fieldName" "$__T_fieldType" "$__T_scope" "$__T_visibility" "$__T_defaultValue" "$__T_comment"
+  reflection types fields define "$( reflection safeName "$__T_typeName" )" "$__T_fieldName" "$__T_fieldType" "$__T_scope" "$__T_visibility" "$__T_defaultValue" "$__T_comment"
 }
