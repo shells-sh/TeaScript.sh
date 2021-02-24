@@ -32,7 +32,6 @@ field() {
     shift; shift;
   fi
 
-  local __T_defaultValue=""
   if [ "$1" = "=" ]
   then
     shift
@@ -40,8 +39,23 @@ field() {
     shift
   fi
 
-  if [ $# -gt 0 ]
+  if [ "$1" = ":" ]
   then
+    shift
+    __T_comment="$*"
+    __T_comment="${__T_comment#"${__T_comment%%[![:space:]]*}"}" # trim spaces
+    __T_comment="${__T_comment%"${__T_comment##*[![:space:]]}"}" # trim spaces
+    if shopt -q extglob
+    then
+      __T_comment="${__T_comment//$'\n'+([[:space:]])/$'\n'}"
+    else
+      shopt -s extglob
+      __T_comment="${__T_comment//$'\n'+([[:space:]])/$'\n'}"
+      shopt -u extglob
+    fi
+  elif [ $# -gt 0 ]
+  then
+  __T_comment=B
     echo "Unexpected field arguments: $*"
     return 1
   fi
@@ -58,24 +72,6 @@ field() {
     local __T_scope="$T_SCOPE"
   else
     local __T_scope=i # instance by default
-  fi
-
-  # TODO update so that comments can have indentation, this strips all indentation
-  if [ "$T_COMMENTS" = enabled ] && read -t 0 -N 0
-  then
-    local __T_comment="$(</dev/stdin)"
-    __T_comment="${__T_comment#"${__T_comment%%[![:space:]]*}"}" # trim spaces
-    __T_comment="${__T_comment%"${__T_comment##*[![:space:]]}"}" # trim spaces
-    if shopt -q extglob
-    then
-      __T_comment="${__T_comment//$'\n'+([[:space:]])/$'\n'}"
-    else
-      shopt -s extglob
-      __T_comment="${__T_comment//$'\n'+([[:space:]])/$'\n'}"
-      shopt -u extglob
-    fi
-  else
-    local __T_comment=""
   fi
 
   reflection types fields define "$( reflection safeName "$__T_typeName" )" "$__T_fieldName" "$__T_fieldType" "$__T_scope" "$__T_visibility" "$__T_defaultValue" "$__T_comment"

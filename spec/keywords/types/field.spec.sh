@@ -125,15 +125,14 @@
 
   field name
 
-  field int age <<< "Represents the dog age"
+  field int age : Represents the dog age
 
-  field List[Dog] another << _
+  field List[Dog] another : '
     Represents some other stuff
     and whatnot
-    and yadda yadda yadda
-_
+    and yadda yadda yadda'
 
   expect { reflection types fields getComment Dog name } toBeEmpty
-  expect { reflection types fields getComment Dog age } toContain "Represents the dog age"
+  expect { reflection types fields getComment Dog age } toEqual "Represents the dog age"
   expect { reflection types fields getComment Dog another } toContain "Represents some other stuff" "and whatnot" "and yadda yadda yadda"
 }
