@@ -1,41 +1,49 @@
 T_COMMENTS=enabled
 
-@spec.reflection.methods.define.no_params() {
+@spec.reflection.methods.define.hello_world() {
   assert reflection types define Dog c
 
-  refute reflection types methods exists Dog bark
+  refute reflection types methods exists Dog $(reflection safeName add[T,K])
   expect { reflection types methods listNames Dog } toBeEmpty
   expect { reflection types methods list Dog } toBeEmpty
 
-  assert reflection types methods define Dog bark[T] String i P Dog.bark "The dog says 'woof!'"
+  ## > > | `$@` | Method parameter arguments, 5 arguments are required to define each parameter: (1) param name (2) reflection-safe param type name (3) param default value or empty (4) param modifier, e.g. `out`, or empty (5) param comment. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out "Array of dogs"` |
+  assert reflection types methods define Dog add[T,K] String i P Dog.add "The dog says 'woof!'" dog Dog "" "" "" message String "default value" "out" ""
   assert reflection types methods define Dog anotherMethod int S P Dog.anotherMethod
 
-  assert reflection types methods exists Dog $(reflection safeName bark[T])
-  expect { reflection types methods listSafeNames Dog } toEqual "$(reflection safeName bark[T]) anotherMethod"
-  expect { reflection types methods listNames Dog } toEqual "bark[T] anotherMethod"
-  expect { reflection types methods list Dog } toContain "bark[T]" "instance" "public" "String" "The dog says 'woof!'"
-  expect { reflection types methods getMethodName Dog $(reflection safeName bark[T]) } toEqual "bark[T]"
-  expect { reflection types methods getFunctionName Dog $(reflection safeName bark[T]) } toEqual Dog.bark
-  expect { reflection types methods getScope Dog $(reflection safeName bark[T]) } toEqual instance
-  expect { reflection types methods getScopeCode Dog $(reflection safeName bark[T]) } toEqual i
-  expect { reflection types methods getVisibility Dog $(reflection safeName bark[T]) } toEqual public
-  expect { reflection types methods getVisibilityCode Dog $(reflection safeName bark[T]) } toEqual P
-  expect { reflection types methods getReturnType Dog $(reflection safeName bark[T]) } toEqual String
-  # expect { reflection types methods getGenericParams Dog $(reflection safeName bark[T]) } toBeEmpty
-  expect { reflection types methods getComment Dog $(reflection safeName bark[T]) } toEqual "The dog says 'woof!'"
-  # expect { reflection types methods getParamNames Dog $(reflection safeName bark[T]) } toEqual ""
-  # expect { reflection types methods getParamCount Dog $(reflection safeName bark[T]) } toEqual ""
+  assert reflection types methods exists Dog $(reflection safeName add[T,K])
+  expect { reflection types methods listSafeNames Dog } toEqual "$(reflection safeName add[T,K]) anotherMethod"
+  expect { reflection types methods listNames Dog } toEqual "add[T,K] anotherMethod"
+  expect { reflection types methods list Dog } toContain "add[T,K]" "instance" "public" "String" "The dog says 'woof!'"
+  expect { reflection types methods getMethodName Dog $(reflection safeName add[T,K]) } toEqual "add[T,K]"
+  expect { reflection types methods getFunctionName Dog $(reflection safeName add[T,K]) } toEqual Dog.add
+  expect { reflection types methods getFunctionName Dog $(reflection safeName anotherMethod) } toEqual Dog.anotherMethod
+  expect { reflection types methods getScope Dog $(reflection safeName add[T,K]) } toEqual instance
+  expect { reflection types methods getScopeCode Dog $(reflection safeName add[T,K]) } toEqual i
+  expect { reflection types methods getVisibility Dog $(reflection safeName add[T,K]) } toEqual public
+  expect { reflection types methods getVisibilityCode Dog $(reflection safeName add[T,K]) } toEqual P
+  expect { reflection types methods getReturnType Dog $(reflection safeName add[T,K]) } toEqual String
+  expect { reflection types methods getGenericParams Dog $(reflection safeName add[T,K]) } toEqual "T K"
+  expect { reflection types methods getComment Dog $(reflection safeName add[T,K]) } toEqual "The dog says 'woof!'"
 
-  # assert reflection types methods undefine Dog bark
+  assert reflection types methods undefine Dog $(reflection safeName add[T,K])
 
-  # refute reflection types methods exists Dog bark
+  refute reflection types methods exists Dog $(reflection safeName add[T,K])
 }
 
-@pending.reflection.methods.define.one_param() {
-  :
+@spec.reflection.methods.define.with_params() {
+  assert reflection types define Dog c
+  # expect { reflection types methods params listNames Dog bark } toBeEmpty
+
+  assert reflection types methods define Dog add[T,K] String i P Dog.add "The dog says 'woof!'" dog Dog "" "" "" message String "default value" "out" ""
+  expect { reflection types methods params listNames Dog $(reflection safeName add[T,K]) } toEqual "dog message"
+
+  #
+  # reflection types methods params define Dog bark result Result[BarkResult] o "" "Out variable which gets the result of the bark"
+  # expect { reflection types methods params listNames Dog bark } toEqual "message result"
 }
 
-@pending.reflection.methods.define.multiple_params() {
+@pending.reflection.methods.define.add_params_individually() {
   :
 }
 

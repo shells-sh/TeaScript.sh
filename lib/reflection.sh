@@ -625,7 +625,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `exists` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         exists)
           eval "[ -n \"\${T_TYPE_$3+x}\" ]"
@@ -641,7 +641,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseClass` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getBaseClass)
@@ -665,7 +665,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getBaseClass` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getComment)
@@ -685,7 +685,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getDescriptorCode` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptorCode)
@@ -711,7 +711,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getDescriptor` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getDescriptor)
@@ -728,13 +728,13 @@ reflection() {
 
         ## ### `reflection types getGenericParams`
         ##
-        ## Get the names of the generic type parameters for a class, e.g. for `MyMap[K,V]` the generic type parametners are `K` and `V`
+        ## Get the names of the generic type parameters for a class, e.g. for `MyMap[K,V]` the generic type parameters are `K` and `V`
         ##
         ## > > | | Parameter |
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getGenericParams` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getGenericParams)
@@ -760,7 +760,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getInterfaces` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getInterfaces)
@@ -783,7 +783,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `getTypeName` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ## > > | `$4` | (Optional) name of BASH variable to set to the return value rather than printing return value |
         ##
         getTypeName)
@@ -805,7 +805,7 @@ reflection() {
         ## > > |-|-----------|
         ## > > | `$1` | `types` |
         ## > > | `$2` | `undefine` |
-        ## > > | `$3` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+        ## > > | `$3` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
         ##
         undefine)
           unset "T_TYPE_$3"
@@ -846,7 +846,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `define` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name, e.g. `name` |
             ## > > | `$6` | Full type name for this field, including generics if any, e.g. `MyMap[K,V]`. All other reflection methods require a differently formatted type name for generic types. |
             ## > > | `$7` | Scope code, e.g. `s` for `static` or `i` for `instance` |
@@ -875,7 +875,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `exists` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ##
             exists)
@@ -891,7 +891,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getComment` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -917,7 +917,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getDefaultValue` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -946,7 +946,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getScope` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -973,7 +973,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getScopeCode` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -999,7 +999,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getType` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1028,7 +1028,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getVisibility` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1055,7 +1055,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `getVisibilityCode` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1086,7 +1086,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `list` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ##
             list)
               local __T_fieldName
@@ -1098,14 +1098,14 @@ reflection() {
 
             ## ### `reflection types fields listNames`
             ##
-            ## Returns a space-demilimited list of field names for this type
+            ## Returns a space-delimited list of field names for this type
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `listNames` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             listNames)
@@ -1143,7 +1143,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `fields` |
             ## > > | `$3` | `undefine` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Field name |
             ##
             undefine)
@@ -1203,7 +1203,7 @@ reflection() {
             ## > > | `$8` | Visibility code, e.g. `p` for `private` or `P` for `public` |
             ## > > | `$9` | Name of BASH function to invoke when invoking this method |
             ## > > | `$10` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
-            ## > > | `$@` | Method parameter arguments, 4 arguments are required to define each parameter: (1) param type (2) param name (3) param default value or empty (4) param modifier, e.g. `out`, or empty. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out` |
+            ## > > | `$@` | Method parameter arguments, 5 arguments are required to define each parameter: (1) param name (2) reflection-safe param type name (3) param default value or empty (4) param modifier, e.g. `out`, or empty (5) param comment. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out "Array of dogs"` |
             define)
               # Calculate a safe the method name (which may include generics)
               if [[ "$5" = *"["* ]]
@@ -1223,7 +1223,8 @@ reflection() {
               while [ $# -gt 0 ]
               do
                 local __T_paramDefinition="$1:$2;$3+$4"
-                shift; shift; shift; shift;
+                # comment gets stored elsewhere, migrate away from this and to `params define`
+                shift; shift; shift; shift; shift;
                 __T_methodDefinition="${__T_methodDefinition}&${__T_paramDefinition}"
               done
               if [ "$T_COMMENTS" = enabled ]
@@ -1245,7 +1246,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `exists` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
             ##
             exists)
@@ -1261,7 +1262,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getComment` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1287,7 +1288,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getFunctionName` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1297,11 +1298,41 @@ reflection() {
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
               eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]#*@}\"" # This gets the method definition + removes everything to the left of the function name
+              __T_tempVariable="${__T_tempVariable%%&*}" # Get rid of everything to the right of the function name (if parameters)
               if [ $# -eq 5 ]
               then
-                printf "${__T_tempVariable%%!*}" # Get rid of everything to the right of the function name
+                printf "${__T_tempVariable%%!*}" # Get rid of everything to the right of the function name (removes trailing comment, if any, when no parameters)
               else
-                printf -v "$6" "${__T_tempVariable%%!*}" # Get rid of everything to the right of the function name
+                printf -v "$6" "${__T_tempVariable%%!*}" # Get rid of everything to the right of the function name (removed trailing comment, if any, when no parameters)
+              fi
+              ;;
+
+            ## ### `reflection types methods getGenericParams`
+            ##
+            ## Get the names of the generic type parameters for this method, e.g. for `add[T,K]` the generic type parameters are `T` and `K`
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `getGenericParams` |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            getGenericParams)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+              __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+              eval "__T_tempVariable=\"\${T_TYPE_$4[$__T_tempVariable]%%^*}\"" # This gets the method definition + removes everything to the right of the original method name
+              __T_tempVariable="${__T_tempVariable##*[}"
+              __T_tempVariable="${__T_tempVariable%]}"
+              if [ $# -eq 5 ]
+              then
+                printf "${__T_tempVariable//,/ }"
+              else
+                printf -v "$6" "${__T_tempVariable//,/ }"
               fi
               ;;
 
@@ -1314,7 +1345,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getMethodName` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1342,7 +1373,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getReturnType` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1371,7 +1402,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getScope` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1398,7 +1429,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getScopeCode` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1427,7 +1458,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getVisibility` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1454,7 +1485,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `getVisibilityCode` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
@@ -1485,7 +1516,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `list` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ##
             list)
               local __T_methodName
@@ -1499,7 +1530,7 @@ reflection() {
             ##
             ## > 👥 User Function
             ##
-            ## Returns a space-demilimited list of method names for this type.
+            ## Returns a space-delimited list of method names for this type.
             ##
             ## > `O(N)` looks up every method's definition to get the original method name (to account for generics)
             ##
@@ -1508,7 +1539,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `listNames` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             listNames)
@@ -1534,7 +1565,7 @@ reflection() {
 
             ## ### `reflection types methods listSafeNames`
             ##
-            ## Returns a space-demilimited list of the reflection-safe method names for this type.
+            ## Returns a space-delimited list of the reflection-safe method names for this type.
             ##
             ## To get the original method names, i.e. with original generic parameter names, use `listNames`
             ##
@@ -1543,7 +1574,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `listSafeNames` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             listSafeNames)
@@ -1581,7 +1612,7 @@ reflection() {
             ## > > | `$1` | `types` |
             ## > > | `$2` | `methods` |
             ## > > | `$3` | `undefine` |
-            ## > > | `$4` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$4` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
             ## > > | `$5` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
             ##
             undefine)
@@ -1611,6 +1642,28 @@ reflection() {
             params)
               case "$4" in
 
+                ## ### `reflection types methods params define`
+                ##
+                ## Add a parameter to the specified method.
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `define` |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | Parameter name |
+                ## > > | `$8` | Reflection-safe type name of parameter type (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$9` | Parameter modifier, e.g. `out` or `ref` or blank value |
+                ## > > | `$10` | Parameter default value. This is stored separately from the method definition, it is stored in its own index of the type definition BASH array. |
+                ## > > | `$11` | Parameter comment. This is stored separately from the method definition, it is stored in its own index of the type definition BASH array when `T_COMMENTS=enabled`. |
+                ##
+                define)
+                  :
+                ;;
+
                 ## ### `reflection types methods params getDefaultValue`
                 ##
                 ## Get the default value of a method parameter with the provided name, if any
@@ -1621,7 +1674,7 @@ reflection() {
                 ## > > | `$2` | `methods` |
                 ## > > | `$3` | `params` |
                 ## > > | `$4` | `getDefaultValue` |
-                ## > > | `$5` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
                 ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
                 ## > > | `$7` | Parameter name|
                 ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
@@ -1640,7 +1693,7 @@ reflection() {
                 ## > > | `$2` | `methods` |
                 ## > > | `$3` | `params` |
                 ## > > | `$4` | `getModifier` |
-                ## > > | `$5` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
                 ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
                 ## > > | `$7` | Parameter name|
                 ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
@@ -1659,7 +1712,7 @@ reflection() {
                 ## > > | `$2` | `methods` |
                 ## > > | `$3` | `params` |
                 ## > > | `$4` | `getType` |
-                ## > > | `$5` | Reflection-safe name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
                 ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
                 ## > > | `$7` | Parameter name|
                 ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
@@ -1668,8 +1721,44 @@ reflection() {
                   :
                 ;;
 
+                ## ### `reflection types methods params listNames`
+                ##
+                ## Returns a space-delimited list of param names for this method
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `listNames` |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+                ##
+                listNames)
+                  local __T_tempVariable
+                  eval "__T_tempVariable=\"\${T_TYPE_$5[2]}\""
+                  __T_tempVariable="${__T_tempVariable#*;$6:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+                  __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+                  eval "__T_tempVariable=\${T_TYPE_$5[\$__T_tempVariable]}"
+                  local __T_currentParamDefinition
+                  local __T_paramNames=""
+                  while [[ "$__T_tempVariable" = *"&"* ]]
+                  do
+                    __T_currentParamDefinition="${__T_tempVariable##*&}"
+                    __T_paramNames="${__T_currentParamDefinition%%:*} ${__T_paramNames}"
+                    __T_tempVariable="${__T_tempVariable%&*}"
+                  done
+                  if [ $# -eq 6 ]
+                  then
+                    printf "${__T_paramNames% }"
+                  else
+                    printf -v "$7" "${__T_paramNames% }"
+                  fi
+                ;;
+
                 *)
-                  echo "Unknown 'reflection types methods params' command: $3"
+                  echo "Unknown 'reflection types methods params' command: $4"
                   ;;
               esac
               ;;
@@ -1683,11 +1772,6 @@ reflection() {
           ;;
       esac
       ;;
-  
-      #   getMethodParamNames)
-      #   getMethodParamDefaultValue)
-      #   ## ### `reflection types getMethodParamType`
-
 
     ## ## 📸 `reflection snapshots`
     ##
@@ -2023,6 +2107,7 @@ reflection() {
         class) __T_code=c ;;
         instance) __T_code=i ;;
         nameref) __T_code=n ;;
+        out) __T_code=o ;;
         private) __T_code=p ;;
         public) __T_code=P ;;
         byref) __T_code=r ;;
@@ -2075,7 +2160,8 @@ reflection() {
       case "$2" in
         c) __T_codeValue=class ;;
         i) __T_codeValue=instance ;;
-        n) __T_codeValue=nameref ;;
+        o) __T_codeValue=out ;;
+        i) __T_codeValue=nameref ;;
         p) __T_codeValue=private ;;
         P) __T_codeValue=public ;;
         r) __T_codeValue=byref ;;
