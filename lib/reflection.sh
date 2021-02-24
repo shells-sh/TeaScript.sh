@@ -46,7 +46,7 @@ T_COMMENTS=disabled
 ## - [`reflection variables`](#reflection-variables)
 ##
 ## ```sh
-## class Dog implements IAnimal do <<- _
+## class Dog implements IAnimal do <<_
 ##   Represents a dog
 ## _
 ##
@@ -54,16 +54,16 @@ T_COMMENTS=disabled
 ##   field age: Integer
 ## end
 ##
-## reflection types getTypeInterface Dog
+## reflection types getInterface Dog
 ## # => "IAnimal"
 ##
-## reflection types getTypeComment Dog
+## reflection types getComment Dog
 ## # => "Represents a dog"
 ##
 ## reflection types methods listNames Dog
 ## # => "name age"
 ##
-## reflection types getFieldType Dog age
+## reflection types fields getType Dog age
 ## # => "Integer"
 ## ```
 ##
@@ -1635,9 +1635,13 @@ reflection() {
             ##
             ## `TODO` talk about params
             ##
+            ## - [`reflection types methods params define`](#reflection-types-methods-params-define)
             ## - [`reflection types methods params list`](#reflection-types-methods-params-list)
-            ## - [`reflection types methods params getType`](#reflection-types-methods-params-getType)
+            ## - [`reflection types methods params getComment`](#reflection-types-methods-params-getComment)
             ## - [`reflection types methods params getDefaultValue`](#reflection-types-methods-params-getDefaultValue)
+            ## - [`reflection types methods params getModifier`](#reflection-types-methods-params-getModifier)
+            ## - [`reflection types methods params getType`](#reflection-types-methods-params-getType)
+            ## - [`reflection types methods params undefine`](#reflection-types-methods-params-undefine)
             ##
             params)
               case "$4" in

@@ -7,8 +7,7 @@ T_COMMENTS=enabled
   expect { reflection types methods listNames Dog } toBeEmpty
   expect { reflection types methods list Dog } toBeEmpty
 
-  ## > > | `$@` | Method parameter arguments, 5 arguments are required to define each parameter: (1) param name (2) reflection-safe param type name (3) param default value or empty (4) param modifier, e.g. `out`, or empty (5) param comment. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out "Array of dogs"` |
-  assert reflection types methods define Dog add[T,K] String i P Dog.add "The dog says 'woof!'" dog Dog "" "" "" message String "default value" "out" ""
+  assert reflection types methods define Dog add[T,K] String i P Dog.add "The dog says 'woof!'"
   assert reflection types methods define Dog anotherMethod int S P Dog.anotherMethod
 
   assert reflection types methods exists Dog $(reflection safeName add[T,K])
@@ -29,32 +28,4 @@ T_COMMENTS=enabled
   assert reflection types methods undefine Dog $(reflection safeName add[T,K])
 
   refute reflection types methods exists Dog $(reflection safeName add[T,K])
-}
-
-@spec.reflection.methods.define.with_params() {
-  assert reflection types define Dog c
-  # expect { reflection types methods params listNames Dog bark } toBeEmpty
-
-  assert reflection types methods define Dog add[T,K] String i P Dog.add "The dog says 'woof!'" dog Dog "" "" "" message String "default value" "out" ""
-  expect { reflection types methods params listNames Dog $(reflection safeName add[T,K]) } toEqual "dog message"
-
-  #
-  # reflection types methods params define Dog bark result Result[BarkResult] o "" "Out variable which gets the result of the bark"
-  # expect { reflection types methods params listNames Dog bark } toEqual "message result"
-}
-
-@pending.reflection.methods.define.add_params_individually() {
-  :
-}
-
-@pending.reflection.methods.define.generic_method_parameter() {
-  :
-}
-
-@pending.reflection.methods.define.multiple_generic_method_parameters() {
-  :
-}
-
-@pending.reflection.methods.define.generic_type_and_return_type_and_method_parameters() {
-  :
 }
