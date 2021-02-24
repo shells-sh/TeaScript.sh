@@ -1,50 +1,33 @@
-@spec.reflection.types.fields.getVisibility.no_generics() {
-  local typeName=Dog
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
+class Dog do
+  field name = "Rover"
+  public field int age
+  private field Array[Dog] siblings
+end
 
-  assert reflection types fields define $safeTypeName name String i P
-  expect { reflection types fields getVisibility $safeTypeName name } toEqual public
+class MyMap[K,V] do
+  field count = 5
+  public field items
+end
 
-  assert reflection types fields define $safeTypeName age Integer i p
-  expect { reflection types fields getVisibility $safeTypeName age } toEqual private
+@spec.reflection.types.fields.getVisibility() {
+  expect { reflection types fields getVisibility Dog name } toEqual private # field default
+  expect { reflection types fields getVisibility Dog age } toEqual public
+  expect { reflection types fields getVisibility Dog siblings } toEqual private
+  expect { reflection types fields getVisibility $(safeName MyMap[K,V]) count } toEqual private
+  expect { reflection types fields getVisibility $(safeName MyMap[K,V]) items } toEqual public
 }
 
-@spec.reflection.types.fields.getVisibility.single_generic_type_parameter() {
-  local typeName=Collection[T]
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P
-  expect { reflection types fields getVisibility $safeTypeName name } toEqual public
-
-  assert reflection types fields define $safeTypeName age Integer i p
-  expect { reflection types fields getVisibility $safeTypeName age } toEqual private
-}
-
-@spec.reflection.types.fields.getVisibility.multiple_generic_type_parameters() {
-  local typeName=VariousThings[A,B,C]
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P
-  expect { reflection types fields getVisibility $safeTypeName name } toEqual public
-
-  assert reflection types fields define $safeTypeName age Integer i p
-  expect { reflection types fields getVisibility $safeTypeName age } toEqual private
+@spec.reflection.types.fields.getVisibility.field_or_type_doesnt_exist() {
+  expect { reflection types fields getVisibility Dog doesntExist } toFail "Field 'doesntExist' not found on type Dog"
+  expect { reflection types fields getVisibility $(safeName MyMap[K,V]) doesntExist } toFail "Field 'doesntExist' not found on type MyMap[K,V]"
+  expect { reflection types fields getVisibility DoesntExist doesntExist } toFail "Type 'DoesntExist' not found"
 }
 
 @spec.reflection.types.fields.getVisibility.as_variable() {
-  local typeName=Dog
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P
-
   local var
   expect "$var" toBeEmpty
 
-  expect { reflection types fields getVisibility $safeTypeName name var } toBeEmpty
+  expect { reflection types fields getVisibility Dog age var } toBeEmpty
 
   expect "$var" toEqual public
 }

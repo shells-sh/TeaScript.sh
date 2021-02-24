@@ -1,75 +1,47 @@
 T_COMMENTS=enabled
 
-@spec.reflection.types.fields.getComment.no_generics() {
-  local typeName=Dog
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
+class Dog do
+  field name <<< "This represents a dog name!"
+  field age
+end
 
-  assert reflection types fields define $safeTypeName name String i P "" "This represents a dog!"
-  expect { reflection types fields getComment $safeTypeName name } toEqual "This represents a dog!"
+class MyMap[K,V] do
+  field count <<< "The count of items"
+  field items
+end
 
-  assert reflection types fields define $safeTypeName age String i P ""
-  expect { reflection types fields getComment $safeTypeName age } toBeEmpty
-
-  assert reflection types fields define $safeTypeName breed String i P "" "Breed name"
-  expect { reflection types fields getComment $safeTypeName breed } toEqual "Breed name"
+@spec.reflection.types.fields.getComment() {
+  expect { reflection types fields getComment Dog name } toEqual "This represents a dog name!"
+  expect { reflection types fields getComment Dog age } toBeEmpty
+  expect { reflection types fields getComment $(safeName MyMap[K,V]) count } toEqual "The count of items"
+  expect { reflection types fields getComment $(safeName MyMap[K,V]) items } toBeEmpty
 }
 
-@spec.reflection.types.fields.getComment.single_generic_type_parameter() {
-  local typeName=Collection[T]
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P "" "This represents a dog!"
-  expect { reflection types fields getComment $safeTypeName name } toEqual "This represents a dog!"
-
-  assert reflection types fields define $safeTypeName age String i P ""
-  expect { reflection types fields getComment $safeTypeName age } toBeEmpty
-
-  assert reflection types fields define $safeTypeName breed Array[String] i P "" "Breed name"
-  expect { reflection types fields getComment $safeTypeName breed } toEqual "Breed name"
-}
-
-@spec.reflection.types.fields.getComment.multiple_generic_type_parameters() {
-  local typeName=VariousThings[A,B,C]
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P "" "This represents a dog!"
-  expect { reflection types fields getComment $safeTypeName name } toEqual "This represents a dog!"
-
-  assert reflection types fields define $safeTypeName age String i P ""
-  expect { reflection types fields getComment $safeTypeName age } toBeEmpty
-
-  assert reflection types fields define $safeTypeName breed Map[K,V] i P "" "Breed name"
-  expect { reflection types fields getComment $safeTypeName breed } toEqual "Breed name"
+@spec.reflection.types.fields.getComment.field_or_type_doesnt_exist() {
+  expect { reflection types fields getComment Dog doesntExist } toFail "Field 'doesntExist' not found on type Dog"
+  expect { reflection types fields getComment $(safeName MyMap[K,V]) doesntExist } toFail "Field 'doesntExist' not found on type MyMap[K,V]"
+  expect { reflection types fields getComment DoesntExist doesntExist } toFail "Type 'DoesntExist' not found"
 }
 
 @spec.reflection.types.fields.getComment.as_variable() {
-  local typeName=Dog
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P "" "This represents a dog!"
-
   local var
   expect "$var" toBeEmpty
 
-  expect { reflection types fields getComment $safeTypeName name var } toBeEmpty
+  expect { reflection types fields getComment Dog name var } toBeEmpty
 
-  expect "$var" toEqual "This represents a dog!"
+  expect "$var" toEqual "This represents a dog name!"
 }
 
 @spec.reflection.types.fields.getComment.does_not_store_comment_if_disabled() {
-  reflection types define Dog c
-  reflection types fields define Dog name String i P "" "This represents a dog!"
-
-  expect { reflection types fields getComment Dog name } toEqual "This represents a dog!"
+  expect { reflection types fields getComment Dog name } toEqual "This represents a dog name!"
+  refute reflection types fields getComment Cat name
 
   local T_COMMENTS=disabled
 
-  reflection types define Cat c
-  reflection types fields define Cat name String i P "" "This represents a cat!"
+  class Cat do
+    field name <<< "This represents a cat name!"
+  end
 
-  expect { reflection types fields getComment Cat name } toBeEmpty
+ expect { reflection types fields getComment Dog name } toEqual "This represents a dog name!" # comments were enabled at the time
+ expect { reflection types fields getComment Cat name } toBeEmpty # comment not added
 }

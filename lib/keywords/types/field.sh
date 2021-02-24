@@ -1,27 +1,35 @@
 field() {
-  if [[ "$1" = *"."* ]]
-  then
-    local __T_typeName="${1%%.*}"
-    local __T_fieldName="${1#*.}"
-    shift
-  else
-    if [ -n "$T_DO" ]
-    then
-      local __T_typeName="$T_DO"
-      local __T_fieldName="$1"
-      shift
-    else
-      echo "What type should I use for field $1?"
-      return 1
-    fi
-  fi
+  local __T_typeName
+  local __T_fieldName
+  local __T_fieldType
+  local __T_defaultValue
+  local __T_comment
 
-  if [ "$1" = "=" ] || [ $# -eq 0 ]
+  if [ -n "$T_DO" ]
   then
-    local __T_fieldType=string
-  else
-    local __T_fieldType="$1"
+    __T_typeName="$T_DO"
+    __T_fieldType="$1"
     shift
+    if [ $# -eq 0 ] || [ "$1" = "=" ] || [ "$1" = ":" ]
+    then
+      __T_fieldName="$__T_fieldType"
+      __T_fieldType=string
+    else
+      __T_fieldName="$1"
+      shift
+    fi
+  elif [[ "$1" = *"."* ]]
+  then
+    __T_fieldType=string
+    __T_typeName="${1%%.*}"
+    __T_fieldName="${1#*.}"
+    shift
+  elif [[ "$2" = *"."* ]]
+  then
+    __T_fieldType="$1"
+    __T_typeName="${2%%.*}"
+    __T_fieldName="${2#*.}"
+    shift; shift;
   fi
 
   local __T_defaultValue=""
@@ -42,7 +50,7 @@ field() {
   then
     local __T_visibility="$T_VISIBILITY"
   else
-    local __T_visibility=P # public by default
+    local __T_visibility=p # private by default
   fi
 
   if [ -n "$T_SCOPE" ]

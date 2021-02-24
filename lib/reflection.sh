@@ -2,31 +2,28 @@
 
 # TODO split into multiple files and compile back into this file with the tree of case statements
 
+# `T_ENV` not currently used.
 # TODO. Note: rather than checking T_ENV in the code, we'll probably LOAD/source a *different* implementation of `reflection` when T_ENV=production (e.g. without comments and maybe no type checking assertions)
 T_ENV=development
 
+# Documented below in #reflection-objects-gc
 T_GC_OBJECT_THRESHOLD=999
 T_GC_OBJECT_THRESHOLD_COUNT=0
 
-# TODO move this documentation to a sensible place
 ## ## `T_COMMENTS`
 ##
-## When set to `enabled`, comments on defined types/fields/methods are stored in type declarations.
+## When set to `enabled`, comments on defined types/fields/methods are stored in type declarations (`enabled` by default in development).
 ##
 ## This makes it easy to generate utilities to generate documentation as well as IDE server usage.
 ##
-## Please note that, because comments are read from STDIN, it is very expensive to check if STDIN has content
-## and defining types/fields/methods with comments enabled will cause your program to load slowly
-## (but there are no performance issues after the initial load, except that your comments will
-## all be stored in active BASH memory)
+## > 💡 Hope to eventually make use of these comments in a TeaScript VSCode Language Server :)
 ##
-## Please enable `T_COMMENTS` with caution, e.g. only when using a documentation generator.
+## > ℹ️ Implementation Detail
+## >
+## > Comments are always stored in their own separate BASH variable index to isolate them and not impact the field/method/param
+## > lookup time (like field/param default values). When `T_COMMENTS` is disabled, these indices are never allocated and the type objects are smaller sized.
 ##
-## Another option is to turn this on, define your types, and save a snapshot.
-##
-## Your types will have comments persisted but there will be no initial load penalty.
-##
-T_COMMENTS=disabled
+T_COMMENTS=enabled
 
 ## # `reflection`
 ##
@@ -175,7 +172,7 @@ T_COMMENTS=disabled
 ##
 ## These functions are annotated with `👥 User Function` and should _never_ be called by TeaScript core code.
 ##
-## #### Character Codes
+## #### ⌨️ Character Codes
 ##
 ## > e.g. `p` for private -_vs_- `P` for public
 ##
@@ -227,6 +224,19 @@ T_COMMENTS=disabled
 ## | `s` | `struct` |
 ## | `S` | `static` |
 ## | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
+##
+## #### 🐞 Error Overhead
+##
+## Please do not rely on errors, e.g. calling `getComment [type] [field]` when the type or field may not exist.
+##
+## Instead, check that type and field `exists` first.
+##
+## Note: every `reflection` function _does include the overhead of checking if the relevant type/field/method/param exists_.
+##
+## However, in error conditions when the type/field/method/param does not exist, we perform a `$(reflection types getName [type])` subshell to get the
+## original name of the type or method for user friendliness. DO NOT RELY ON THIS IN HOT PATH CODE please :)
+##
+## > _Originally, we did not include the overhead of checking that types/fields/etc exist in each `reflection` method but it was not worth the sometimes hard to debug resulting bugs_
 ##
 ## #### TeaScript use of BASH arrays
 ##
@@ -896,6 +906,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getComment)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -922,6 +934,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getDefaultValue)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -951,6 +965,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getScope)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -978,6 +994,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getScopeCode)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -1004,6 +1022,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getType)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -1033,6 +1053,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getVisibility)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -1060,6 +1082,8 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getVisibilityCode)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -1109,6 +1133,7 @@ reflection() {
             ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             listNames)
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               if shopt -q extglob

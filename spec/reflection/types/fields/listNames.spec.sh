@@ -1,48 +1,28 @@
-@spec.reflection.types.fields.listNames.no_generics() {
-  local typeName=Dog
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
+class Dog do
+  field name = "Rover"
+  public field int age
+  private field Array[Dog] siblings
+end
 
-  assert reflection types fields define $safeTypeName name String i P
-  expect { reflection types fields listNames $safeTypeName } toEqual "name"
+class MyMap[K,V] do
+  field count = 5
+  public field items
+end
+
+@spec.reflection.types.fields.listNames() {
+  expect { reflection types fields listNames Dog } toEqual "name age siblings"
+  expect { reflection types fields listNames $(safeName MyMap[K,V]) } toEqual "count items"
 }
 
-@spec.reflection.types.fields.listNames.single_generic_type_parameter() {
-  local typeName=Collection[T]
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P
-  assert reflection types fields define $safeTypeName siblings Array[Dog] i P
-
-  expect { reflection types fields listNames $safeTypeName } toEqual "name siblings"
-}
-
-@spec.reflection.types.fields.listNames.multiple_generic_type_parameters() {
-  local typeName=VariousThings[A,B,C]
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P
-  assert reflection types fields define $safeTypeName siblings Array[Dog] i P
-  assert reflection types fields define $safeTypeName relations Map[String,Dog] i P
-
-  expect { reflection types fields listNames $safeTypeName } toEqual "name siblings relations"
+@spec.reflection.types.fields.listNames.field_or_type_doesnt_exist() {
+  expect { reflection types fields listNames DoesntExist doesntExist } toFail "Type 'DoesntExist' not found"
 }
 
 @spec.reflection.types.fields.listNames.as_variable() {
-  local typeName=Dog
-  local safeTypeName="$(reflection safeName $typeName)"
-  assert reflection types define $typeName c
-
-  assert reflection types fields define $safeTypeName name String i P
-  assert reflection types fields define $safeTypeName siblings Array[Dog] i P
-  assert reflection types fields define $safeTypeName relations Map[String,Dog] i P
-
   local var
   expect "$var" toBeEmpty
 
-  expect { reflection types fields listNames $safeTypeName var } toBeEmpty
+  expect { reflection types fields listNames Dog var } toBeEmpty
 
-  expect "$var" toEqual "name siblings relations"
+  expect "$var" toEqual "name age siblings"
 }

@@ -14,7 +14,7 @@
   class Dog do
   refute reflection types fields exists Dog age
 
-  field age int
+  field int age
 
   assert reflection types fields exists Dog age
   expect { reflection types fields getType Dog age } toEqual int
@@ -45,8 +45,8 @@
   refute reflection types fields exists Dog name
   refute reflection types fields exists Dog age
 
-  field name string
-  field age int
+  field string name
+  field int age
 
   assert reflection types fields exists Dog name
   assert reflection types fields exists Dog age
@@ -59,8 +59,8 @@
   refute reflection types fields exists Dog siblings
   refute reflection types fields exists Dog toys
 
-  field siblings List[Dog]
-  field toys Map[string,Toy]
+  field List[Dog] siblings
+  field Map[string,Toy] toys
 
   assert reflection types fields exists Dog siblings
   assert reflection types fields exists Dog toys
@@ -78,12 +78,12 @@
   expect { reflection types fields getType Dog name } toEqual string
 }
 
-@spec.field.visibility.default_is_public() {
+@spec.field.visibility.default_is_private() {
   class Dog do
 
   field name
 
-  expect { reflection types fields getVisibility Dog name } toEqual public
+  expect { reflection types fields getVisibility Dog name } toEqual private
 }
 
 @spec.field.visibility.public() {
@@ -125,9 +125,9 @@
 
   field name
 
-  field age int <<< "Represents the dog age"
+  field int age <<< "Represents the dog age"
 
-  field another List[Dog] << _
+  field List[Dog] another << _
     Represents some other stuff
     and whatnot
     and yadda yadda yadda
