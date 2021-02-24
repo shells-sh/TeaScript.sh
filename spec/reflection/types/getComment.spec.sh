@@ -1,3 +1,5 @@
+T_COMMENTS=enabled
+
 @spec.reflection.types.getComment.does_not_collide_with_anything_if_comment_has_all_the_special_character_separators() {
   declare -a crazyCommentStrings
   crazyCommentStrings+=("|Hello|<World>;I'm using tons of & characters and Whatnot.|><")

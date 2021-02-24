@@ -1,15 +1,18 @@
+T_COMMENTS=enabled
+
 @spec.reflection.methods.define.no_params() {
   assert reflection types define Dog c
 
   refute reflection types methods exists Dog bark
-  # expect { reflection types methods listNames Dog } not toContain "bark"
+  expect { reflection types methods listNames Dog } toBeEmpty
+  expect { reflection types methods list Dog } toBeEmpty
 
   assert reflection types methods define Dog bark String i P "The dog says 'woof!'"
 
   assert reflection types methods exists Dog bark
   expect { reflection types methods getMethodName Dog bark } toEqual "bark"
-  # expect { reflection types methods listNames Dog } toContain "bark"
-  # expect { reflection types methods listNames Dog } toContain "instance" "public" "String" "The dog says 'woof!'"
+  expect { reflection types methods listNames Dog } toEqual "bark"
+  expect { reflection types methods list Dog } toContain "instance" "public" "String" "The dog says 'woof!'"
   expect { reflection types methods getScope Dog bark } toEqual instance
   expect { reflection types methods getScopeCode Dog bark } toEqual i
   expect { reflection types methods getVisibility Dog bark } toEqual public

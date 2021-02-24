@@ -1,3 +1,5 @@
+T_COMMENTS=enabled
+
 @spec.reflection.types.fields.list.no_generics() {
   local typeName=Dog
   local safeTypeName="$(reflection reflectionType $typeName)"

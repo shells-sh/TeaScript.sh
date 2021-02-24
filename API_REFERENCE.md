@@ -21,6 +21,36 @@ Returns 1 if the variable does not exist or is not a reference type.
 | `$1` | Variable name |
 | `$2` | (Optional) name of BASH variable to store Object ID in |
 
+# `var`
+
+Sets a variable equal to the result of an expression.
+
+Used implicit typing, e.g. with `var x = 5` the `x` variable is set to an `int` type
+without using explicit typing using the alternate syntax: `int x = 5`
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | Variable name |
+> > | `$2` | `=` |
+> > | `$@` | Right hand side expression which is evaluated via `evaluate` |
+
+## `T_COMMENTS`
+
+When set to 'enabled', comments on defined types/fields/methods are stored in type declarations.
+
+This makes it easy to generate utilities to generate documentation as well as IDE server usage.
+
+Please note that, because comments are read from STDIN, it is very expensive to check if STDIN has content
+and defining types/fields/methods with comments enabled will cause your program to load slowly
+(but there are no performance issues after the initial load, except that your comments will
+all be stored in active BASH memory)
+
+Please enable `T_COMMENTS` with caution, e.g. only when using a documentation generator.
+
+Another option is to turn this on, define your types, and save a snapshot.
+
+Your types will have comments persisted but there will be no initial load penalty.
+
 # `reflection`
 
 🍵 TeaScript Reflection API
@@ -35,6 +65,7 @@ or making changes to types.
 - [`reflection types`](#reflection-types)
   - [`reflection types fields`](#reflection-types-fields)
   - [`reflection types methods`](#reflection-types-methods)
+    - [`reflection types methods params`](#reflection-types-methods-params)
 - [`reflection variables`](#reflection-variables)
 
 ```sh
@@ -424,14 +455,14 @@ Manages the TeaScript types in the TeaScript type system.
 
 - [`reflection types define`](#reflection-types-define)
 - [`reflection types exists`](#reflection-types-exists)
-- [`reflection types fields`](#reflection-types-fields)
+- [`reflection types fields *`](#reflection-types-fields)
 - [`reflection types getBaseClass`](#reflection-types-getBaseClass)
 - [`reflection types getComment`](#reflection-types-getComment)
 - [`reflection types getDescriptorCode`](#reflection-types-getDescriptorCode)
 - [`reflection types getDescriptor`](#reflection-types-getDescriptor)
 - [`reflection types getGenericTypes`](#reflection-types-getGenericTypes)
 - [`reflection types getInterfaces`](#reflection-types-getInterfaces)
-- [`reflection types methods`](#reflection-types-methods)
+- [`reflection types methods *`](#reflection-types-methods)
 - [`reflection types undefine`](#reflection-types-undefine)
 
 Types are `define`'d and `undefine`'d.
@@ -798,6 +829,7 @@ Remove the given field from the type definition.
 - [`reflection types methods getScopeCode`](#reflection-types-methods-getScopeCode)
 - [`reflection types methods getVisibility`](#reflection-types-methods-getVisibility)
 - [`reflection types methods getVisibilityCode`](#reflection-types-methods-getVisibilityCode)
+- [`reflection types methods params *`](#reflection-types-methods-params)
 - [`reflection types methods undefine`](#reflection-types-methods-undefine)
 
 ### `reflection types methods define`
@@ -815,7 +847,7 @@ Remove the given field from the type definition.
 > > | `$7` | Scope code, e.g. `s` for `static` or `i` for `instance` |
 > > | `$8` | Visibility code, e.g. `p` for `private` or `P` for `public` |
 > > | `$9` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
-> > | `$@` | Method parameter arguments, e.g. `"String" "name" "default value" "Array[T]" "items" ""` to add 2 parameters, `name` and `items`, where `name` has a default value and `items` does not |
+> > | `$@` | Method parameter arguments, 4 arguments are required to define each parameter: (1) param type (2) param name (3) param default value or empty (4) param modifier, e.g. `out`, or empty. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out` |
 ### `reflection types methods exists`
 
 Returns 0 if method with provided name exists on this type else returns 1.
@@ -925,6 +957,33 @@ Returns the short code for this method's visibility, e.g. `P` for `public` and `
 > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
+### `reflection types methods list`
+
+> 👥 User Function
+
+Print a list of each of this type's methods with details including the scope, visibility, default value, and comment.
+
+Prints one method per line
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `methods` |
+> > | `$3` | `list` |
+> > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+
+### `reflection types methods listNames`
+
+Returns a space-demilimited list of method names for this type
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `methods` |
+> > | `$3` | `listNames` |
+> > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
 ### `reflection types methods undefine`
 
 Remove the given methods from the type definition.
@@ -943,7 +1002,60 @@ Remove the given methods from the type definition.
 > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
 
-## `reflection snapshots`
+### `reflection types methods params`
+
+`TODO` talk about params
+
+- [`reflection types methods params list`](#reflection-types-methods-params-list)
+- [`reflection types methods params getType`](#reflection-types-methods-params-getType)
+- [`reflection types methods params getDefaultValue`](#reflection-types-methods-params-getDefaultValue)
+
+### `reflection types methods params getDefaultValue`
+
+Get the default value of a method parameter with the provided name, if any
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `methods` |
+> > | `$3` | `params` |
+> > | `$4` | `getDefaultValue` |
+> > | `$5` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$6` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+> > | `$7` | Parameter name|
+> > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types methods params getModifier`
+
+Get the modifier of a method parameter with the provided name, if any, e.g. `out` or `ref`
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `methods` |
+> > | `$3` | `params` |
+> > | `$4` | `getModifier` |
+> > | `$5` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$6` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+> > | `$7` | Parameter name|
+> > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+### `reflection types methods params getType`
+
+Get the full type name of a method parameter with the provided name
+
+> > | | Parameter |
+> > |-|-----------|
+> > | `$1` | `types` |
+> > | `$2` | `methods` |
+> > | `$3` | `params` |
+> > | `$4` | `getType` |
+> > | `$5` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+> > | `$6` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+> > | `$7` | Parameter name|
+> > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+
+## 📸 `reflection snapshots`
 
 You can save the state of your TeaScript program to a snapshot and load it later.
 
@@ -1109,8 +1221,6 @@ Returns 1 if variable with provided name does not exist else returns 0.
 
 ## `reflection reflectionType`
 
-> 👥 User Function
-
 Given a type name, e.g. `Dog` or `MyMap[K,V]`, get a type identifier which can be used to pass this type name to any other `reflection` function.
 
 Calling `reflection types exists MyMap[K,V]` does NOT WORK.
@@ -1138,8 +1248,6 @@ Note: it is always safe to use `reflectionType` without "quotation marks"
 > > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
 
 ## `reflection getCode`
-
-> 👥 User Function
 
 Returns the special code for values such as "class", "private", "public", "static", et al for use with `reflection`
 
@@ -1170,8 +1278,6 @@ See [`getCodeValue`](#reflection-getCodeValue) to get the value from a code
 
 ## `reflection getCodeValue`
 
-> 👥 User Function
-
 Returns the full value for a code such as `private` for `p` and `public` for `P`.
 
 These codes are used all throughout `reflection`
@@ -1200,17 +1306,4 @@ printf "$code"
 > > | `$1` | `getCodeValue` |
 > > | `$2` | Code such as "class" or "private" or "static" |
 > > | `$3` | (Optional) name of BASH variable to set to the return value rather than printing return value |
-
-# `var`
-
-Sets a variable equal to the result of an expression.
-
-Used implicit typing, e.g. with `var x = 5` the `x` variable is set to an `int` type
-without using explicit typing using the alternate syntax: `int x = 5`
-
-> > | | Parameter |
-> > |-|-----------|
-> > | `$1` | Variable name |
-> > | `$2` | `=` |
-> > | `$@` | Right hand side expression which is evaluated via `evaluate` |
 

@@ -2,9 +2,6 @@
   reflection types define Dog c "" "" "This represents a dog"
 
   expect { reflection types getInterfaces Dog } toBeEmpty
-
-  local BASHTypeVariables="$( ( set -o posix ; set ) | grep "^T_TYPE_" )"
-  expect "$BASHTypeVariables" toContain 'T_TYPE_Dog=([0]="Dog;c|<>This represents a dog" [1]="" [2]="")'
 }
 
 @spec.reflection.types.getInterfaces.single_generic_type_parameter() {

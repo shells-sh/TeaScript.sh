@@ -1,6 +1,11 @@
 source lib/reflection.sh
 source lib/evaluate.sh
 source lib/expression.sh
-source lib/var.sh
-source lib/typeof.sh
-source lib/objectid.sh
+source lib/keywords/variables/var.sh
+source lib/keywords/objects/objectid.sh
+source lib/keywords/types/class.sh
+source lib/keywords/types/field.sh
+source lib/keywords/types/typeof.sh
+source lib/keywords/types/public.sh
+source lib/keywords/types/private.sh
+source lib/keywords/types/static.sh

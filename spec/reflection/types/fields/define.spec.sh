@@ -1,3 +1,5 @@
+T_COMMENTS=enabled
+
 @spec.reflection.fields.define() {
   reflection types define Dog c
 

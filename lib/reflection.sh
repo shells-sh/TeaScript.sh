@@ -6,9 +6,27 @@ T_ENV=development
 T_GC_OBJECT_THRESHOLD=999
 T_GC_OBJECT_THRESHOLD_COUNT=0
 
-# TODO test that comments on each of the types (type, method, field, param)
-#      are not persisted if this is disabled (not = enabled)
-T_COMMENTS=enabled
+# TODO - lots of optimizations, I forgot you can do: ${something#"${something#"${...}"}"}
+
+# TODO move this documentation to a sensible place
+## ## `T_COMMENTS`
+##
+## When set to 'enabled', comments on defined types/fields/methods are stored in type declarations.
+##
+## This makes it easy to generate utilities to generate documentation as well as IDE server usage.
+##
+## Please note that, because comments are read from STDIN, it is very expensive to check if STDIN has content
+## and defining types/fields/methods with comments enabled will cause your program to load slowly
+## (but there are no performance issues after the initial load, except that your comments will
+## all be stored in active BASH memory)
+##
+## Please enable `T_COMMENTS` with caution, e.g. only when using a documentation generator.
+##
+## Another option is to turn this on, define your types, and save a snapshot.
+##
+## Your types will have comments persisted but there will be no initial load penalty.
+##
+T_COMMENTS=disabled
 
 ## # `reflection`
 ##
@@ -24,6 +42,7 @@ T_COMMENTS=enabled
 ## - [`reflection types`](#reflection-types)
 ##   - [`reflection types fields`](#reflection-types-fields)
 ##   - [`reflection types methods`](#reflection-types-methods)
+##     - [`reflection types methods params`](#reflection-types-methods-params)
 ## - [`reflection variables`](#reflection-variables)
 ##
 ## ```sh
@@ -514,14 +533,14 @@ reflection() {
     ##
     ## - [`reflection types define`](#reflection-types-define)
     ## - [`reflection types exists`](#reflection-types-exists)
-    ## - [`reflection types fields`](#reflection-types-fields)
+    ## - [`reflection types fields *`](#reflection-types-fields)
     ## - [`reflection types getBaseClass`](#reflection-types-getBaseClass)
     ## - [`reflection types getComment`](#reflection-types-getComment)
     ## - [`reflection types getDescriptorCode`](#reflection-types-getDescriptorCode)
     ## - [`reflection types getDescriptor`](#reflection-types-getDescriptor)
     ## - [`reflection types getGenericTypes`](#reflection-types-getGenericTypes)
     ## - [`reflection types getInterfaces`](#reflection-types-getInterfaces)
-    ## - [`reflection types methods`](#reflection-types-methods)
+    ## - [`reflection types methods *`](#reflection-types-methods)
     ## - [`reflection types undefine`](#reflection-types-undefine)
     ##
     ## Types are `define`'d and `undefine`'d.
@@ -1160,6 +1179,7 @@ reflection() {
         ## - [`reflection types methods getScopeCode`](#reflection-types-methods-getScopeCode)
         ## - [`reflection types methods getVisibility`](#reflection-types-methods-getVisibility)
         ## - [`reflection types methods getVisibilityCode`](#reflection-types-methods-getVisibilityCode)
+        ## - [`reflection types methods params *`](#reflection-types-methods-params)
         ## - [`reflection types methods undefine`](#reflection-types-methods-undefine)
         ##
         methods)
@@ -1180,7 +1200,7 @@ reflection() {
             ## > > | `$7` | Scope code, e.g. `s` for `static` or `i` for `instance` |
             ## > > | `$8` | Visibility code, e.g. `p` for `private` or `P` for `public` |
             ## > > | `$9` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
-            ## > > | `$@` | Method parameter arguments, e.g. `"String" "name" "default value" "Array[T]" "items" ""` to add 2 parameters, `name` and `items`, where `name` has a default value and `items` does not |
+            ## > > | `$@` | Method parameter arguments, 4 arguments are required to define each parameter: (1) param type (2) param name (3) param default value or empty (4) param modifier, e.g. `out`, or empty. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out` |
             define)
               # Calculate a safe the method name (which may include generics)
               if [[ "$5" = *"["* ]]
@@ -1199,8 +1219,8 @@ reflection() {
               shift; shift; shift; shift; shift; shift; shift; shift; shift;
               while [ $# -gt 0 ]
               do
-                local __T_paramDefinition="$1:$2;$3"
-                shift; shift; shift;
+                local __T_paramDefinition="$1:$2;$3+$4"
+                shift; shift; shift; shift;
                 __T_methodDefinition="${__T_methodDefinition}&${__T_paramDefinition}"
               done
               if [ "$T_COMMENTS" = enabled ]
@@ -1422,6 +1442,61 @@ reflection() {
               fi
               ;;
 
+            ## ### `reflection types methods list`
+            ##
+            ## > 👥 User Function
+            ##
+            ## Print a list of each of this type's methods with details including the scope, visibility, default value, and comment.
+            ##
+            ## Prints one method per line
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `list` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ##
+            list)
+              local __T_methodName
+              for __T_methodName in $(reflection types methods listNames $4)
+              do
+                echo "$(reflection types methods getVisibility $4 $__T_methodName)\t$(reflection types methods getScope $4 $__T_methodName)\t$(reflection types methods getReturnType $4 $__T_methodName)\t$__T_methodName\t$(reflection types methods getName $4 $__T_methodName)\t$(reflection types methods getComment $4 $__T_methodName)"
+              done
+              ;;
+
+            ## ### `reflection types methods listNames`
+            ##
+            ## Returns a space-demilimited list of method names for this type
+            ##
+            ## > > | | Parameter |
+            ## > > |-|-----------|
+            ## > > | `$1` | `types` |
+            ## > > | `$2` | `methods` |
+            ## > > | `$3` | `listNames` |
+            ## > > | `$4` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+            ## > > | `$5` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+            ##
+            listNames)
+              local __T_tempVariable
+              eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
+              if shopt -q extglob
+              then
+                __T_tempVariable="${__T_tempVariable//:+([0-9])}"
+              else
+                shopt -s extglob
+                __T_tempVariable="${__T_tempVariable//:+([0-9])}"
+                shopt -u extglob
+              fi
+              __T_tempVariable="${__T_tempVariable//;/ }"
+              if [ $# -eq 4 ]
+              then
+                printf "${__T_tempVariable# }"
+              else
+                printf -v "$5" "${__T_tempVariable# }"
+              fi
+              ;;
+
             ## ### `reflection types methods undefine`
             ##
             ## Remove the given methods from the type definition.
@@ -1456,436 +1531,96 @@ reflection() {
               fi
               ;;
 
+            ## ### `reflection types methods params`
+            ##
+            ## `TODO` talk about params
+            ##
+            ## - [`reflection types methods params list`](#reflection-types-methods-params-list)
+            ## - [`reflection types methods params getType`](#reflection-types-methods-params-getType)
+            ## - [`reflection types methods params getDefaultValue`](#reflection-types-methods-params-getDefaultValue)
+            ##
+            params)
+              case "$4" in
+
+                ## ### `reflection types methods params getDefaultValue`
+                ##
+                ## Get the default value of a method parameter with the provided name, if any
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `getDefaultValue` |
+                ## > > | `$5` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | Parameter name|
+                ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+                ##
+                getDefaultValue)
+                  :
+                ;;
+
+                ## ### `reflection types methods params getModifier`
+                ##
+                ## Get the modifier of a method parameter with the provided name, if any, e.g. `out` or `ref`
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `getModifier` |
+                ## > > | `$5` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | Parameter name|
+                ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+                ##
+                getModifier)
+                  :
+                ;;
+
+                ## ### `reflection types methods params getType`
+                ##
+                ## Get the full type name of a method parameter with the provided name
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `getType` |
+                ## > > | `$5` | Reflection-safe type name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`reflectionType`](#reflection-reflectionType) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | Parameter name|
+                ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+                ##
+                getType)
+                  :
+                ;;
+
+                *)
+                  echo "Unknown 'reflection types methods params' command: $3"
+                  ;;
+              esac
+              ;;
             *)
               echo "Unknown 'reflection types methods' command: $3"
               ;;
           esac
           ;;
-
         *)
           echo "Unknown 'reflection types' command: $2"
           ;;
       esac
       ;;
-
-      #   ## ### `reflection types addMethod`
-      #   ##
-      #   addMethod)
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodScope="$1"; shift
-      #     local methodVisibility="$1"; shift
-      #     local methodName="$1"; shift
-      #     local methodReturnType="$1"; shift
-      #     local methodComment="$1"; shift
-      #     custom function name
-      #
-      #     while [ $# -gt 0 ]
-      #     do
-      #       local paramName="$1"; shift
-      #       local paramType="$1"; shift
-      #       local paramDefaultValue="$1"; shift
-      #       local paramDefinition="$paramName:$paramType;$paramDefaultValue"
-      #       methodDefinition="${methodDefinition}&${paramDefinition}"
-      #     done
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     methodList="${methodList};${methodName}:\${#$bashVariableName[@]}"
-      #     eval "$bashVariableName[6]=\"$methodList\""
-      #     eval "$bashVariableName+=(\"$methodDefinition\")"
-      #     ;;
-      #     ;;
-
-      #   ## ### `reflection types undefine`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   undefine)
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     unset "$bashVariableName"
-      #     ;;
-
-
-      #   ## ### `reflection types getMethodComment`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodComment` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getMethodComment)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method comment from the method definition
-      #       local methodComment="${methodDefinition##*>}"
-      #       methodComment="${methodComment%%&*}"
-      #       printf "$methodComment"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getMethodParamNames`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodParamNames` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
+  
       #   getMethodParamNames)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method param names from the method definition
-      #       if [[ "$methodDefinition" = *"&"* ]]
-      #       then
-      #         local methodParamNames=""
-      #         local methodParamDefinitions="${methodDefinition#*&}"
-      #         while [[ "$methodParamDefinitions" = *":"* ]]
-      #         do
-      #           methodParamDefinitions="${methodParamDefinitions%:*}"
-      #           methodParamNames="${methodParamDefinitions##*&} ${methodParamNames}"
-      #         done
-      #         printf "${methodParamNames% }"
-      #       else
-      #         return 1
-      #       fi
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getMethodParamDefaultValue`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodParamDefaultValue` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
       #   getMethodParamDefaultValue)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local paramName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method param default value from the method definition
-      #       if [[ "$methodDefinition" = *"&"* ]]
-      #       then
-      #         local paramDefaultValue="${methodDefinition##*&$paramName:}"
-      #         paramDefaultValue="${paramDefaultValue#*;}"
-      #         paramDefaultValue="${paramDefaultValue%%&*}"
-      #         printf "$paramDefaultValue"
-      #       else
-      #         return 1
-      #       fi
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
       #   ## ### `reflection types getMethodParamType`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodParamType` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getMethodParamType)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local paramName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method param type from the method definition
-      #       if [[ "$methodDefinition" = *"&"* ]]
-      #       then
-      #         local paramType="${methodDefinition##*&$paramName:}"
-      #         paramType="${paramType%%;*}"
-      #         printf "$paramType"
-      #       else
-      #         return 1
-      #       fi
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getMethodReturnType`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodReturnType` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getMethodReturnType)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method type from the method definition
-      #       local methodType="${methodDefinition#*<}"
-      #       methodType="${methodType%%>*}"
-      #       printf "$methodType"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getMethodScope`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodScope` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getMethodScope)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method scope from the method definition
-      #       local methodScope="${methodDefinition%%!*}"
-      #       printf "$methodScope"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getMethodVisibility`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getMethodVisibility` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getMethodVisibility)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     local methodName="$1"; shift
-      #     local methodList
-      #     eval "methodList=\"\${$bashVariableName[6]}\""
-      #     if [[ "$methodList" = *";$methodName:"* ]]
-      #     then
-      #       local methodIndex="${methodList#*;$methodName:}"
-      #       local methodIndex="${methodIndex%%;*}"
-      #       local methodDefinition
-      #       eval "methodDefinition=\"\${$bashVariableName[$methodIndex]}\""
-      #       # Get the method visibility from the method definition
-      #       local methodVisibility="${methodDefinition%%|*}"
-      #       methodVisibility="${methodVisibility##*!}"
-      #       printf "$methodVisibility"
-      #     else
-      #       return 1
-      #     fi
-      #     ;;
-
-      #   ## ### `reflection types getTypeBaseClass`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getTypeBaseClass` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getTypeBaseClass)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf \"\${$bashVariableName[3]}\""
-      #     ;;
-
-      #   ## ### `reflection types getTypeComment`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getTypeComment` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getTypeComment)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf \"\${$bashVariableName[2]}\""
-      #     ;;
-
-      #   ## ### `reflection types getTypeOfType`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getTypeOfType` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getTypeOfType)
-      #     ## TODO
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf \"\${$bashVariableName[0]}\""
-      #     ;;
-
-      #   ## ### `reflection types getTypeInterface`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getTypeInterface` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getTypeInterface)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf "\${$bashVariableName[4]}\""
-      #     ;;
-
-      #   ## ### `reflection types getTypeStorageType`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | `getTypeStorageType` |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   getTypeStorageType)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     eval "printf \"\${$bashVariableName[1]}\""
-      #     ;;
-
-      #   ## ### `reflection types list`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   list)
-      #     ( set -o posix ; set ) | grep "^$BASH_VAR_PREFIX_TYPE"
-      #     ;;
-
-      #   ## ### `reflection types show`
-      #   ##
-      #   ## | | Parameter |
-      #   ## |-|-----------|
-      #   ## | `$2` | `types` |
-      #   ## | `$3` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ## | `$x` | ... |
-      #   ##
-      #   show)
-      #     ## UPDATE ME
-      #     local typeName="$1"; shift
-      #     local bashVariableName="T_TYPE_${typeName}"
-      #     declare -p "$bashVariableName" | sed 's/^declare -a //'
-      #     ;;
-
-      #   *)
-      #     echo "Unknown 'reflection types' command: $2"
-      #     return 1
-      #     ;;
-
-    # ====================================
-    # ====================================
-    # ====================================
 
 
-    ## ## `reflection snapshots`
+    ## ## 📸 `reflection snapshots`
     ##
     ## You can save the state of your TeaScript program to a snapshot and load it later.
     ##
@@ -2141,8 +1876,6 @@ reflection() {
 
       ## ## `reflection reflectionType`
       ##
-      ## > 👥 User Function
-      ##
       ## Given a type name, e.g. `Dog` or `MyMap[K,V]`, get a type identifier which can be used to pass this type name to any other `reflection` function.
       ##
       ## Calling `reflection types exists MyMap[K,V]` does NOT WORK.
@@ -2187,8 +1920,6 @@ reflection() {
         ;;
 
     ## ## `reflection getCode`
-    ##
-    ## > 👥 User Function
     ##
     ## Returns the special code for values such as "class", "private", "public", "static", et al for use with `reflection`
     ##
@@ -2240,8 +1971,6 @@ reflection() {
       ;;
 
     ## ## `reflection getCodeValue`
-    ##
-    ## > 👥 User Function
     ##
     ## Returns the full value for a code such as `private` for `p` and `public` for `P`.
     ##

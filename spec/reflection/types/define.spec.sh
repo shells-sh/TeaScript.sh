@@ -1,3 +1,5 @@
+T_COMMENTS=enabled
+
 @spec.reflection.types.define.no_generics() {
   refute reflection types exists Dog
 
