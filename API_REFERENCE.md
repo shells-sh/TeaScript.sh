@@ -859,25 +859,27 @@ Encoding:
 | <code>&#124;</code> | |
 | | Visibility code, e.g. `P` for `public` or `p` for `private` |
 | `<` | |
-| | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire) |
+| | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire)<br><br>_Note: this is defined using [`returns`](#returns) after the initial [`def`](#def) has been defined_ |
 | `>` | |
-| | Function type code, e.g. `b` for `BASH` function or `f` for TeaScript function (`fn`) |
-| `@` | |
-| | Function name to call when invoking this method |
+| | Name of function to call when invoking this method |
 | `#` | |
 | | Index to access this method's comment, if present |
-| `&` | _This begins a parameter definition, every parameter definition starts with `&` - this section can be repeated_ |
+| `&` | _This begins a parameter definition, every parameter definition starts with `&` - this section can be repeated_ <br><br> _Note: these are defined using [`param`](#param) after the initial [`def`](#def) has been defined_ |
 | | Method parameter name |
 | `:` | |
 | | Reflection-safe name for paramter type (use [`safeName`](#reflection-safeName) to acquire) |
 | `;` | |
-| | Parameter modifier, e.g. `o` for an `out` parameter or `r` for a `ref` parameter or `v` for `byval` |
+| | Parameter modifier, e.g. `o` for an `out` parameter or `r` for a `ref` parameter or `v` for `val` |
 | `+` | |
 | |  Index to access this parameter's default value, if any |
 | `~` | |
 | | Index to access this paramter's comment, if any |
 | `&` | |
 | | ... _any number of additional parameters may be defined._ |
+
+See `types methods params define` for adding new parameters to an existing method.
+
+The `types methods define` function has been updated to no longer supporting adding parameters as part of the `methods define` call.
 
 ### `reflection types methods define`
 
@@ -890,12 +892,10 @@ Encoding:
 > > | `$3` | `define` |
 > > | `$4` | Reflection-safe name to add method to (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
 > > | `$5` | Method name, e.g. `name` or `add[T]` for a generic method |
-> > | `$6` | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
-> > | `$7` | Scope code, e.g. `s` for `static` or `i` for `instance` |
-> > | `$8` | Visibility code, e.g. `p` for `private` or `P` for `public` |
-> > | `$9` | Name of BASH function to invoke when invoking this method |
-> > | `$10` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
-> > | `$@` | Method parameter arguments, 5 arguments are required to define each parameter: (1) param name (2) reflection-safe param type name (3) param default value or empty (4) param modifier, e.g. `out`, or empty (5) param comment. e.g. `String name "Rover" ""` or `Array[Dog] dogs "" out "Array of dogs"` |
+> > | `$6` | Scope code, e.g. `S` for `static` or `i` for `instance` |
+> > | `$7` | Visibility code, e.g. `p` for `private` or `P` for `public` |
+> > | `$8` | Name of function to invoke when invoking this method |
+> > | `$9` | Comment text, if any. Note: this is only persisted if `T_COMMENTS=enabled` (default value in development environment) |
 ### `reflection types methods exists`
 
 Returns 0 if method with provided name exists on this type else returns 1.
@@ -1270,7 +1270,7 @@ for reference or a field index is the variable stores as `struct`.
 
 Get the type of this variable, e.g. object reference, literal value, or named reference.
 
-Specifically returns one of these values: `nameref`, `byref`, or `byval`.
+Specifically returns one of these values: `nameref`, `byref`, or `val`.
 
 > > | | Parameter |
 > > |-|-----------|
