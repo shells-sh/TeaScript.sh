@@ -854,27 +854,27 @@ Encoding:
 | | Description |
 |-|-------------|
 | | Method name, including any generics, e.g. `add[T]` |
-| `^` | |
+| `^` | _separator_ |
 | | Scope code, e.g. `S` for `static` or `i` for instance |
-| <code>&#124;</code> | |
+| <code>&#124;</code> | _separator_ |
 | | Visibility code, e.g. `P` for `public` or `p` for `private` |
-| `<` | |
+| `<` | _separator_ |
 | | Reflection-safe name for method return value type (use [`safeName`](#reflection-safeName) to acquire)<br><br>_Note: this is defined using [`returns`](#returns) after the initial [`def`](#def) has been defined_ |
-| `>` | |
+| `>` | _separator_ |
 | | Name of function to call when invoking this method |
-| `#` | |
+| `#` | _separator_ |
 | | Index to access this method's comment, if present |
 | `&` | _This begins a parameter definition, every parameter definition starts with `&` - this section can be repeated_ <br><br> _Note: these are defined using [`param`](#param) after the initial [`def`](#def) has been defined_ |
 | | Method parameter name |
-| `:` | |
+| `:` | _separator_ |
 | | Reflection-safe name for paramter type (use [`safeName`](#reflection-safeName) to acquire) |
-| `;` | |
+| `;` | _separator_ |
 | | Parameter modifier, e.g. `o` for an `out` parameter or `r` for a `ref` parameter or `v` for `val` |
-| `+` | |
+| `+` | _separator_ |
 | |  Index to access this parameter's default value, if any |
-| `~` | |
+| `~` | _separator_ |
 | | Index to access this paramter's comment, if any |
-| `&` | |
+| `&` | _separator_ |
 | | ... _any number of additional parameters may be defined._ |
 
 See `types methods params define` for adding new parameters to an existing method.
