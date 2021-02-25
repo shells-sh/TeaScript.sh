@@ -1053,7 +1053,7 @@ Returns a space-delimited list of method names for this type.
 
 Returns a space-delimited list of the reflection-safe method names for this type.
 
-To get the original method names, i.e. with original generic parameter names, use `listNames`
+To get the original method names, i.e. with original generic parameter names, use `listNames` or `getMethodName` given a safe name
 
 > > | | Parameter |
 > > |-|-----------|

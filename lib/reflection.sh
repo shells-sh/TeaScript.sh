@@ -1621,7 +1621,7 @@ reflection() {
             ##
             ## Returns a space-delimited list of the reflection-safe method names for this type.
             ##
-            ## To get the original method names, i.e. with original generic parameter names, use `listNames`
+            ## To get the original method names, i.e. with original generic parameter names, use `listNames` or `getMethodName` given a safe name
             ##
             ## > > | | Parameter |
             ## > > |-|-----------|
@@ -1719,7 +1719,56 @@ reflection() {
                 ## > > | `$11` | Parameter comment. This is stored separately from the method definition, it is stored in its own index of the type definition BASH array when `T_COMMENTS=enabled`. |
                 ##
                 define)
-                  :
+                  local __T_tempVariable
+                  eval "[ -n \"\${T_TYPE_$5+x}\" ]" || { echo "Type '$5' not found" >&2; return 1; }
+                  eval "[[ \"\${T_TYPE_$5[2]}\" = *\";$6:\"* ]]" || { reflection types getTypeName "$5" __T_tempVariable; echo "Method '$6' not found on type $__T_tempVariable" >&2; return 1; }
+                  # ^ TODO TESTME
+                  eval "__T_tempVariable=\"\${T_TYPE_$5[2]}\""
+                  __T_tempVariable="${__T_tempVariable#*;$6:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+                  __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+                  local __T_methodDefinition
+                  eval "__T_methodDefinition=\"\${T_TYPE_$5[$__T_tempVariable]}\"" # Gets the method definition
+                  # If there is a default value specified, get the new index of where to store it and store it
+                  local __T_defaultValueIndex
+                  if [ -n "${10}" ]
+                  then
+                    eval "__T_defaultValueIndex=\${#T_TYPE_$5[@]}"
+                    eval "T_TYPE_$5+=(\"\${10}\")"
+                  fi
+                  local __T_commentIndex
+                  # If there is a default value specified and T_COMMENTS is enabled, get the new index of where to store it and store it
+                  if [ -n "${11}" ] && [ "$T_COMMENTS" = enabled ]
+                  then
+                    eval "__T_commentIndex=\${#T_TYPE_$5[@]}"
+                    eval "T_TYPE_$5+=(\"\${11}\")"
+                  fi
+                  eval "T_TYPE_$5[\$__T_tempVariable]=\"\${__T_methodDefinition}&\$7:\$8;\$9+\$__T_defaultValueIndex~\$__T_commentIndex\"" # Update the method definition
+                ;;
+
+                ## ### `reflection types methods params exists`
+                ##
+                ## Returns 0 if param with provided name exists for this method else returns 1.
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `exists` |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | Parameter name |
+                ##
+                exists)
+                  local __T_tempVariable
+                  eval "[ -n \"\${T_TYPE_$5+x}\" ]" || { echo "Type '$5' not found" >&2; return 1; }
+                  eval "[[ \"\${T_TYPE_$5[2]}\" = *\";$6:\"* ]]" || { reflection types getTypeName "$5" __T_tempVariable; echo "Method '$6' not found on type $__T_tempVariable" >&2; return 1; }
+                  # ^ TODO TESTME
+                  eval "__T_tempVariable=\"\${T_TYPE_$5[2]}\""
+                  __T_tempVariable="${__T_tempVariable#*;$6:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+                  __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+                  eval "__T_tempVariable=\"\${T_TYPE_$5[$__T_tempVariable]}\"" # This gets the method definition
+                  [[ "$__T_tempVariable" = *"&$7:"* ]] # Does the method definition include '&[param name]:'
                 ;;
 
                 ## ### `reflection types methods params getDefaultValue`
@@ -1758,6 +1807,41 @@ reflection() {
                 ##
                 getModifier)
                   :
+                ;;
+
+                ## ### `reflection types methods params getModifierCode`
+                ##
+                ## Returns the code for this method parameter's modifier, e.g. `v` for passing by value, `o` for out parameters, and `r` for `ref` parameters
+                ##
+                ## > > | | Parameter |
+                ## > > |-|-----------|
+                ## > > | `$1` | `types` |
+                ## > > | `$2` | `methods` |
+                ## > > | `$3` | `params` |
+                ## > > | `$4` | `getModifierCode` |
+                ## > > | `$5` | Reflection-safe type name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions. |
+                ## > > | `$6` | Reflection-safe method name (use [`safeName`](#reflection-safeName) to acquire) which converts generic type and method names into a BASH variable compatible format for use directly with hot-path reflection functions.  |
+                ## > > | `$7` | Parameter name |
+                ## > > | `$8` | (Optional) name of BASH variable to set to the return value rather than printing return value |
+                ##
+                getModifierCode)
+                  local __T_tempVariable
+                  eval "[ -n \"\${T_TYPE_$5+x}\" ]" || { echo "Type '$5' not found" >&2; return 1; }
+                  eval "[[ \"\${T_TYPE_$5[2]}\" = *\";$6:\"* ]]" || { reflection types getTypeName "$5" __T_tempVariable; echo "Method '$6' not found on type $__T_tempVariable" >&2; return 1; }
+                  # ^ TODO TESTME
+                  eval "__T_tempVariable=\"\${T_TYPE_$5[2]}\""
+                  __T_tempVariable="${__T_tempVariable#*;$6:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
+                  __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
+                  eval "__T_tempVariable=\"\${T_TYPE_$5[$__T_tempVariable]}\"" # This gets the method definition
+                  [[ "$__T_tempVariable" = *"&$7:"* ]] || { local __T_typeName; local __T_methodName; reflection types getTypeName "$5" __T_typeName; reflection types methods getMethodName "$5" "$6" __T_methodName; echo "Parameter '$7' not found on method ${__T_typeName}.${__T_methodName}" >&2; return 1; } # Does the method definition include '&[param name]:'
+                  __T_tempVariable="${__T_tempVariable##*&$7:}" # remove everything to the left of the parameter definition
+                  __T_tempVariable="${__T_tempVariable%%+*}" # remove everything to the right of the modifier code
+                  if [ -n "$8" ]
+                  then
+                    printf -v "$8" "${__T_tempVariable##*;}"
+                  else
+                    printf "${__T_tempVariable##*;}"
+                  fi
                 ;;
 
                 ## ### `reflection types methods params getType`
@@ -2163,10 +2247,13 @@ reflection() {
       local __T_code="$2"
       case "$2" in
         BASH) __T_code=b ;;
+        block) __T_code=k ;;
         class) __T_code=c ;;
         fn) __T_code=f ;;
         instance) __T_code=i ;;
-        primitive) __T_code=m ;;
+        primitive) __T_code=V ;;
+        main) __T_code=M ;;
+        method) __T_code=m ;;
         nameref) __T_code=n ;;
         out) __T_code=o ;;
         private) __T_code=p ;;
@@ -2174,6 +2261,7 @@ reflection() {
         ref) __T_code=r ;;
         struct) __T_code=s ;;
         static) __T_code=S ;;
+        type) __T_code=t ;;
         val) __T_code=v ;;
       esac
       # TODO: update all functions to use -n "$x" for this logic, it's much more sensible!
@@ -2223,15 +2311,19 @@ reflection() {
         c) __T_codeValue=class ;;
         i) __T_codeValue=instance ;;
         f) __T_codeValue=fn ;;
+        k) __T_codeValue=block ;;
         o) __T_codeValue=out ;;
         i) __T_codeValue=nameref ;;
-        m) __T_codeValue=primitive ;;
+        m) __T_codeValue=method;;
+        M) __T_codeValue=main;;
         p) __T_codeValue=private ;;
         P) __T_codeValue=public ;;
         r) __T_codeValue=ref ;;
         s) __T_codeValue=struct ;;
         S) __T_codeValue=static ;;
+        t) __T_codeValue=type ;;
         v) __T_codeValue=val ;;
+        V) __T_codeValue=primitive ;;
       esac
       if [ -n "$3" ]
       then

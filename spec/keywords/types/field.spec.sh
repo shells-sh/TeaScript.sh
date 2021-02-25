@@ -1,4 +1,4 @@
-@spec.field.define.without_type_do_scope() {
+@spec.field.without_type_do_scope() {
   class Dog
   class Cat
   expect { reflection types fields listNames Dog } toBeEmpty
@@ -10,7 +10,7 @@
   expect { reflection types fields listNames Cat } toBeEmpty
 }
 
-@spec.field.define.with_type_do_scope.explicit_type() {
+@spec.field.with_type_do_scope.explicit_type() {
   class Dog do
   refute reflection types fields exists Dog age
 
@@ -20,7 +20,16 @@
   expect { reflection types fields getType Dog age } toEqual int
 }
 
-@spec.field.define.with_type_do_scope.implicit_type() {
+## TODO field MyMap[K,V].count - will probably fail, update field to use safeName
+
+@pending.field.with_type_do_scope.explicit_target_type() {
+  :
+  # TODO do field Cat.age within Dog and make sure it works, I believe it's currently broken
+  #
+  # TODO rename specs and clarify 'type' being defined on and 'type' of the field
+}
+
+@spec.field.with_type_do_scope.implicit_type() {
   class Dog do
   refute reflection types fields exists Dog name
 
@@ -30,7 +39,7 @@
   expect { reflection types fields getType Dog name } toEqual string
 }
 
-@spec.field.define.error_if_implicit_type_but_no_open_do_scope() {
+@spec.field.error_if_implicit_type_but_no_open_do_scope() {
   class Dog
 
   refute reflection types fields exists Dog name
@@ -38,6 +47,10 @@
   refute field name
 
   refute reflection types fields exists Dog name
+}
+
+@pending.field.error_if_field_already_exists() {
+  :
 }
 
 @spec.field.type() {
