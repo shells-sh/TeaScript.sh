@@ -247,19 +247,6 @@ printf "$var"
 | `S` | `static` |
 | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
 
-#### 🐞 Error Overhead
-
-Please do not rely on errors, e.g. calling `getComment [type] [field]` when the type or field may not exist.
-
-Instead, check that type and field `exists` first.
-
-Note: every `reflection` function _does include the overhead of checking if the relevant type/field/method/param exists_.
-
-However, in error conditions when the type/field/method/param does not exist, we perform a `$(reflection types getName [type])` subshell to get the
-original name of the type or method for user friendliness. DO NOT RELY ON THIS IN HOT PATH CODE please :)
-
-> _Originally, we did not include the overhead of checking that types/fields/etc exist in each `reflection` method but it was not worth the sometimes hard to debug resulting bugs_
-
 #### TeaScript use of BASH arrays
 
 BASH 4.0 introduces associative arrays.

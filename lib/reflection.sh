@@ -225,19 +225,6 @@ T_COMMENTS=enabled
 ## | `S` | `static` |
 ## | `v` | Value, e.g. marking a type as being a value type or a variable as containing a value |
 ##
-## #### 🐞 Error Overhead
-##
-## Please do not rely on errors, e.g. calling `getComment [type] [field]` when the type or field may not exist.
-##
-## Instead, check that type and field `exists` first.
-##
-## Note: every `reflection` function _does include the overhead of checking if the relevant type/field/method/param exists_.
-##
-## However, in error conditions when the type/field/method/param does not exist, we perform a `$(reflection types getName [type])` subshell to get the
-## original name of the type or method for user friendliness. DO NOT RELY ON THIS IN HOT PATH CODE please :)
-##
-## > _Originally, we did not include the overhead of checking that types/fields/etc exist in each `reflection` method but it was not worth the sometimes hard to debug resulting bugs_
-##
 ## #### TeaScript use of BASH arrays
 ##
 ## BASH 4.0 introduces associative arrays.
@@ -801,7 +788,7 @@ reflection() {
           then
             eval "printf \"\${T_TYPE_$3[0]%%;*}\""
           else
-            eval "printf -v \"$\4\" \"\${T_TYPE_$3[0]%%;*}\""
+            eval "printf -v \"\$4\" \"\${T_TYPE_$3[0]%%;*}\""
           fi
           ;;
 
@@ -906,9 +893,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getComment)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -934,9 +921,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getDefaultValue)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -965,9 +952,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getScope)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -994,9 +981,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getScopeCode)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -1022,9 +1009,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getType)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -1053,9 +1040,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getVisibility)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -1082,9 +1069,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getVisibilityCode)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { echo "Field '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[1]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Field '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the field definition
@@ -1172,6 +1159,7 @@ reflection() {
             ## > > | `$5` | Field name |
             ##
             undefine)
+              # TODO test for undefining field that doesn't exist
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[1]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the field index (possibly followed by a ;)
@@ -1319,6 +1307,7 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getComment)
+              # TODO redo comment storage
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
@@ -1345,9 +1334,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getFunctionName)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { echo "Method '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Method '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
@@ -1375,6 +1364,7 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getGenericParams)
+              # TODO test me
               local __T_tempVariable
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
@@ -1404,9 +1394,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getMethodName)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { echo "Method '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Method '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
@@ -1463,9 +1453,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getScope)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { echo "Method '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Method '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
@@ -1492,9 +1482,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getScopeCode)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { echo "Method '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Method '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
@@ -1523,9 +1513,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getVisibility)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { echo "Method '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Method '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
@@ -1552,9 +1542,9 @@ reflection() {
             ## > > | `$6` | (Optional) name of BASH variable to set to the return value rather than printing return value |
             ##
             getVisibilityCode)
-              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
-              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { echo "Method '$5' not found on type $(reflection types getTypeName "$4")" >&2; return 1; }
               local __T_tempVariable
+              eval "[ -n \"\${T_TYPE_$4+x}\" ]" || { echo "Type '$4' not found" >&2; return 1; }
+              eval "[[ \"\${T_TYPE_$4[2]}\" = *\";$5:\"* ]]" || { reflection types getTypeName "$4" __T_tempVariable; echo "Method '$5' not found on type $__T_tempVariable" >&2; return 1; }
               eval "__T_tempVariable=\"\${T_TYPE_$4[2]}\""
               __T_tempVariable="${__T_tempVariable#*;$5:}" # Get rid of the left side, leaving just the method index (possibly followed by a ;)
               __T_tempVariable="${__T_tempVariable%%;*}" # This gets the array index of the method definition
