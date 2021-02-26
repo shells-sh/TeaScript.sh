@@ -10,22 +10,25 @@
 
 ---
 
-- Strongly typed
-- Generics
-- Object-oriented
-- Closures
-- Async/Await
-- Enumerable Support
-- Primitives, Structs, and Classes
-- BASH command integration
-- BASH function integration
+### Features
+
+- _Strongly typed_
+- _Generics_
+- _Object-oriented_
+- _Closures_
+- _Async/Await_
+- _Enumerable Support_
+- _Primitives, Structs, and Classes_
+- _BASH command integration_
+- _BASH function integration_
 
 ---
 
 🍵 `TeaScript.sh` can either be authored from scratch or iteratively added to existing BASH scripts:
 
+> _# Simple BASH script_
+
 ```sh
-# Simple BASH script
 verifyServer() {
   local serverNumber="$1"
   local expectedStatus="$2"
@@ -33,8 +36,9 @@ verifyServer() {
 }
 ```
 
+> _# Example using TeaScript to add robustness and clarity to an existing BASH script:_
+
 ```sh
-# Example using TeaScript to add robustness and clarity to an existing BASH script:
 enum ServerStatus { ACTIVE MAINTENANCE REBOOTING }
 
 fn verifyServer(int serverNumber, ServerStatus expectedStatus) bool
@@ -42,10 +46,10 @@ verifyServer() {
   run servers stat | grep "^Server {{serverNumber}}" | grep "{{expectedStatus}}"
 }
 ```
+> _# Example which wraps the return value of the shell script in a strongly typed object_  
+> _# and adds business logic into static and instance methods:_
 
 ```sh
-# Example which wraps the return value of the shell script in a strongly typed object
-# and adds business logic into static and instance methods:
 struct Server {
   enum Status { ACTIVE MAINTENANCE REBOOTING }
 
