@@ -42,8 +42,8 @@ verifyServer() {
 ```
 
 ```sh
-# Perhaps even wrap the response from an existing shell utility in a strongly typed structure
-# with the logic provided via static and instance methods:
+# Example which wraps the return value of the shell script in a strongly typed object
+# and adds business logic into static and instance methods:
 struct Server {
   enum Status { ACTIVE MAINTENANCE REBOOTING }
 
