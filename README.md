@@ -61,7 +61,8 @@ call verifyServer 42 ALIVE
 > _# adds business logic into static and instance methods (also using TeaScript functions):_
 
 ```sh
-# This is all regular ol' BASH!
+# Use the full version of TeaScript
+# This is really all just regular ol' BASH!
 source teascript.sh
 
 struct Server do
