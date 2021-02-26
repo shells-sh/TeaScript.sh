@@ -67,13 +67,21 @@ struct Server {
     end
   }
   
-  def verify : Returns true if the server matches the expected status
+  def verifyServer() : Returns true if the server matches the expected status
   param int serverNumber : Identifier of server to verify
-  param Status expectedStatus
+  param Status expectedStatus : Expected status
   returns bool
-  Server.verify() {
+  Server.verifyServer() {
     var server = Server.getServers() getFirst (server) { server.number == serverNumber }
     returns server.status == expectedStatus
   }
 }
+
+# ... code elsewhere ...
+if call Server.verifyServer "$1" "$2"
+then
+  # ... do something ...
+else
+  # ... do something ...
+fi
 ```
