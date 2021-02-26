@@ -53,7 +53,8 @@ verifyServer() {
 }
 
 # Invoke via `call`
-call verifyServer 42 ACTIVE
+call verifyServer 42 ALIVE
+# => [ArgumentError] Parameter expectedStatus. 'ALIVE' is not a valid 'ServerStatus'
 ```
 > _# Example which wraps the return value of the shell script in a strongly typed object_  
 > _# and adds business logic into static and instance methods:_
