@@ -78,7 +78,7 @@ struct Server do
     end
   }
   
-  static def getServer() : Server
+  static def getServer(int serverNumber) Server : Get server with the specified identifying number
   Server.getServer() {
     returns Server.getServers() getFirst (server) { server.number == serverNumber }
   }
