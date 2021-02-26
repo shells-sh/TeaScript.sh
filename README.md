@@ -11,10 +11,12 @@
 ---
 
 - Strongly typed
-- Object-oriented
 - Generics
+- Object-oriented
 - Closures
 - Async/Await
+- Enumerable Support
+- Primitives, Structs, and Classes
 - BASH command integration
 - BASH function integration
 
