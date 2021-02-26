@@ -74,7 +74,9 @@ struct Server do
   Server.getServers() {
     run servers stat
     output map (line) do
-      new Server number: line.match(/Server (\d+)/)[0].groups.first, status: line.match(/Status: (\w+)/)[0]
+      var number = line.match(/Server (\d+)/)[0]
+      var status = line.match(/Status: (\w+)/)[0]
+      new Server :number :status
     end
   }
   
