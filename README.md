@@ -41,6 +41,8 @@ verifyServer() {
 > _# Example using TeaScript to add robustness and clarity to an existing BASH script:_
 
 ```sh
+source teascript.sh
+
 enum ServerStatus { ACTIVE MAINTENANCE REBOOTING }
 
 fn verifyServer(int serverNumber, ServerStatus expectedStatus) bool
@@ -52,7 +54,10 @@ verifyServer() {
 > _# and adds business logic into static and instance methods:_
 
 ```sh
-struct Server {
+source teascript.sh
+
+# This is regular ol' BASH!
+struct Server do
   enum Status { ACTIVE MAINTENANCE REBOOTING }
 
   int number
@@ -75,7 +80,7 @@ struct Server {
     var server = Server.getServers() getFirst (server) { server.number == serverNumber }
     returns server.status == expectedStatus
   }
-}
+end
 
 # In some regular ol' BASH code elsewhere ...
 if call Server.verifyServer "$1" "$2"
