@@ -79,11 +79,11 @@ struct Server do
   end
   
   static def getServer(int serverNumber) Server do
-    returns Server.getServers().getFirst (server) { server.number == serverNumber }
+    returns getServers().getFirst (server) { server.number == serverNumber }
   end
   
   def verifyServer(int serverNumber, Status expectedStatus) bool do
-    returns Server.getServer(serverNumber).status == expectedStatus
+    returns getServer(serverNumber).status == expectedStatus
   end
 end
 
