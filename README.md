@@ -18,7 +18,9 @@
 - _Closures_
 - _Async/Await_
 - _Enumerable Support_
+- _First class functions_
 - _Primitives, Structs, and Classes_
+- _Built-in API doc generation_
 - _BASH command integration_
 - _BASH function integration_
 
@@ -66,9 +68,9 @@ struct Server {
   }
   
   def verify : Returns true if the server matches the expected status
-    param int serverNumber : Identifier of server to verify
-    param Status expectedStatus
-    returns bool
+  param int serverNumber : Identifier of server to verify
+  param Status expectedStatus
+  returns bool
   Server.verify() {
     var server = Server.getServers() getFirst (server) { server.number == serverNumber }
     returns server.status == expectedStatus
