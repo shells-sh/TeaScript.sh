@@ -71,7 +71,7 @@ struct Server do
   
   static def getServers() List[Server] do
     var output = run servers stat
-    returns output.eachLine.map (line) do
+    returns output.lines.map (line) do
       var number = line.match(/Server (\d+)/)[0]
       var status = line.match(/Status: (\w+)/)[0]
       new Server :number :status
@@ -79,7 +79,7 @@ struct Server do
   end
   
   static def getServer(int serverNumber) Server do
-    returns getServers().getFirst (server) { server.number == serverNumber }
+    returns getServers().first (server) { server.number == serverNumber }
   end
   
   def verifyServer(int serverNumber, Status expectedStatus) bool do
