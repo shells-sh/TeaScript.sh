@@ -38,18 +38,19 @@ verifyServer() {
 }
 ```
 
-> _# Example using TeaScript to add robustness and clarity to an existing BASH script:_
+> _# Example using TeaScript to add robustness and clarity to an existing BASH script_  
+> _(using the mini version of TeaScript which only adds one `T` keyword to your scripts):_
 
 ```sh
-source teascript.sh
+source teascript-T.sh
 
-enum ServerStatus { ACTIVE MAINTENANCE REBOOTING }
+T enum ServerStatus { ACTIVE MAINTENANCE REBOOTING }
 
-fn verifyServer(int serverNumber, ServerStatus expectedStatus) bool
+T fn verifyServer(int serverNumber, ServerStatus expectedStatus) bool
 verifyServer() {
   local serverNumber="$( params serverNumber )"
   local expectedStatus="$( params expectedStatus )"
-  run servers stat | grep "^Server $serverNumber" | grep "$expectedStatus"
+  T run servers stat | grep "^Server $serverNumber" | grep "$expectedStatus"
 }
 
 # Invoke via `call`:
