@@ -47,8 +47,13 @@ enum ServerStatus { ACTIVE MAINTENANCE REBOOTING }
 
 fn verifyServer(int serverNumber, ServerStatus expectedStatus) bool
 verifyServer() {
-  run servers stat | grep "^Server {{serverNumber}}" | grep "{{expectedStatus}}"
+  local serverNumber="$( params serverNumber )"
+  local expectedStatus="$( params expectedStatus )"
+  run servers stat | grep "^Server $serverNumber" | grep "$expectedStatus"
 }
+
+# Invoke via `call`
+call verifyServer 42 ACTIVE
 ```
 > _# Example which wraps the return value of the shell script in a strongly typed object_  
 > _# and adds business logic into static and instance methods:_
@@ -72,21 +77,25 @@ struct Server do
     end
   }
   
+  static def getServer() : Server
+  Server.getServer() {
+    returns Server.getServers() getFirst (server) { server.number == serverNumber }
+  }
+  
   def verifyServer() : Returns true if the server matches the expected status
   param int serverNumber : Identifier of server to verify
   param Status expectedStatus : Expected status
   returns bool
   Server.verifyServer() {
-    var server = Server.getServers() getFirst (server) { server.number == serverNumber }
-    returns server.status == expectedStatus
+    returns Server.getServer(serverNumber).status == expectedStatus
   }
 end
 
 # In some regular ol' BASH code elsewhere ...
-if call Server.verifyServer "$1" "$2"
+if call Server.verifyServer 42 ACTIVE
 then
-  # ... do something ...
+  echo "We found the answer to life, the universe, and everything!"
 else
-  # ... do something ...
+  echo "Uh oh, the server status was actually: $( call Server.getServer(42).status )"
 fi
 ```
