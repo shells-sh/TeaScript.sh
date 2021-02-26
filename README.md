@@ -52,7 +52,7 @@ verifyServer() {
   run servers stat | grep "^Server $serverNumber" | grep "$expectedStatus"
 }
 
-# Invoke via `call`
+# Invoke via `call`:
 call verifyServer 42 ALIVE
 # => [ArgumentError] Parameter expectedStatus. 'ALIVE' is not a valid 'ServerStatus' enum value.
 ```
@@ -87,7 +87,7 @@ struct Server do
   end
 end
 
-# In some regular ol' BASH code elsewhere ...
+# In a regular ol' BASH shell script elsewhere, invoke via `call`:
 if call Server.verifyServer 42 ACTIVE
 then
   echo "We found the answer to life, the universe, and everything!"
