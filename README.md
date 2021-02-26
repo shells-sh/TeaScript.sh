@@ -54,9 +54,9 @@ verifyServer() {
 > _# and adds business logic into static and instance methods:_
 
 ```sh
+# This is regular ol' BASH!
 source teascript.sh
 
-# This is regular ol' BASH!
 struct Server do
   enum Status { ACTIVE MAINTENANCE REBOOTING }
 
