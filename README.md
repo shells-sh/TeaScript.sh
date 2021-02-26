@@ -1,5 +1,9 @@
+> ℹ️ All of the content here is simply _aspirational_ - nothing to see here yet 👋
+
+---
+
 # 🍵 `TeaScript.sh`
 
-> Strongly Typed Programming Language
+> Strongly Typed Programming Langage
 >
-> _Implemented on top of BASH_
+> _» Implemented on the BASH interpreter_
