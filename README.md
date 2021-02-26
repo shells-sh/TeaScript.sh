@@ -38,10 +38,11 @@ verifyServer() {
 }
 ```
 
-> _# Example using TeaScript to add robustness and clarity to an existing BASH script_  
-> _(using the mini version of TeaScript which only adds one `T` keyword to your scripts):_
+> _# Example using TeaScript to add robustness and clarity to an existing BASH script:_
 
 ```sh
+# Using the mini version of TeaScript which does not pollute your PATH
+# and only adds one keyword: T
 source teascript-T.sh
 
 T enum ServerStatus { ACTIVE MAINTENANCE REBOOTING }
