@@ -69,8 +69,7 @@ struct Server do
   int number
   Status status
   
-  static def getServers() : Get the current list of servers with status (via `servers stat`)
-  returns List[Server] : The current list of servers
+  static def getServers() List[Server] : Get current list of servers (via `servers stat`)
   Server.getServers() {
     run servers stat
     output map (line) do
@@ -85,10 +84,7 @@ struct Server do
     returns Server.getServers() getFirst (server) { server.number == serverNumber }
   }
   
-  def verifyServer() : Returns true if the server matches the expected status
-  param int serverNumber : Identifier of server to verify
-  param Status expectedStatus : Expected status
-  returns bool
+  def verifyServer(int serverNumber, Status expectedStatus) bool : Returns true if the server matches the expected status
   Server.verifyServer() {
     returns Server.getServer(serverNumber).status == expectedStatus
   }
