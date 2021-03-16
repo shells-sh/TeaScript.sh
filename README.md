@@ -55,7 +55,7 @@ verifyServer() {
 }
 
 # Invoke via `call`:
-call verifyServer 42 ALIVE
+T call verifyServer 42 ALIVE
 # => [ArgumentError] Parameter expectedStatus. 'ALIVE' is not a valid 'ServerStatus' enum value.
 ```
 > _# Example which wraps the return value of the shell script in a strongly typed object and_  
